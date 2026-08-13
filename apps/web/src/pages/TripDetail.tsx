@@ -8,6 +8,8 @@ import GearSection from "@/components/trip/GearSection";
 import LocationsSection from "@/components/trip/LocationsSection";
 import NotesSection from "@/components/trip/NotesSection";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
+import MotocampingPanel from "@/modes/motocamping/MotocampingPanel";
+import type { MotocampingDetail } from "@/modes/motocamping/types";
 
 const STATUS_OPTIONS: TripStatus[] = ["planning", "active", "completed"];
 
@@ -17,6 +19,7 @@ export default function TripDetail() {
   const navigate = useNavigate();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [motoDetail, setMotoDetail] = useState<MotocampingDetail | null>(null);
 
   const refreshTrip = useCallback(() => {
     getTrip(id)
@@ -87,8 +90,16 @@ export default function TripDetail() {
         </div>
       </div>
 
+      {trip.trip_type === "motocamping" && (
+        <MotocampingPanel tripId={id} onChange={refreshTrip} onDetailChange={setMotoDetail} />
+      )}
+
       <LocationsSection tripId={id} onChange={refreshTrip} />
-      <ActivitiesSection tripId={id} onChange={refreshTrip} />
+      <ActivitiesSection
+        tripId={id}
+        onChange={refreshTrip}
+        dailyTargetMiles={motoDetail?.daily_ride_target_miles}
+      />
       <NotesSection tripId={id} onChange={refreshTrip} />
       <ExpensesSection tripId={id} />
       <GearSection tripId={id} />

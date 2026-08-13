@@ -10,6 +10,7 @@ from app.routers import (
     health,
     locations,
     notes,
+    trip_detail,
     trips,
 )
 
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(trips.router)
+app.include_router(trip_detail.router)
 app.include_router(locations.router)
 app.include_router(activities.router)
 app.include_router(expenses.router)

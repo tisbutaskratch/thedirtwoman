@@ -1,13 +1,14 @@
-from app.models.trip import Trip
+from app.models.trip import Trip, TripType
 from app.schemas.trip import TripRead
 
 
 def compute_percent_planned(trip: Trip) -> int:
-    """Rough completeness score for a trip, independent of mode-specific detail.
+    """Rough completeness score for a trip.
 
-    Counts core fields being filled in: dates set, and at least one
-    location/activity/note logged. Gets more precise once mode-specific
-    detail (Phase 4+) contributes its own required fields.
+    Counts core fields shared by every trip type, plus mode-specific
+    required fields once that mode's detail model exists (currently
+    just motocamping; other modes fall back to the core checks only
+    until their own Phase adds a detail model).
     """
     checks = [
         trip.start_date is not None,
@@ -16,6 +17,15 @@ def compute_percent_planned(trip: Trip) -> int:
         len(trip.activities) > 0,
         len(trip.notes) > 0,
     ]
+
+    if trip.trip_type == TripType.motocamping and trip.motocamping_detail is not None:
+        detail = trip.motocamping_detail
+        checks += [
+            detail.motorcycle_name is not None,
+            detail.fuel_capacity_gal is not None,
+            detail.fuel_economy_mpg is not None,
+        ]
+
     return round(100 * sum(checks) / len(checks))
 
 

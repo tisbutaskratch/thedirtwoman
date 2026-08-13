@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_owned_trip
 from app.db.session import get_db
-from app.models.trip import Trip
+from app.models.motocamping_detail import MotocampingDetail
+from app.models.trip import Trip, TripType
 from app.models.user import User
 from app.schemas.trip import TripCreate, TripRead, TripUpdate
 from app.services.trip_progress import to_trip_read
@@ -32,6 +33,11 @@ def create_trip(
 ) -> TripRead:
     trip = Trip(user_id=current_user.id, **payload.model_dump())
     db.add(trip)
+    db.flush()
+
+    if trip.trip_type == TripType.motocamping:
+        db.add(MotocampingDetail(trip_id=trip.id))
+
     db.commit()
     db.refresh(trip)
     return to_trip_read(trip)

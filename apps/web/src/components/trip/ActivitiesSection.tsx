@@ -5,9 +5,11 @@ import type { Activity } from "@/api/types";
 export default function ActivitiesSection({
   tripId,
   onChange,
+  dailyTargetMiles,
 }: {
   tripId: number;
   onChange?: () => void;
+  dailyTargetMiles?: number | null;
 }) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [title, setTitle] = useState("");
@@ -34,25 +36,61 @@ export default function ActivitiesSection({
     }
   }
 
+  const groupedByDay = dailyTargetMiles
+    ? Array.from(
+        activities
+          .reduce((map, activity) => {
+            const list = map.get(activity.day_index) ?? [];
+            list.push(activity);
+            map.set(activity.day_index, list);
+            return map;
+          }, new Map<number, Activity[]>())
+          .entries(),
+      ).sort(([a], [b]) => a - b)
+    : null;
+
   return (
     <section className="flex flex-col gap-4">
       <h2 className="text-xl font-semibold">Timeline</h2>
-      <ul className="flex flex-col gap-2">
-        {activities.map((activity) => (
-          <li
-            key={activity.id}
-            className="flex items-center justify-between rounded-md border border-slate-800 px-4 py-2"
-          >
-            <span>
-              <span className="mr-2 text-xs uppercase tracking-widest text-slate-500">
-                Day {activity.day_index}
+
+      {groupedByDay ? (
+        <div className="flex flex-col gap-3">
+          {groupedByDay.map(([day, dayActivities]) => (
+            <div key={day} className="rounded-md border border-slate-800 p-3">
+              <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-widest text-slate-500">
+                <span>Day {day}</span>
+                <span>Target: {dailyTargetMiles} mi</span>
+              </div>
+              <ul className="flex flex-col gap-1">
+                {dayActivities.map((activity) => (
+                  <li key={activity.id} className="text-sm text-slate-100">
+                    {activity.title}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          {activities.length === 0 && <p className="text-sm text-slate-500">No activities yet.</p>}
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-2">
+          {activities.map((activity) => (
+            <li
+              key={activity.id}
+              className="flex items-center justify-between rounded-md border border-slate-800 px-4 py-2"
+            >
+              <span>
+                <span className="mr-2 text-xs uppercase tracking-widest text-slate-500">
+                  Day {activity.day_index}
+                </span>
+                {activity.title}
               </span>
-              {activity.title}
-            </span>
-          </li>
-        ))}
-        {activities.length === 0 && <p className="text-sm text-slate-500">No activities yet.</p>}
-      </ul>
+            </li>
+          ))}
+          {activities.length === 0 && <p className="text-sm text-slate-500">No activities yet.</p>}
+        </ul>
+      )}
+
       <form onSubmit={handleSubmit} className="flex gap-2">
         <input
           type="number"
