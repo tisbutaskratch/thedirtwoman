@@ -8,6 +8,8 @@ __pycache__/
 .venv/
 venv/
 
+*.db
+
 .env
 .env.*
 !.env.example

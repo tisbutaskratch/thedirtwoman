@@ -1,0 +1,77 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.core.deps import get_current_user
+from app.core.security import (
+    InvalidTokenError,
+    create_token,
+    decode_token,
+    hash_password,
+    verify_password,
+)
+from app.db.session import get_db
+from app.models.user import User
+from app.schemas.auth import AccessTokenResponse, RefreshRequest, TokenPair
+from app.schemas.user import UserCreate, UserLogin, UserRead
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _issue_token_pair(user: User) -> TokenPair:
+    return TokenPair(
+        access_token=create_token(str(user.id), "access"),
+        refresh_token=create_token(str(user.id), "refresh"),
+        user=UserRead.model_validate(user),
+    )
+
+
+@router.post("/register", response_model=TokenPair, status_code=status.HTTP_201_CREATED)
+def register(payload: UserCreate, db: Session = Depends(get_db)) -> TokenPair:
+    existing = db.query(User).filter(User.email == payload.email).first()
+    if existing is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
+
+    user = User(
+        email=payload.email, name=payload.name, hashed_password=hash_password(payload.password)
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return _issue_token_pair(user)
+
+
+@router.post("/login", response_model=TokenPair)
+def login(payload: UserLogin, db: Session = Depends(get_db)) -> TokenPair:
+    unauthorized = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password"
+    )
+
+    user = db.query(User).filter(User.email == payload.email).first()
+    if user is None or not verify_password(payload.password, user.hashed_password):
+        raise unauthorized
+
+    return _issue_token_pair(user)
+
+
+@router.post("/refresh", response_model=AccessTokenResponse)
+def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> AccessTokenResponse:
+    unauthorized = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+    )
+
+    try:
+        user_id = decode_token(payload.refresh_token, expected_type="refresh")
+    except InvalidTokenError as exc:
+        raise unauthorized from exc
+
+    user = db.get(User, int(user_id))
+    if user is None:
+        raise unauthorized
+
+    return AccessTokenResponse(access_token=create_token(str(user.id), "access"))
+
+
+@router.get("/me", response_model=UserRead)
+def read_current_user(current_user: User = Depends(get_current_user)) -> User:
+    return current_user

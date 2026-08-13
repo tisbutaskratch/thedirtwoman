@@ -2,7 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import health
+from app.routers import (
+    activities,
+    auth,
+    expenses,
+    gear,
+    health,
+    locations,
+    notes,
+    trips,
+)
 
 app = FastAPI(title="Adventure Planner API")
 
@@ -15,3 +24,10 @@ app.add_middleware(
 )
 
 app.include_router(health.router)
+app.include_router(auth.router)
+app.include_router(trips.router)
+app.include_router(locations.router)
+app.include_router(activities.router)
+app.include_router(expenses.router)
+app.include_router(gear.router)
+app.include_router(notes.router)
