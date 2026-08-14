@@ -12,6 +12,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
 import CampingPanel from "@/modes/camping/CampingPanel";
+import InternationalPanel from "@/modes/international/InternationalPanel";
 import MotocampingPanel from "@/modes/motocamping/MotocampingPanel";
 import type { MotocampingDetail } from "@/modes/motocamping/types";
 import OverlandingPanel from "@/modes/overlanding/OverlandingPanel";
@@ -109,6 +110,9 @@ export default function TripDetail() {
         <OverlandingPanel tripId={id} onChange={refreshTrip} />
       )}
       {trip.trip_type === "camping" && <CampingPanel tripId={id} onChange={refreshTrip} />}
+      {trip.trip_type === "international" && (
+        <InternationalPanel tripId={id} onChange={refreshTrip} />
+      )}
 
       <ShareSection tripId={id} isOwner={isOwner} />
 

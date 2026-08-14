@@ -61,7 +61,9 @@ def test_percent_planned_increases_with_trip_content(client, auth_headers):
         headers=headers,
     )
     trip_id = created.json()["id"]
-    assert created.json()["percent_planned"] == 40
+    # 2 of 8 checks true (start_date, end_date); international's 3 mode
+    # checks are still unanswered
+    assert created.json()["percent_planned"] == 25
 
     client.post(
         f"/trips/{trip_id}/locations",
@@ -74,7 +76,8 @@ def test_percent_planned_increases_with_trip_content(client, auth_headers):
     client.post(f"/trips/{trip_id}/notes", json={"body": "Bring extra lembas."}, headers=headers)
 
     response = client.get(f"/trips/{trip_id}", headers=headers)
-    assert response.json()["percent_planned"] == 100
+    # 5 of 8 checks true now (dates + locations + activities + notes)
+    assert response.json()["percent_planned"] == 62
 
 
 def test_nested_resources_scoped_to_trip_owner(client, auth_headers):

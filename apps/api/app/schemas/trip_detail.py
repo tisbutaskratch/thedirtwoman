@@ -37,3 +37,8 @@ class TripDetailUpdate(BaseModel):
     # camping
     campground_reservation_ref: Optional[str] = Field(default=None, max_length=255)
     fire_restrictions_checked: Optional[bool] = None
+
+    # international
+    home_currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
+    destination_currencies: Optional[list[str]] = None
+    primary_timezone: Optional[str] = Field(default=None, max_length=100)

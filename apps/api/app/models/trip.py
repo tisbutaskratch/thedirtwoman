@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from app.models.camping_detail import CampingDetail
     from app.models.expense import Expense
     from app.models.gear import Gear
+    from app.models.international_detail import InternationalDetail
     from app.models.location import Location
     from app.models.motocamping_detail import MotocampingDetail
     from app.models.note import Note
@@ -78,6 +79,9 @@ class Trip(Base):
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
     camping_detail: Mapped[Optional[CampingDetail]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", uselist=False
+    )
+    international_detail: Mapped[Optional[InternationalDetail]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
     collaborators: Mapped[list[TripCollaborator]] = relationship(

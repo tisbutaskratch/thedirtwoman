@@ -5,6 +5,7 @@ from app.core.deps import get_accessible_trip, get_current_user, get_owned_trip,
 from app.db.session import get_db
 from app.models.backpacking_detail import BackpackingDetail
 from app.models.camping_detail import CampingDetail
+from app.models.international_detail import InternationalDetail
 from app.models.motocamping_detail import MotocampingDetail
 from app.models.overlanding_detail import OverlandingDetail
 from app.models.trip import Trip, TripType
@@ -14,13 +15,14 @@ from app.services.trip_progress import to_trip_read
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 
-# Each mode with a detail model gets a blank row created alongside its trip;
-# modes without one yet (international) are simply absent here.
+# Every trip type now has a detail model — each gets a blank row created
+# alongside its trip.
 _DETAIL_MODEL_BY_TYPE = {
     TripType.motocamping: MotocampingDetail,
     TripType.backpacking: BackpackingDetail,
     TripType.overlanding: OverlandingDetail,
     TripType.camping: CampingDetail,
+    TripType.international: InternationalDetail,
 }
 
 

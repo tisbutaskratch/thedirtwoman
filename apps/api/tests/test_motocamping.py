@@ -12,17 +12,6 @@ def test_motocamping_trip_gets_blank_detail_auto_created(client, auth_headers):
     assert body["est_range_miles"] is None
 
 
-def test_non_motocamping_trip_has_no_detail_yet(client, auth_headers):
-    headers = auth_headers()
-    created = client.post(
-        "/trips", json={"title": "Grand Tour", "trip_type": "international"}, headers=headers
-    )
-    trip_id = created.json()["id"]
-
-    response = client.get(f"/trips/{trip_id}/detail", headers=headers)
-    assert response.status_code == 404
-
-
 def test_update_detail_computes_est_range(client, auth_headers):
     headers = auth_headers()
     created = client.post(

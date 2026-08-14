@@ -3,6 +3,7 @@ from app.models.backpacking_detail import BackpackingDetail
 from app.models.camping_detail import CampingDetail
 from app.models.expense import Expense
 from app.models.gear import Gear
+from app.models.international_detail import InternationalDetail
 from app.models.location import Location, LocationKind
 from app.models.motocamping_detail import MotocampingDetail
 from app.models.note import Note
@@ -19,6 +20,7 @@ __all__ = [
     "CampingDetail",
     "Expense",
     "Gear",
+    "InternationalDetail",
     "Location",
     "LocationKind",
     "MotocampingDetail",

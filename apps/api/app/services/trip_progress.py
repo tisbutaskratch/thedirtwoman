@@ -6,10 +6,8 @@ def compute_percent_planned(trip: Trip) -> int:
     """Rough completeness score for a trip.
 
     Counts core fields shared by every trip type, plus mode-specific
-    required fields once that mode's detail model exists (currently
-    motocamping, backpacking, overlanding, and camping; international
-    falls back to the core checks only until its own Phase adds a
-    detail model).
+    required fields from that mode's detail model. Every trip type has
+    one as of Phase 8 (international).
     """
     checks = [
         trip.start_date is not None,
@@ -45,6 +43,13 @@ def compute_percent_planned(trip: Trip) -> int:
         checks += [
             detail.campground_reservation_ref is not None,
             detail.fire_restrictions_checked is not None,
+        ]
+    elif trip.trip_type == TripType.international and trip.international_detail is not None:
+        detail = trip.international_detail
+        checks += [
+            detail.home_currency is not None,
+            bool(detail.destination_currencies),
+            detail.primary_timezone is not None,
         ]
 
     return round(100 * sum(checks) / len(checks))
