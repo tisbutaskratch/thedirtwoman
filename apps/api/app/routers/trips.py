@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_owned_trip
 from app.db.session import get_db
+from app.models.backpacking_detail import BackpackingDetail
 from app.models.motocamping_detail import MotocampingDetail
 from app.models.trip import Trip, TripType
 from app.models.user import User
@@ -37,6 +38,8 @@ def create_trip(
 
     if trip.trip_type == TripType.motocamping:
         db.add(MotocampingDetail(trip_id=trip.id))
+    elif trip.trip_type == TripType.backpacking:
+        db.add(BackpackingDetail(trip_id=trip.id))
 
     db.commit()
     db.refresh(trip)

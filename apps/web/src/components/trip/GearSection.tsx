@@ -2,9 +2,16 @@ import { useEffect, useState, type FormEvent } from "react";
 import { createGear, listGear, updateGear } from "@/api/trips";
 import type { Gear } from "@/api/types";
 
-export default function GearSection({ tripId }: { tripId: number }) {
+export default function GearSection({
+  tripId,
+  onChange,
+}: {
+  tripId: number;
+  onChange?: () => void;
+}) {
   const [gear, setGear] = useState<Gear[]>([]);
   const [name, setName] = useState("");
+  const [weightOz, setWeightOz] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   function refresh() {
@@ -18,9 +25,11 @@ export default function GearSection({ tripId }: { tripId: number }) {
     if (!name.trim()) return;
     setSubmitting(true);
     try {
-      await createGear(tripId, { name });
+      await createGear(tripId, { name, weight_oz: weightOz ? Number(weightOz) : null });
       setName("");
+      setWeightOz("");
       refresh();
+      onChange?.();
     } finally {
       setSubmitting(false);
     }
@@ -49,6 +58,9 @@ export default function GearSection({ tripId }: { tripId: number }) {
             <span className={item.packed ? "text-slate-500 line-through" : "text-slate-100"}>
               {item.name}
             </span>
+            {item.weight_oz !== null && (
+              <span className="ml-auto text-xs text-slate-500">{item.weight_oz} oz</span>
+            )}
           </li>
         ))}
         {gear.length === 0 && <p className="text-sm text-slate-500">No gear yet.</p>}
@@ -60,6 +72,15 @@ export default function GearSection({ tripId }: { tripId: number }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+        />
+        <input
+          type="number"
+          min={0}
+          step="0.1"
+          placeholder="oz"
+          value={weightOz}
+          onChange={(e) => setWeightOz(e.target.value)}
+          className="w-20 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
         />
         <button
           type="submit"

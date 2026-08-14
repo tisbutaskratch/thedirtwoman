@@ -7,8 +7,8 @@ def compute_percent_planned(trip: Trip) -> int:
 
     Counts core fields shared by every trip type, plus mode-specific
     required fields once that mode's detail model exists (currently
-    just motocamping; other modes fall back to the core checks only
-    until their own Phase adds a detail model).
+    motocamping and backpacking; other modes fall back to the core
+    checks only until their own Phase adds a detail model).
     """
     checks = [
         trip.start_date is not None,
@@ -24,6 +24,13 @@ def compute_percent_planned(trip: Trip) -> int:
             detail.motorcycle_name is not None,
             detail.fuel_capacity_gal is not None,
             detail.fuel_economy_mpg is not None,
+        ]
+    elif trip.trip_type == TripType.backpacking and trip.backpacking_detail is not None:
+        detail = trip.backpacking_detail
+        checks += [
+            detail.base_pack_weight_oz is not None,
+            detail.permit_required is not None,
+            detail.resupply_plan is not None,
         ]
 
     return round(100 * sum(checks) / len(checks))

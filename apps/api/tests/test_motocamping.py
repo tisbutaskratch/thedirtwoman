@@ -15,7 +15,7 @@ def test_motocamping_trip_gets_blank_detail_auto_created(client, auth_headers):
 def test_non_motocamping_trip_has_no_detail_yet(client, auth_headers):
     headers = auth_headers()
     created = client.post(
-        "/trips", json={"title": "Mordor", "trip_type": "backpacking"}, headers=headers
+        "/trips", json={"title": "Weekend at the KOA", "trip_type": "camping"}, headers=headers
     )
     trip_id = created.json()["id"]
 

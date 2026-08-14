@@ -53,8 +53,8 @@ def test_percent_planned_increases_with_trip_content(client, auth_headers):
     created = client.post(
         "/trips",
         json={
-            "title": "Mount Doom",
-            "trip_type": "backpacking",
+            "title": "Weekend at the KOA",
+            "trip_type": "camping",
             "start_date": "3018-03-01",
             "end_date": "3018-03-25",
         },

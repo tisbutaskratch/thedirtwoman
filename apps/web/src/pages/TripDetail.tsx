@@ -8,6 +8,7 @@ import GearSection from "@/components/trip/GearSection";
 import LocationsSection from "@/components/trip/LocationsSection";
 import NotesSection from "@/components/trip/NotesSection";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
+import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
 import MotocampingPanel from "@/modes/motocamping/MotocampingPanel";
 import type { MotocampingDetail } from "@/modes/motocamping/types";
 
@@ -93,16 +94,20 @@ export default function TripDetail() {
       {trip.trip_type === "motocamping" && (
         <MotocampingPanel tripId={id} onChange={refreshTrip} onDetailChange={setMotoDetail} />
       )}
+      {trip.trip_type === "backpacking" && (
+        <BackpackingPanel tripId={id} onChange={refreshTrip} />
+      )}
 
       <LocationsSection tripId={id} onChange={refreshTrip} />
       <ActivitiesSection
         tripId={id}
         onChange={refreshTrip}
+        groupByDay={trip.trip_type === "backpacking"}
         dailyTargetMiles={motoDetail?.daily_ride_target_miles}
       />
       <NotesSection tripId={id} onChange={refreshTrip} />
       <ExpensesSection tripId={id} />
-      <GearSection tripId={id} />
+      <GearSection tripId={id} onChange={refreshTrip} />
     </section>
   );
 }

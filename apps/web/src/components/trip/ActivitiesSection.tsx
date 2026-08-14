@@ -5,10 +5,12 @@ import type { Activity } from "@/api/types";
 export default function ActivitiesSection({
   tripId,
   onChange,
+  groupByDay = false,
   dailyTargetMiles,
 }: {
   tripId: number;
   onChange?: () => void;
+  groupByDay?: boolean;
   dailyTargetMiles?: number | null;
 }) {
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -36,7 +38,7 @@ export default function ActivitiesSection({
     }
   }
 
-  const groupedByDay = dailyTargetMiles
+  const groupedByDay = groupByDay || dailyTargetMiles
     ? Array.from(
         activities
           .reduce((map, activity) => {
@@ -59,7 +61,7 @@ export default function ActivitiesSection({
             <div key={day} className="rounded-md border border-slate-800 p-3">
               <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-widest text-slate-500">
                 <span>Day {day}</span>
-                <span>Target: {dailyTargetMiles} mi</span>
+                {dailyTargetMiles && <span>Target: {dailyTargetMiles} mi</span>}
               </div>
               <ul className="flex flex-col gap-1">
                 {dayActivities.map((activity) => (

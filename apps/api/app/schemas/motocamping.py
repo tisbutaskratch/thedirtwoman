@@ -2,14 +2,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
-
-
-class MotocampingDetailUpdate(BaseModel):
-    motorcycle_name: Optional[str] = Field(default=None, max_length=255)
-    fuel_capacity_gal: Optional[float] = Field(default=None, gt=0)
-    fuel_economy_mpg: Optional[float] = Field(default=None, gt=0)
-    daily_ride_target_miles: Optional[float] = Field(default=None, gt=0)
+from pydantic import BaseModel, ConfigDict
 
 
 class MotocampingDetailRead(BaseModel):

@@ -11,6 +11,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.activity import Activity
+    from app.models.backpacking_detail import BackpackingDetail
     from app.models.expense import Expense
     from app.models.gear import Gear
     from app.models.location import Location
@@ -64,5 +65,8 @@ class Trip(Base):
         back_populates="trip", cascade="all, delete-orphan", order_by="Note.created_at.desc()"
     )
     motocamping_detail: Mapped[Optional[MotocampingDetail]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", uselist=False
+    )
+    backpacking_detail: Mapped[Optional[BackpackingDetail]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
