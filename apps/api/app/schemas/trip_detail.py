@@ -25,3 +25,11 @@ class TripDetailUpdate(BaseModel):
     permit_required: Optional[bool] = None
     permit_notes: Optional[str] = None
     resupply_plan: Optional[str] = None
+
+    # overlanding (fuel_capacity_gal / fuel_economy_mpg shared with motocamping above)
+    vehicle_name: Optional[str] = Field(default=None, max_length=255)
+    ground_clearance_in: Optional[float] = Field(default=None, ge=0)
+    drivetrain: Optional[str] = Field(default=None, max_length=50)
+    has_recovery_gear: Optional[bool] = None
+    comms_plan: Optional[str] = None
+    emergency_contact: Optional[str] = Field(default=None, max_length=255)

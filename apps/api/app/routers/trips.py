@@ -5,12 +5,21 @@ from app.core.deps import get_accessible_trip, get_current_user, get_owned_trip,
 from app.db.session import get_db
 from app.models.backpacking_detail import BackpackingDetail
 from app.models.motocamping_detail import MotocampingDetail
+from app.models.overlanding_detail import OverlandingDetail
 from app.models.trip import Trip, TripType
 from app.models.user import User
 from app.schemas.trip import TripCreate, TripRead, TripUpdate
 from app.services.trip_progress import to_trip_read
 
 router = APIRouter(prefix="/trips", tags=["trips"])
+
+# Each mode with a detail model gets a blank row created alongside its trip;
+# modes without one yet (camping, international) are simply absent here.
+_DETAIL_MODEL_BY_TYPE = {
+    TripType.motocamping: MotocampingDetail,
+    TripType.backpacking: BackpackingDetail,
+    TripType.overlanding: OverlandingDetail,
+}
 
 
 @router.get("", response_model=list[TripRead])
@@ -36,10 +45,9 @@ def create_trip(
     db.add(trip)
     db.flush()
 
-    if trip.trip_type == TripType.motocamping:
-        db.add(MotocampingDetail(trip_id=trip.id))
-    elif trip.trip_type == TripType.backpacking:
-        db.add(BackpackingDetail(trip_id=trip.id))
+    detail_model = _DETAIL_MODEL_BY_TYPE.get(trip.trip_type)
+    if detail_model is not None:
+        db.add(detail_model(trip_id=trip.id))
 
     db.commit()
     db.refresh(trip)

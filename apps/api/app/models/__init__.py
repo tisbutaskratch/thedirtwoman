@@ -5,6 +5,7 @@ from app.models.gear import Gear
 from app.models.location import Location, LocationKind
 from app.models.motocamping_detail import MotocampingDetail
 from app.models.note import Note
+from app.models.overlanding_detail import OverlandingDetail
 from app.models.route import Route
 from app.models.trip import Trip, TripStatus, TripType
 from app.models.trip_collaborator import TripCollaborator
@@ -20,6 +21,7 @@ __all__ = [
     "LocationKind",
     "MotocampingDetail",
     "Note",
+    "OverlandingDetail",
     "Route",
     "Trip",
     "TripCollaborator",

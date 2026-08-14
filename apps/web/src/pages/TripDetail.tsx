@@ -13,6 +13,7 @@ import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
 import MotocampingPanel from "@/modes/motocamping/MotocampingPanel";
 import type { MotocampingDetail } from "@/modes/motocamping/types";
+import OverlandingPanel from "@/modes/overlanding/OverlandingPanel";
 
 const STATUS_OPTIONS: TripStatus[] = ["planning", "active", "completed"];
 
@@ -103,6 +104,9 @@ export default function TripDetail() {
       {trip.trip_type === "backpacking" && (
         <BackpackingPanel tripId={id} onChange={refreshTrip} />
       )}
+      {trip.trip_type === "overlanding" && (
+        <OverlandingPanel tripId={id} onChange={refreshTrip} />
+      )}
 
       <ShareSection tripId={id} isOwner={isOwner} />
 
@@ -110,7 +114,7 @@ export default function TripDetail() {
       <ActivitiesSection
         tripId={id}
         onChange={refreshTrip}
-        groupByDay={trip.trip_type === "backpacking"}
+        groupByDay={trip.trip_type === "backpacking" || trip.trip_type === "overlanding"}
         dailyTargetMiles={motoDetail?.daily_ride_target_miles}
       />
       <NotesSection tripId={id} onChange={refreshTrip} />

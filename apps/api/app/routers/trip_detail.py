@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,21 +9,46 @@ from app.db.session import get_db
 from app.models.trip import Trip, TripType
 from app.schemas.backpacking import BackpackingDetailRead
 from app.schemas.motocamping import MotocampingDetailRead
+from app.schemas.overlanding import OverlandingDetailRead
 from app.schemas.trip_detail import TripDetailUpdate
 from app.services.backpacking import to_backpacking_detail_read
 from app.services.motocamping import to_motocamping_detail_read
+from app.services.overlanding import to_overlanding_detail_read
 
 router = APIRouter(prefix="/trips/{trip_id}/detail", tags=["trip-detail"])
 
-DetailRead = Union[MotocampingDetailRead, BackpackingDetailRead]
+DetailRead = Union[MotocampingDetailRead, BackpackingDetailRead, OverlandingDetailRead]
 
-_MOTOCAMPING_FIELDS = {
-    "motorcycle_name",
-    "fuel_capacity_gal",
-    "fuel_economy_mpg",
-    "daily_ride_target_miles",
+# Each mode with a detail model: the Trip relationship holding it, the
+# TripDetailUpdate fields it owns, and how to build its read schema. Modes
+# without a detail model yet (camping, international) are simply absent,
+# falling through to _not_implemented below.
+_MODE_CONFIG: dict[TripType, tuple[str, set[str], Callable[[object, Trip], object]]] = {
+    TripType.motocamping: (
+        "motocamping_detail",
+        {"motorcycle_name", "fuel_capacity_gal", "fuel_economy_mpg", "daily_ride_target_miles"},
+        lambda detail, trip: to_motocamping_detail_read(detail),
+    ),
+    TripType.backpacking: (
+        "backpacking_detail",
+        {"base_pack_weight_oz", "permit_required", "permit_notes", "resupply_plan"},
+        to_backpacking_detail_read,
+    ),
+    TripType.overlanding: (
+        "overlanding_detail",
+        {
+            "vehicle_name",
+            "fuel_capacity_gal",
+            "fuel_economy_mpg",
+            "ground_clearance_in",
+            "drivetrain",
+            "has_recovery_gear",
+            "comms_plan",
+            "emergency_contact",
+        },
+        lambda detail, trip: to_overlanding_detail_read(detail),
+    ),
 }
-_BACKPACKING_FIELDS = {"base_pack_weight_oz", "permit_required", "permit_notes", "resupply_plan"}
 
 
 def _not_implemented(trip: Trip) -> HTTPException:
@@ -32,13 +58,21 @@ def _not_implemented(trip: Trip) -> HTTPException:
     )
 
 
+def _get_detail(trip: Trip):
+    config = _MODE_CONFIG.get(trip.trip_type)
+    if config is None:
+        raise _not_implemented(trip)
+    attr_name, fields, to_read = config
+    detail = getattr(trip, attr_name)
+    if detail is None:
+        raise _not_implemented(trip)
+    return detail, fields, to_read
+
+
 @router.get("", response_model=DetailRead)
 def get_trip_detail(trip: Trip = Depends(get_accessible_trip)) -> DetailRead:
-    if trip.trip_type == TripType.motocamping and trip.motocamping_detail is not None:
-        return to_motocamping_detail_read(trip.motocamping_detail)
-    if trip.trip_type == TripType.backpacking and trip.backpacking_detail is not None:
-        return to_backpacking_detail_read(trip.backpacking_detail, trip)
-    raise _not_implemented(trip)
+    detail, _fields, to_read = _get_detail(trip)
+    return to_read(detail, trip)
 
 
 @router.patch("", response_model=DetailRead)
@@ -47,24 +81,11 @@ def update_trip_detail(
     trip: Trip = Depends(get_accessible_trip),
     db: Session = Depends(get_db),
 ) -> DetailRead:
-    updates = payload.model_dump(exclude_unset=True)
+    detail, fields, to_read = _get_detail(trip)
 
-    if trip.trip_type == TripType.motocamping and trip.motocamping_detail is not None:
-        detail = trip.motocamping_detail
-        for field, value in updates.items():
-            if field in _MOTOCAMPING_FIELDS:
-                setattr(detail, field, value)
-        db.commit()
-        db.refresh(detail)
-        return to_motocamping_detail_read(detail)
-
-    if trip.trip_type == TripType.backpacking and trip.backpacking_detail is not None:
-        detail = trip.backpacking_detail
-        for field, value in updates.items():
-            if field in _BACKPACKING_FIELDS:
-                setattr(detail, field, value)
-        db.commit()
-        db.refresh(detail)
-        return to_backpacking_detail_read(detail, trip)
-
-    raise _not_implemented(trip)
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        if field in fields:
+            setattr(detail, field, value)
+    db.commit()
+    db.refresh(detail)
+    return to_read(detail, trip)

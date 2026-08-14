@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from app.models.location import Location
     from app.models.motocamping_detail import MotocampingDetail
     from app.models.note import Note
+    from app.models.overlanding_detail import OverlandingDetail
     from app.models.route import Route
     from app.models.trip_collaborator import TripCollaborator
     from app.models.trip_invite import TripInvite
@@ -70,6 +71,9 @@ class Trip(Base):
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
     backpacking_detail: Mapped[Optional[BackpackingDetail]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", uselist=False
+    )
+    overlanding_detail: Mapped[Optional[OverlandingDetail]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
     collaborators: Mapped[list[TripCollaborator]] = relationship(
