@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, get_owned_trip
+from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
 from app.db.session import get_db
 from app.models.gear import Gear
 from app.models.trip import Trip
@@ -19,7 +19,7 @@ def get_owned_gear(
     gear = (
         db.query(Gear)
         .join(Trip, Gear.trip_id == Trip.id)
-        .filter(Gear.id == gear_id, Trip.user_id == current_user.id)
+        .filter(Gear.id == gear_id, trip_access_filter(current_user.id))
         .first()
     )
     if gear is None:
@@ -28,13 +28,13 @@ def get_owned_gear(
 
 
 @router.get("/trips/{trip_id}/gear", response_model=list[GearRead])
-def list_gear(trip: Trip = Depends(get_owned_trip)) -> list[Gear]:
+def list_gear(trip: Trip = Depends(get_accessible_trip)) -> list[Gear]:
     return trip.gear
 
 
 @router.post("/trips/{trip_id}/gear", response_model=GearRead, status_code=status.HTTP_201_CREATED)
 def create_gear(
-    payload: GearCreate, trip: Trip = Depends(get_owned_trip), db: Session = Depends(get_db)
+    payload: GearCreate, trip: Trip = Depends(get_accessible_trip), db: Session = Depends(get_db)
 ) -> Gear:
     gear = Gear(trip_id=trip.id, **payload.model_dump())
     db.add(gear)

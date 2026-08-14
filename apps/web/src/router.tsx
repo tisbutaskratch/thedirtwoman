@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import AcceptInvite from "@/pages/AcceptInvite";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
 import Dashboard from "@/pages/Dashboard";
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
   },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
+  { path: "/invite/:token", element: <AcceptInvite /> },
   {
     element: <ProtectedRoute />,
     children: [

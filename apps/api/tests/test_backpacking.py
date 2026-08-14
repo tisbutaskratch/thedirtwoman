@@ -31,7 +31,11 @@ def test_update_detail_computes_est_pack_weight_from_base_and_gear(client, auth_
 
     response = client.patch(
         f"/trips/{trip_id}/detail",
-        json={"base_pack_weight_oz": 128, "permit_required": True, "permit_notes": "Trailhead kiosk"},
+        json={
+            "base_pack_weight_oz": 128,
+            "permit_required": True,
+            "permit_notes": "Trailhead kiosk",
+        },
         headers=headers,
     )
     assert response.status_code == 200

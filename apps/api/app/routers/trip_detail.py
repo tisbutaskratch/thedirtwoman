@@ -3,7 +3,7 @@ from typing import Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_owned_trip
+from app.core.deps import get_accessible_trip
 from app.db.session import get_db
 from app.models.trip import Trip, TripType
 from app.schemas.backpacking import BackpackingDetailRead
@@ -33,7 +33,7 @@ def _not_implemented(trip: Trip) -> HTTPException:
 
 
 @router.get("", response_model=DetailRead)
-def get_trip_detail(trip: Trip = Depends(get_owned_trip)) -> DetailRead:
+def get_trip_detail(trip: Trip = Depends(get_accessible_trip)) -> DetailRead:
     if trip.trip_type == TripType.motocamping and trip.motocamping_detail is not None:
         return to_motocamping_detail_read(trip.motocamping_detail)
     if trip.trip_type == TripType.backpacking and trip.backpacking_detail is not None:
@@ -44,7 +44,7 @@ def get_trip_detail(trip: Trip = Depends(get_owned_trip)) -> DetailRead:
 @router.patch("", response_model=DetailRead)
 def update_trip_detail(
     payload: TripDetailUpdate,
-    trip: Trip = Depends(get_owned_trip),
+    trip: Trip = Depends(get_accessible_trip),
     db: Session = Depends(get_db),
 ) -> DetailRead:
     updates = payload.model_dump(exclude_unset=True)

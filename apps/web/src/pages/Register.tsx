@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import AuthLayout from "@/components/AuthLayout";
 import { useAuth } from "@/lib/AuthContext";
@@ -10,11 +10,14 @@ const inputClass =
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const from = (location.state as { from?: string } | null)?.from ?? "/app/dashboard";
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -22,7 +25,7 @@ export default function Register() {
     setSubmitting(true);
     try {
       await register(email, password, name);
-      navigate("/app/dashboard", { replace: true });
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {
@@ -81,7 +84,7 @@ export default function Register() {
       </form>
       <p className="mt-4 text-center text-sm text-slate-500">
         Already have an account?{" "}
-        <Link to="/login" className="text-emerald-400 hover:text-emerald-300">
+        <Link to="/login" state={location.state} className="text-emerald-400 hover:text-emerald-300">
           Log in
         </Link>
       </p>

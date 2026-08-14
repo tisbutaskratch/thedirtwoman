@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, get_owned_trip
+from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
 from app.db.session import get_db
 from app.models.location import Location
 from app.models.trip import Trip
@@ -19,7 +19,7 @@ def get_owned_location(
     location = (
         db.query(Location)
         .join(Trip, Location.trip_id == Trip.id)
-        .filter(Location.id == location_id, Trip.user_id == current_user.id)
+        .filter(Location.id == location_id, trip_access_filter(current_user.id))
         .first()
     )
     if location is None:
@@ -28,7 +28,7 @@ def get_owned_location(
 
 
 @router.get("/trips/{trip_id}/locations", response_model=list[LocationRead])
-def list_locations(trip: Trip = Depends(get_owned_trip)) -> list[Location]:
+def list_locations(trip: Trip = Depends(get_accessible_trip)) -> list[Location]:
     return trip.locations
 
 
@@ -36,7 +36,9 @@ def list_locations(trip: Trip = Depends(get_owned_trip)) -> list[Location]:
     "/trips/{trip_id}/locations", response_model=LocationRead, status_code=status.HTTP_201_CREATED
 )
 def create_location(
-    payload: LocationCreate, trip: Trip = Depends(get_owned_trip), db: Session = Depends(get_db)
+    payload: LocationCreate,
+    trip: Trip = Depends(get_accessible_trip),
+    db: Session = Depends(get_db),
 ) -> Location:
     location = Location(trip_id=trip.id, **payload.model_dump())
     db.add(location)

@@ -7,6 +7,8 @@ import ExpensesSection from "@/components/trip/ExpensesSection";
 import GearSection from "@/components/trip/GearSection";
 import LocationsSection from "@/components/trip/LocationsSection";
 import NotesSection from "@/components/trip/NotesSection";
+import ShareSection from "@/components/trip/ShareSection";
+import { useAuth } from "@/lib/AuthContext";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
 import MotocampingPanel from "@/modes/motocamping/MotocampingPanel";
@@ -18,6 +20,7 @@ export default function TripDetail() {
   const { tripId } = useParams<{ tripId: string }>();
   const id = Number(tripId);
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [motoDetail, setMotoDetail] = useState<MotocampingDetail | null>(null);
@@ -47,6 +50,7 @@ export default function TripDetail() {
   if (!trip) return <p className="text-slate-500">Loading…</p>;
 
   const meta = TRIP_TYPE_META[trip.trip_type];
+  const isOwner = trip.user_id === user?.id;
 
   return (
     <section className="flex flex-col gap-10">
@@ -72,12 +76,14 @@ export default function TripDetail() {
               </option>
             ))}
           </select>
-          <button
-            onClick={handleDelete}
-            className="rounded-md border border-red-900 px-3 py-1.5 text-sm text-red-400 transition-colors hover:border-red-700"
-          >
-            Delete trip
-          </button>
+          {isOwner && (
+            <button
+              onClick={handleDelete}
+              className="rounded-md border border-red-900 px-3 py-1.5 text-sm text-red-400 transition-colors hover:border-red-700"
+            >
+              Delete trip
+            </button>
+          )}
         </div>
       </div>
 
@@ -97,6 +103,8 @@ export default function TripDetail() {
       {trip.trip_type === "backpacking" && (
         <BackpackingPanel tripId={id} onChange={refreshTrip} />
       )}
+
+      <ShareSection tripId={id} isOwner={isOwner} />
 
       <LocationsSection tripId={id} onChange={refreshTrip} />
       <ActivitiesSection

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, get_owned_trip
+from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
 from app.db.session import get_db
 from app.models.note import Note
 from app.models.trip import Trip
@@ -19,7 +19,7 @@ def get_owned_note(
     note = (
         db.query(Note)
         .join(Trip, Note.trip_id == Trip.id)
-        .filter(Note.id == note_id, Trip.user_id == current_user.id)
+        .filter(Note.id == note_id, trip_access_filter(current_user.id))
         .first()
     )
     if note is None:
@@ -28,13 +28,13 @@ def get_owned_note(
 
 
 @router.get("/trips/{trip_id}/notes", response_model=list[NoteRead])
-def list_notes(trip: Trip = Depends(get_owned_trip)) -> list[Note]:
+def list_notes(trip: Trip = Depends(get_accessible_trip)) -> list[Note]:
     return trip.notes
 
 
 @router.post("/trips/{trip_id}/notes", response_model=NoteRead, status_code=status.HTTP_201_CREATED)
 def create_note(
-    payload: NoteCreate, trip: Trip = Depends(get_owned_trip), db: Session = Depends(get_db)
+    payload: NoteCreate, trip: Trip = Depends(get_accessible_trip), db: Session = Depends(get_db)
 ) -> Note:
     note = Note(trip_id=trip.id, **payload.model_dump())
     db.add(note)

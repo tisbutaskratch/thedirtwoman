@@ -7,6 +7,8 @@ from app.models.motocamping_detail import MotocampingDetail
 from app.models.note import Note
 from app.models.route import Route
 from app.models.trip import Trip, TripStatus, TripType
+from app.models.trip_collaborator import TripCollaborator
+from app.models.trip_invite import TripInvite
 from app.models.user import User
 
 __all__ = [
@@ -20,6 +22,8 @@ __all__ = [
     "Note",
     "Route",
     "Trip",
+    "TripCollaborator",
+    "TripInvite",
     "TripStatus",
     "TripType",
     "User",

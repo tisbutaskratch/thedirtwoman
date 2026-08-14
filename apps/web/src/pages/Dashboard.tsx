@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listTrips } from "@/api/trips";
 import type { Trip } from "@/api/types";
+import { useAuth } from "@/lib/AuthContext";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const [trips, setTrips] = useState<Trip[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,9 +45,16 @@ export default function Dashboard() {
             >
               <div className="flex items-center justify-between">
                 <span className="text-2xl">{meta.icon}</span>
-                <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium capitalize text-slate-300">
-                  {trip.status}
-                </span>
+                <div className="flex gap-2">
+                  {trip.user_id !== user?.id && (
+                    <span className="rounded-full bg-sky-500/10 px-2.5 py-0.5 text-xs font-medium text-sky-400">
+                      Shared
+                    </span>
+                  )}
+                  <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium capitalize text-slate-300">
+                    {trip.status}
+                  </span>
+                </div>
               </div>
               <h2 className="text-lg font-semibold">{trip.title}</h2>
               <p className="text-sm text-slate-500">{meta.label}</p>

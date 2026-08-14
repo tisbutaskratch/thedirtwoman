@@ -70,7 +70,7 @@ export default function Login() {
       </form>
       <p className="mt-4 text-center text-sm text-slate-500">
         No account?{" "}
-        <Link to="/register" className="text-emerald-400 hover:text-emerald-300">
+        <Link to="/register" state={location.state} className="text-emerald-400 hover:text-emerald-300">
           Register
         </Link>
       </p>

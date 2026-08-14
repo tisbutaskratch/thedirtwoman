@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, get_owned_trip
+from app.core.deps import get_accessible_trip, get_current_user, get_owned_trip, trip_access_filter
 from app.db.session import get_db
 from app.models.backpacking_detail import BackpackingDetail
 from app.models.motocamping_detail import MotocampingDetail
@@ -19,7 +19,7 @@ def list_trips(
 ) -> list[TripRead]:
     trips = (
         db.query(Trip)
-        .filter(Trip.user_id == current_user.id)
+        .filter(trip_access_filter(current_user.id))
         .order_by(Trip.created_at.desc())
         .all()
     )
@@ -47,14 +47,14 @@ def create_trip(
 
 
 @router.get("/{trip_id}", response_model=TripRead)
-def get_trip(trip: Trip = Depends(get_owned_trip)) -> TripRead:
+def get_trip(trip: Trip = Depends(get_accessible_trip)) -> TripRead:
     return to_trip_read(trip)
 
 
 @router.patch("/{trip_id}", response_model=TripRead)
 def update_trip(
     payload: TripUpdate,
-    trip: Trip = Depends(get_owned_trip),
+    trip: Trip = Depends(get_accessible_trip),
     db: Session = Depends(get_db),
 ) -> TripRead:
     for field, value in payload.model_dump(exclude_unset=True).items():

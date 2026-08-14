@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, get_owned_trip
+from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
 from app.db.session import get_db
 from app.models.activity import Activity
 from app.models.trip import Trip
@@ -19,7 +19,7 @@ def get_owned_activity(
     activity = (
         db.query(Activity)
         .join(Trip, Activity.trip_id == Trip.id)
-        .filter(Activity.id == activity_id, Trip.user_id == current_user.id)
+        .filter(Activity.id == activity_id, trip_access_filter(current_user.id))
         .first()
     )
     if activity is None:
@@ -28,7 +28,7 @@ def get_owned_activity(
 
 
 @router.get("/trips/{trip_id}/activities", response_model=list[ActivityRead])
-def list_activities(trip: Trip = Depends(get_owned_trip)) -> list[Activity]:
+def list_activities(trip: Trip = Depends(get_accessible_trip)) -> list[Activity]:
     return trip.activities
 
 
@@ -36,7 +36,9 @@ def list_activities(trip: Trip = Depends(get_owned_trip)) -> list[Activity]:
     "/trips/{trip_id}/activities", response_model=ActivityRead, status_code=status.HTTP_201_CREATED
 )
 def create_activity(
-    payload: ActivityCreate, trip: Trip = Depends(get_owned_trip), db: Session = Depends(get_db)
+    payload: ActivityCreate,
+    trip: Trip = Depends(get_accessible_trip),
+    db: Session = Depends(get_db),
 ) -> Activity:
     activity = Activity(trip_id=trip.id, **payload.model_dump())
     db.add(activity)

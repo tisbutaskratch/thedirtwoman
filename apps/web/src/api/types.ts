@@ -119,3 +119,28 @@ export interface Note {
 export interface NoteCreate {
   body: string;
 }
+
+export interface Collaborator {
+  user_id: number;
+  name: string;
+  email: string;
+  joined_at: string;
+}
+
+export interface Invite {
+  token: string;
+  trip_id: number;
+  expires_at: string;
+}
+
+export interface InvitePreview {
+  trip_id: number;
+  trip_title: string;
+  trip_type: TripType;
+  owner_name: string;
+  already_member: boolean;
+}
+
+export interface InviteAcceptResult {
+  trip_id: number;
+}

@@ -10,6 +10,7 @@ from app.routers import (
     health,
     locations,
     notes,
+    sharing,
     trip_detail,
     trips,
 )
@@ -33,3 +34,4 @@ app.include_router(activities.router)
 app.include_router(expenses.router)
 app.include_router(gear.router)
 app.include_router(notes.router)
+app.include_router(sharing.router)
