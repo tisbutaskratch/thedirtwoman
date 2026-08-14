@@ -1,5 +1,6 @@
 from app.models.activity import Activity
 from app.models.backpacking_detail import BackpackingDetail
+from app.models.camping_detail import CampingDetail
 from app.models.expense import Expense
 from app.models.gear import Gear
 from app.models.location import Location, LocationKind
@@ -15,6 +16,7 @@ from app.models.user import User
 __all__ = [
     "Activity",
     "BackpackingDetail",
+    "CampingDetail",
     "Expense",
     "Gear",
     "Location",

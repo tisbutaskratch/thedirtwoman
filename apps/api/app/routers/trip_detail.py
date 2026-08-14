@@ -8,21 +8,25 @@ from app.core.deps import get_accessible_trip
 from app.db.session import get_db
 from app.models.trip import Trip, TripType
 from app.schemas.backpacking import BackpackingDetailRead
+from app.schemas.camping import CampingDetailRead
 from app.schemas.motocamping import MotocampingDetailRead
 from app.schemas.overlanding import OverlandingDetailRead
 from app.schemas.trip_detail import TripDetailUpdate
 from app.services.backpacking import to_backpacking_detail_read
+from app.services.camping import to_camping_detail_read
 from app.services.motocamping import to_motocamping_detail_read
 from app.services.overlanding import to_overlanding_detail_read
 
 router = APIRouter(prefix="/trips/{trip_id}/detail", tags=["trip-detail"])
 
-DetailRead = Union[MotocampingDetailRead, BackpackingDetailRead, OverlandingDetailRead]
+DetailRead = Union[
+    MotocampingDetailRead, BackpackingDetailRead, OverlandingDetailRead, CampingDetailRead
+]
 
 # Each mode with a detail model: the Trip relationship holding it, the
 # TripDetailUpdate fields it owns, and how to build its read schema. Modes
-# without a detail model yet (camping, international) are simply absent,
-# falling through to _not_implemented below.
+# without a detail model yet (international) are simply absent, falling
+# through to _not_implemented below.
 _MODE_CONFIG: dict[TripType, tuple[str, set[str], Callable[[object, Trip], object]]] = {
     TripType.motocamping: (
         "motocamping_detail",
@@ -47,6 +51,11 @@ _MODE_CONFIG: dict[TripType, tuple[str, set[str], Callable[[object, Trip], objec
             "emergency_contact",
         },
         lambda detail, trip: to_overlanding_detail_read(detail),
+    ),
+    TripType.camping: (
+        "camping_detail",
+        {"campground_reservation_ref", "fire_restrictions_checked"},
+        lambda detail, trip: to_camping_detail_read(detail),
     ),
 }
 

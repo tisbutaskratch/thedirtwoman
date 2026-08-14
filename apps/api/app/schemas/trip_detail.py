@@ -33,3 +33,7 @@ class TripDetailUpdate(BaseModel):
     has_recovery_gear: Optional[bool] = None
     comms_plan: Optional[str] = None
     emergency_contact: Optional[str] = Field(default=None, max_length=255)
+
+    # camping
+    campground_reservation_ref: Optional[str] = Field(default=None, max_length=255)
+    fire_restrictions_checked: Optional[bool] = None
