@@ -12,25 +12,31 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100">
-      <header className="border-b border-slate-800">
-        <nav className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-4">
-          <NavLink to="/app/dashboard" className="text-lg font-bold tracking-tight">
+    <div className="flex min-h-screen flex-col bg-surface text-content">
+      <header className="border-b border-edge bg-surface/90 backdrop-blur">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <NavLink
+            to="/app/dashboard"
+            className="flex items-center gap-2 text-base font-bold tracking-tight"
+          >
+            <span aria-hidden className="text-lg">
+              🧭
+            </span>
             Adventure Planner
           </NavLink>
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-slate-400">{user?.name}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="hidden text-content-muted sm:inline">{user?.name}</span>
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-300 transition-colors hover:border-slate-500"
+              className="rounded-md border border-edge px-3 py-1.5 text-content-muted transition-colors hover:border-edge-strong hover:text-content"
             >
               Log out
             </button>
           </div>
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <Outlet />
       </main>
     </div>

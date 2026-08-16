@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { listCollaborators } from "@/api/sharing";
 import { createGear, deleteGear, listGear, updateGear } from "@/api/trips";
 import type { Collaborator, Gear, GearRequiredLevel } from "@/api/types";
+import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
 const REQUIRED_LEVELS: GearRequiredLevel[] = ["required", "optional"];
 
@@ -11,26 +13,32 @@ const REQUIRED_LEVEL_LABEL: Record<GearRequiredLevel, string> = {
 };
 
 const REQUIRED_LEVEL_STYLE: Record<GearRequiredLevel, string> = {
-  required: "border-rose-900 bg-rose-950/40 text-rose-300",
-  optional: "border-amber-900 bg-amber-950/40 text-amber-300",
+  required: "border-rose-800/60 bg-rose-950/50 text-rose-300",
+  optional: "border-amber-800/60 bg-amber-950/50 text-amber-300",
 };
 
 const UNCATEGORIZED = "Uncategorized";
+
+/** A glyph per common packing-list category, purely to make the grid scannable. */
+function categoryGlyph(name: string) {
+  const n = name.toLowerCase();
+  if (n.includes("riding") || n.includes("moto")) return "🏍️";
+  if (n.includes("camp") || n.includes("sleep")) return "⛺";
+  if (n.includes("tool") || n.includes("repair")) return "🔧";
+  if (n.includes("cook") || n.includes("food") || n.includes("kitchen")) return "🍳";
+  if (n.includes("cloth") || n.includes("layer")) return "🧥";
+  if (n.includes("water") || n.includes("consum")) return "💧";
+  if (n.includes("comfort")) return "🛋️";
+  if (n.includes("nav") || n.includes("electro")) return "🧭";
+  if (n.includes("first") || n.includes("med")) return "🩹";
+  return "🎒";
+}
 
 interface Draft {
   name: string;
   category: string;
   weightOz: string;
   notes: string;
-}
-
-function draftFrom(item: Gear): Draft {
-  return {
-    name: item.name,
-    category: item.category ?? "",
-    weightOz: item.weight_oz?.toString() ?? "",
-    notes: item.notes ?? "",
-  };
 }
 
 export default function GearSection({
@@ -60,16 +68,10 @@ export default function GearSection({
 
   useEffect(refresh, [tripId]);
 
-  const nameByUserId = useMemo(() => {
-    const map = new Map<number, string>();
-    roster.forEach((c) => map.set(c.user_id, c.name));
-    return map;
-  }, [roster]);
-
-  const categories = useMemo(() => {
-    const existing = new Set(gear.map((g) => g.category ?? UNCATEGORIZED));
-    return Array.from(existing).sort();
-  }, [gear]);
+  const categories = useMemo(
+    () => Array.from(new Set(gear.map((g) => g.category ?? UNCATEGORIZED))).sort(),
+    [gear],
+  );
 
   const grouped = useMemo(() => {
     const map = new Map<string, Gear[]>();
@@ -79,6 +81,8 @@ export default function GearSection({
     }
     return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
   }, [gear]);
+
+  const packedCount = gear.filter((g) => g.packed).length;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -94,10 +98,7 @@ export default function GearSection({
         notes: notes.trim() || null,
       });
       setName("");
-      setCategory("");
       setWeightOz("");
-      setRequiredLevel("required");
-      setAssignedTo("");
       setNotes("");
       refresh();
       onChange?.();
@@ -110,16 +111,6 @@ export default function GearSection({
     await deleteGear(id);
     refresh();
     onChange?.();
-  }
-
-  function startEdit(item: Gear) {
-    setEditingId(item.id);
-    setDraft(draftFrom(item));
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setDraft(null);
   }
 
   async function saveEdit(id: number) {
@@ -141,46 +132,28 @@ export default function GearSection({
     onChange?.();
   }
 
-  async function changeRequiredLevel(item: Gear, level: GearRequiredLevel) {
-    await updateGear(item.id, { required_level: level });
-    refresh();
-  }
-
-  async function changeAssignedTo(item: Gear, value: string) {
-    await updateGear(item.id, { assigned_to_user_id: value ? Number(value) : null });
-    refresh();
-  }
-
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Packing List</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add gear"
-            className="text-slate-500 hover:text-emerald-300"
-          >
-            +
-          </button>
-        )}
-      </div>
-
+    <Section
+      icon={SECTION_META.packing.icon}
+      title="Packing list"
+      tone={SECTION_META.packing.tone}
+      actions={
+        <>
+          {gear.length > 0 && (
+            <span className="mr-1 text-xs tabular-nums text-content-subtle">
+              {packedCount}/{gear.length} packed
+            </span>
+          )}
+          {!showAdd && (
+            <IconButton onClick={() => setShowAdd(true)} title="Add gear">
+              +
+            </IconButton>
+          )}
+        </>
+      }
+    >
       {showAdd && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-        >
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
+        <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
           <div className="flex flex-wrap gap-2">
             <input
               type="text"
@@ -188,7 +161,7 @@ export default function GearSection({
               placeholder="Gear item"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} flex-1`}
             />
             <input
               type="text"
@@ -196,7 +169,7 @@ export default function GearSection({
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-40 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} w-40`}
             />
             <datalist id="gear-categories">
               {categories
@@ -212,14 +185,14 @@ export default function GearSection({
               placeholder="oz"
               value={weightOz}
               onChange={(e) => setWeightOz(e.target.value)}
-              className="w-20 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} w-20`}
             />
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap gap-2">
             <select
               value={requiredLevel}
               onChange={(e) => setRequiredLevel(e.target.value as GearRequiredLevel)}
-              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} w-32`}
             >
               {REQUIRED_LEVELS.map((level) => (
                 <option key={level} value={level}>
@@ -230,7 +203,7 @@ export default function GearSection({
             <select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} w-36`}
             >
               <option value="">Unassigned</option>
               {roster.map((c) => (
@@ -244,165 +217,164 @@ export default function GearSection({
               placeholder="Notes (optional)"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} flex-1`}
             />
-            <button
-              type="submit"
-              disabled={submitting}
-              title="Add"
-              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
           </div>
-        </form>
+        </AddForm>
       )}
 
-      {grouped.length === 0 && <p className="text-sm text-slate-500">No gear yet.</p>}
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {grouped.map(([categoryName, items]) => (
-          <div
-            key={categoryName}
-            className="flex flex-col gap-3 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-          >
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-slate-400">
-              {categoryName}
-            </h3>
-            <ul className="flex flex-col gap-2">
-              {items.map((item) =>
-                editingId === item.id && draft ? (
-                  <li
-                    key={item.id}
-                    className="flex flex-col gap-1.5 rounded-md border border-slate-800 px-3 py-2"
-                  >
-                    <input
-                      type="text"
-                      value={draft.name}
-                      onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                      className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                    />
-                    <div className="flex gap-1.5">
+      {grouped.length === 0 ? (
+        <EmptyState icon="🎒" message="Nothing on the packing list yet." />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {grouped.map(([categoryName, items]) => (
+            <div
+              key={categoryName}
+              className="flex flex-col gap-2 rounded-card border border-edge bg-surface-raised p-3"
+            >
+              <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-muted">
+                <span aria-hidden>{categoryGlyph(categoryName)}</span>
+                {categoryName}
+                <span className="ml-auto font-normal tabular-nums text-content-subtle">
+                  {items.filter((i) => i.packed).length}/{items.length}
+                </span>
+              </h3>
+              <ul className="flex flex-col gap-1">
+                {items.map((item) =>
+                  editingId === item.id && draft ? (
+                    <li key={item.id} className="flex flex-col gap-1.5 rounded-md bg-surface-sunken p-2">
                       <input
                         type="text"
-                        placeholder="Category"
-                        value={draft.category}
-                        onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-                        className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                        value={draft.name}
+                        onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                        className={`${inputClass} py-1 text-xs`}
                       />
+                      <div className="flex gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="Category"
+                          value={draft.category}
+                          onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                          className={`${inputClass} flex-1 py-1 text-xs`}
+                        />
+                        <input
+                          type="number"
+                          min={0}
+                          step="0.1"
+                          placeholder="oz"
+                          value={draft.weightOz}
+                          onChange={(e) => setDraft({ ...draft, weightOz: e.target.value })}
+                          className={`${inputClass} w-16 py-1 text-xs`}
+                        />
+                      </div>
                       <input
-                        type="number"
-                        min={0}
-                        step="0.1"
-                        placeholder="oz"
-                        value={draft.weightOz}
-                        onChange={(e) => setDraft({ ...draft, weightOz: e.target.value })}
-                        className="w-16 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                        type="text"
+                        placeholder="Notes"
+                        value={draft.notes}
+                        onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+                        className={`${inputClass} py-1 text-xs`}
                       />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Notes"
-                      value={draft.notes}
-                      onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-                      className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                    />
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => saveEdit(item.id)}
-                        title="Save"
-                        className="text-emerald-400 hover:text-emerald-300"
-                      >
-                        ✓
-                      </button>
-                      <button
-                        onClick={cancelEdit}
-                        title="Cancel"
-                        className="text-slate-500 hover:text-slate-300"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </li>
-                ) : (
-                  <li
-                    key={item.id}
-                    className="flex flex-col gap-1.5 rounded-md border border-slate-800 px-3 py-2"
-                  >
-                    <div className="flex items-start gap-2">
+                      <div className="flex justify-end gap-1">
+                        <IconButton onClick={() => saveEdit(item.id)} title="Save" variant="confirm">
+                          ✓
+                        </IconButton>
+                        <IconButton onClick={() => setEditingId(null)} title="Cancel">
+                          ×
+                        </IconButton>
+                      </div>
+                    </li>
+                  ) : (
+                    <li
+                      key={item.id}
+                      className="group flex items-start gap-2 rounded-md px-1 py-1 hover:bg-surface-overlay"
+                    >
                       <input
                         type="checkbox"
                         checked={item.packed}
                         onChange={() => togglePacked(item)}
-                        className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-500"
+                        className="mt-1 h-3.5 w-3.5 shrink-0 accent-emerald-500"
                       />
-                      <div className="flex flex-1 flex-wrap items-center gap-2">
-                        <span
-                          className={
-                            item.packed ? "text-slate-500 line-through" : "text-sm text-slate-100"
-                          }
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className={`truncate text-sm ${item.packed ? "text-content-subtle line-through" : "text-content"}`}
                         >
                           {item.name}
-                        </span>
-                        {item.weight_oz !== null && (
-                          <span className="text-xs text-slate-500">{item.weight_oz} oz</span>
+                          {item.weight_oz !== null && (
+                            <span className="ml-1.5 text-xs text-content-subtle">
+                              {item.weight_oz}oz
+                            </span>
+                          )}
+                        </p>
+                        {item.notes && (
+                          <p className="truncate text-xs italic text-content-subtle">{item.notes}</p>
                         )}
+                        <div className="mt-1 flex flex-wrap items-center gap-1">
+                          <select
+                            value={item.required_level}
+                            onChange={(e) =>
+                              updateGear(item.id, {
+                                required_level: e.target.value as GearRequiredLevel,
+                              }).then(refresh)
+                            }
+                            className={`rounded-full border px-1.5 py-0 text-[11px] outline-none ${REQUIRED_LEVEL_STYLE[item.required_level]}`}
+                          >
+                            {REQUIRED_LEVELS.map((level) => (
+                              <option key={level} value={level} className="bg-surface text-content">
+                                {REQUIRED_LEVEL_LABEL[level]}
+                              </option>
+                            ))}
+                          </select>
+                          <select
+                            value={item.assigned_to_user_id ?? ""}
+                            onChange={(e) =>
+                              updateGear(item.id, {
+                                assigned_to_user_id: e.target.value
+                                  ? Number(e.target.value)
+                                  : null,
+                              }).then(refresh)
+                            }
+                            className="rounded-full border border-edge bg-surface-overlay px-1.5 py-0 text-[11px] text-content-muted outline-none"
+                          >
+                            <option value="">Unassigned</option>
+                            {roster.map((c) => (
+                              <option key={c.user_id} value={c.user_id}>
+                                {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
-                      <div className="flex shrink-0 gap-2">
-                        <button
-                          onClick={() => startEdit(item)}
+                      <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                        <IconButton
+                          onClick={() => {
+                            setEditingId(item.id);
+                            setDraft({
+                              name: item.name,
+                              category: item.category ?? "",
+                              weightOz: item.weight_oz?.toString() ?? "",
+                              notes: item.notes ?? "",
+                            });
+                          }}
                           title="Edit"
-                          className="text-slate-500 hover:text-emerald-300"
                         >
                           ✎
-                        </button>
-                        <button
+                        </IconButton>
+                        <IconButton
                           onClick={() => handleDelete(item.id)}
                           title="Delete"
-                          className="text-slate-600 hover:text-red-400"
+                          variant="danger"
                         >
                           −
-                        </button>
+                        </IconButton>
                       </div>
-                    </div>
-
-                    {item.notes && <p className="ml-6 text-xs text-slate-500 italic">{item.notes}</p>}
-
-                    <div className="ml-6 flex flex-wrap items-center gap-2">
-                      <select
-                        value={item.required_level}
-                        onChange={(e) =>
-                          changeRequiredLevel(item, e.target.value as GearRequiredLevel)
-                        }
-                        className={`rounded-full border px-2 py-0.5 text-xs font-medium outline-none ${REQUIRED_LEVEL_STYLE[item.required_level]}`}
-                      >
-                        {REQUIRED_LEVELS.map((level) => (
-                          <option key={level} value={level} className="bg-slate-900 text-slate-100">
-                            {REQUIRED_LEVEL_LABEL[level]}
-                          </option>
-                        ))}
-                      </select>
-
-                      <select
-                        value={item.assigned_to_user_id ?? ""}
-                        onChange={(e) => changeAssignedTo(item, e.target.value)}
-                        className="rounded-full border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-300 outline-none"
-                      >
-                        <option value="">Unassigned</option>
-                        {roster.map((c) => (
-                          <option key={c.user_id} value={c.user_id}>
-                            {nameByUserId.get(c.user_id) ?? c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </li>
-                ),
-              )}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </section>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
   );
 }

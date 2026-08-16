@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { createNote, deleteNote, listNotes } from "@/api/trips";
 import type { Note } from "@/api/types";
+import { EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
 function bulletLines(text: string): string[] {
   return text
@@ -62,66 +64,66 @@ export default function NotesSection({
   }
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Notes</h2>
-        {!editing && (
-          <button
-            onClick={startEdit}
-            title="Edit"
-            className="text-slate-500 hover:text-emerald-300"
-          >
+    <Section
+      icon={SECTION_META.notes.icon}
+      title="Notes"
+      tone={SECTION_META.notes.tone}
+      count={notes.length}
+      actions={
+        !editing && (
+          <IconButton onClick={startEdit} title="Edit notes">
             ✎
-          </button>
-        )}
-      </div>
-
+          </IconButton>
+        )
+      }
+    >
       {editing ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4">
+          <div className="flex justify-end">
+            <IconButton onClick={() => setEditing(false)} title="Cancel">
+              ×
+            </IconButton>
+          </div>
           <textarea
-            rows={6}
+            rows={7}
             autoFocus
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={"One note per line\ne.g. Red River Gorge area is a lot of fun"}
-            className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            className={inputClass}
           />
-          <div className="flex gap-3">
-            <button
+          <div className="flex justify-end">
+            <IconButton
               onClick={handleSave}
-              disabled={saving}
               title="Save"
-              className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+              variant="confirm"
+              disabled={saving}
             >
               ✓
-            </button>
-            <button
-              onClick={() => setEditing(false)}
-              title="Cancel"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
+            </IconButton>
           </div>
         </div>
       ) : notes.length > 0 ? (
-        <ul className="list-disc space-y-1 pl-5 text-sm text-slate-300">
+        <ul className="flex flex-col gap-1">
           {notes.map((note) => (
-            <li key={note.id} className="group flex items-start justify-between gap-2">
-              <span>{note.body}</span>
-              <button
+            <li
+              key={note.id}
+              className="flex items-start justify-between gap-2 rounded-md border border-edge bg-surface-raised px-3 py-2"
+            >
+              <span className="text-sm leading-relaxed text-content-muted">{note.body}</span>
+              <IconButton
                 onClick={() => handleRemoveLine(note.id)}
                 title="Remove"
-                className="shrink-0 text-slate-600 hover:text-red-400"
+                variant="danger"
               >
                 −
-              </button>
+              </IconButton>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-slate-500">No notes yet.</p>
+        <EmptyState icon="📝" message="No notes yet." />
       )}
-    </section>
+    </Section>
   );
 }

@@ -1,17 +1,15 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { getOverlandingDetail, updateOverlandingDetail } from "@/modes/overlanding/api";
 import type { OverlandingDetail } from "@/modes/overlanding/types";
+import { Badge, Card, Field, IconButton, Section, StatTile, inputClass } from "@/components/ui";
 
-const inputClass =
-  "w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500";
-
-const DRIVETRAIN_OPTIONS = ["", "4WD", "AWD", "RWD", "FWD"];
-
-const RECOVERY_GEAR_OPTIONS = [
+const YES_NO = [
   { label: "Not sure yet", value: "" },
-  { label: "Yes, packed", value: "true" },
+  { label: "Yes", value: "true" },
   { label: "No", value: "false" },
 ];
+
+const DRIVETRAINS = ["", "4WD", "AWD", "2WD"];
 
 export default function OverlandingPanel({
   tripId,
@@ -21,45 +19,66 @@ export default function OverlandingPanel({
   onChange?: () => void;
 }) {
   const [detail, setDetail] = useState<OverlandingDetail | null>(null);
-  const [vehicleName, setVehicleName] = useState("");
-  const [fuelCapacity, setFuelCapacity] = useState("");
-  const [fuelEconomy, setFuelEconomy] = useState("");
-  const [groundClearance, setGroundClearance] = useState("");
-  const [drivetrain, setDrivetrain] = useState("");
-  const [hasRecoveryGear, setHasRecoveryGear] = useState("");
-  const [commsPlan, setCommsPlan] = useState("");
-  const [emergencyContact, setEmergencyContact] = useState("");
+  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({
+    vehicle_name: "",
+    fuel_capacity_gal: "",
+    aux_fuel_gal: "",
+    fuel_economy_mpg: "",
+    water_capacity_gal: "",
+    tire_pressure_highway_psi: "",
+    tire_pressure_offroad_psi: "",
+    ground_clearance_in: "",
+    drivetrain: "",
+    has_recovery_gear: "",
+    comms_plan: "",
+    emergency_contact: "",
+  });
 
-  useEffect(() => {
+  function load() {
     getOverlandingDetail(tripId).then((d) => {
       setDetail(d);
-      setVehicleName(d.vehicle_name ?? "");
-      setFuelCapacity(d.fuel_capacity_gal?.toString() ?? "");
-      setFuelEconomy(d.fuel_economy_mpg?.toString() ?? "");
-      setGroundClearance(d.ground_clearance_in?.toString() ?? "");
-      setDrivetrain(d.drivetrain ?? "");
-      setHasRecoveryGear(d.has_recovery_gear === null ? "" : String(d.has_recovery_gear));
-      setCommsPlan(d.comms_plan ?? "");
-      setEmergencyContact(d.emergency_contact ?? "");
+      setForm({
+        vehicle_name: d.vehicle_name ?? "",
+        fuel_capacity_gal: d.fuel_capacity_gal?.toString() ?? "",
+        aux_fuel_gal: d.aux_fuel_gal?.toString() ?? "",
+        fuel_economy_mpg: d.fuel_economy_mpg?.toString() ?? "",
+        water_capacity_gal: d.water_capacity_gal?.toString() ?? "",
+        tire_pressure_highway_psi: d.tire_pressure_highway_psi?.toString() ?? "",
+        tire_pressure_offroad_psi: d.tire_pressure_offroad_psi?.toString() ?? "",
+        ground_clearance_in: d.ground_clearance_in?.toString() ?? "",
+        drivetrain: d.drivetrain ?? "",
+        has_recovery_gear: d.has_recovery_gear === null ? "" : String(d.has_recovery_gear),
+        comms_plan: d.comms_plan ?? "",
+        emergency_contact: d.emergency_contact ?? "",
+      });
     });
-  }, [tripId]);
+  }
+
+  useEffect(load, [tripId]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSaving(true);
     try {
+      const num = (v: string) => (v === "" ? null : Number(v));
       const updated = await updateOverlandingDetail(tripId, {
-        vehicle_name: vehicleName || null,
-        fuel_capacity_gal: fuelCapacity ? Number(fuelCapacity) : null,
-        fuel_economy_mpg: fuelEconomy ? Number(fuelEconomy) : null,
-        ground_clearance_in: groundClearance ? Number(groundClearance) : null,
-        drivetrain: drivetrain || null,
-        has_recovery_gear: hasRecoveryGear === "" ? null : hasRecoveryGear === "true",
-        comms_plan: commsPlan || null,
-        emergency_contact: emergencyContact || null,
+        vehicle_name: form.vehicle_name || null,
+        fuel_capacity_gal: num(form.fuel_capacity_gal),
+        aux_fuel_gal: num(form.aux_fuel_gal),
+        fuel_economy_mpg: num(form.fuel_economy_mpg),
+        water_capacity_gal: num(form.water_capacity_gal),
+        tire_pressure_highway_psi: num(form.tire_pressure_highway_psi),
+        tire_pressure_offroad_psi: num(form.tire_pressure_offroad_psi),
+        ground_clearance_in: num(form.ground_clearance_in),
+        drivetrain: form.drivetrain || null,
+        has_recovery_gear: form.has_recovery_gear === "" ? null : form.has_recovery_gear === "true",
+        comms_plan: form.comms_plan || null,
+        emergency_contact: form.emergency_contact || null,
       });
       setDetail(updated);
+      setEditing(false);
       onChange?.();
     } finally {
       setSaving(false);
@@ -68,129 +87,240 @@ export default function OverlandingPanel({
 
   if (!detail) return null;
 
+  const set = (k: keyof typeof form) => (e: { target: { value: string } }) =>
+    setForm({ ...form, [k]: e.target.value });
+
+  const tirePressures =
+    detail.tire_pressure_offroad_psi && detail.tire_pressure_highway_psi
+      ? `${detail.tire_pressure_offroad_psi} → ${detail.tire_pressure_highway_psi}`
+      : (detail.tire_pressure_offroad_psi ?? detail.tire_pressure_highway_psi ?? "—");
+
   return (
-    <section className="flex flex-col gap-4 rounded-lg border border-emerald-900/50 bg-emerald-500/5 p-5">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">🚙 Overlanding details</h2>
-        {detail.est_range_miles !== null && (
-          <span className="text-sm text-emerald-400">
-            Est. range: {detail.est_range_miles} mi
-          </span>
-        )}
-      </div>
-      <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Vehicle
-          </label>
-          <input
-            type="text"
-            value={vehicleName}
-            onChange={(e) => setVehicleName(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Drivetrain
-          </label>
-          <select
-            value={drivetrain}
-            onChange={(e) => setDrivetrain(e.target.value)}
-            className={inputClass}
-          >
-            {DRIVETRAIN_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option || "Not sure yet"}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Fuel capacity (gal)
-          </label>
-          <input
-            type="number"
-            min={0}
-            step="0.1"
-            value={fuelCapacity}
-            onChange={(e) => setFuelCapacity(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Fuel economy (mpg)
-          </label>
-          <input
-            type="number"
-            min={0}
-            step="0.1"
-            value={fuelEconomy}
-            onChange={(e) => setFuelEconomy(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Ground clearance (in)
-          </label>
-          <input
-            type="number"
-            min={0}
-            step="0.1"
-            value={groundClearance}
-            onChange={(e) => setGroundClearance(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Recovery gear packed
-          </label>
-          <select
-            value={hasRecoveryGear}
-            onChange={(e) => setHasRecoveryGear(e.target.value)}
-            className={inputClass}
-          >
-            {RECOVERY_GEAR_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Comms plan
-          </label>
-          <textarea
-            value={commsPlan}
-            onChange={(e) => setCommsPlan(e.target.value)}
-            rows={2}
-            className={inputClass}
-          />
-        </div>
-        <div className="sm:col-span-2">
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
-            Emergency contact
-          </label>
-          <input
-            type="text"
-            value={emergencyContact}
-            onChange={(e) => setEmergencyContact(e.target.value)}
-            className={inputClass}
-          />
-        </div>
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-50 sm:col-span-2 sm:w-fit"
+    <Section
+      icon="🚙"
+      title="Rig & range"
+      tone="amber"
+      actions={
+        !editing && (
+          <IconButton onClick={() => setEditing(true)} title="Edit rig details">
+            ✎
+          </IconButton>
+        )
+      }
+    >
+      {editing ? (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
         >
-          {saving ? "Saving…" : "Save"}
-        </button>
-      </form>
-    </section>
+          <div className="flex justify-end">
+            <IconButton onClick={() => setEditing(false)} title="Cancel">
+              ×
+            </IconButton>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <Field label="Vehicle">
+              <input
+                type="text"
+                placeholder="4Runner"
+                value={form.vehicle_name}
+                onChange={set("vehicle_name")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Drivetrain">
+              <select value={form.drivetrain} onChange={set("drivetrain")} className={inputClass}>
+                {DRIVETRAINS.map((d) => (
+                  <option key={d} value={d}>
+                    {d || "Not set"}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Ground clearance (in)">
+              <input
+                type="number"
+                min={0}
+                step="0.1"
+                value={form.ground_clearance_in}
+                onChange={set("ground_clearance_in")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Main tank (gal)">
+              <input
+                type="number"
+                min={0}
+                step="0.1"
+                value={form.fuel_capacity_gal}
+                onChange={set("fuel_capacity_gal")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Jerry cans (gal)">
+              <input
+                type="number"
+                min={0}
+                step="0.1"
+                value={form.aux_fuel_gal}
+                onChange={set("aux_fuel_gal")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Economy (mpg)">
+              <input
+                type="number"
+                min={0}
+                step="0.1"
+                value={form.fuel_economy_mpg}
+                onChange={set("fuel_economy_mpg")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Water onboard (gal)">
+              <input
+                type="number"
+                min={0}
+                step="0.1"
+                value={form.water_capacity_gal}
+                onChange={set("water_capacity_gal")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Aired-down PSI">
+              <input
+                type="number"
+                min={0}
+                step="0.5"
+                placeholder="18"
+                value={form.tire_pressure_offroad_psi}
+                onChange={set("tire_pressure_offroad_psi")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Highway PSI">
+              <input
+                type="number"
+                min={0}
+                step="0.5"
+                placeholder="35"
+                value={form.tire_pressure_highway_psi}
+                onChange={set("tire_pressure_highway_psi")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Recovery gear aboard">
+              <select
+                value={form.has_recovery_gear}
+                onChange={set("has_recovery_gear")}
+                className={inputClass}
+              >
+                {YES_NO.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Emergency contact">
+              <input
+                type="text"
+                value={form.emergency_contact}
+                onChange={set("emergency_contact")}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Comms plan" span>
+              <textarea
+                rows={2}
+                placeholder="GMRS ch. 16 for convoy, inReach check-in nightly…"
+                value={form.comms_plan}
+                onChange={set("comms_plan")}
+                className={inputClass}
+              />
+            </Field>
+          </div>
+          <div className="flex justify-end">
+            <IconButton type="submit" title="Save" variant="confirm" disabled={saving}>
+              ✓
+            </IconButton>
+          </div>
+        </form>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <StatTile
+              label="Range on main"
+              value={detail.est_range_miles ?? "—"}
+              unit={detail.est_range_miles ? "mi" : undefined}
+              hint={
+                detail.fuel_capacity_gal && detail.fuel_economy_mpg
+                  ? `${detail.fuel_capacity_gal} gal @ ${detail.fuel_economy_mpg} mpg`
+                  : "Set tank + economy"
+              }
+              tone="amber"
+            />
+            <StatTile
+              label="With jerry cans"
+              value={detail.est_total_range_miles ?? "—"}
+              unit={detail.est_total_range_miles ? "mi" : undefined}
+              hint={detail.aux_fuel_gal ? `+${detail.aux_fuel_gal} gal aux` : "No aux fuel logged"}
+              tone="orange"
+            />
+            <StatTile
+              label="Water supply"
+              value={detail.water_days_supported ?? "—"}
+              unit={detail.water_days_supported ? "days" : undefined}
+              hint={
+                detail.water_capacity_gal
+                  ? `${detail.water_capacity_gal} gal onboard`
+                  : "Set water capacity"
+              }
+              tone="cyan"
+            />
+            <StatTile
+              label="Tire PSI"
+              value={tirePressures}
+              hint="Aired down → highway"
+              tone="sky"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {detail.vehicle_name && <Badge tone="amber">🚙 {detail.vehicle_name}</Badge>}
+            {detail.drivetrain && <Badge tone="sky">{detail.drivetrain}</Badge>}
+            {detail.ground_clearance_in && (
+              <Badge tone="sky">{detail.ground_clearance_in}" clearance</Badge>
+            )}
+            {detail.has_recovery_gear !== null && (
+              <Badge tone={detail.has_recovery_gear ? "emerald" : "rose"}>
+                {detail.has_recovery_gear ? "🛟 Recovery gear aboard" : "🛟 No recovery gear"}
+              </Badge>
+            )}
+          </div>
+
+          {(detail.comms_plan || detail.emergency_contact) && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {detail.comms_plan && (
+                <Card>
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                    📡 Comms plan
+                  </p>
+                  <p className="mt-1 text-sm text-content-muted">{detail.comms_plan}</p>
+                </Card>
+              )}
+              {detail.emergency_contact && (
+                <Card>
+                  <p className="text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                    🆘 Emergency contact
+                  </p>
+                  <p className="mt-1 text-sm text-content-muted">{detail.emergency_contact}</p>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </Section>
   );
 }

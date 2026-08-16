@@ -2,21 +2,34 @@ import { useEffect, useState, type FormEvent } from "react";
 import { listCollaborators } from "@/api/sharing";
 import { createActivity, deleteActivity, listActivities, updateActivity } from "@/api/trips";
 import type { Activity, Collaborator } from "@/api/types";
+import {
+  AddForm,
+  EmptyState,
+  Field,
+  IconButton,
+  Section,
+  TONE_EDGE,
+  TONE_SOFT,
+  inputClass,
+  type Tone,
+} from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
-const DAY_COLORS = [
-  { badge: "border-emerald-800 bg-emerald-950/40 text-emerald-300", accent: "border-l-emerald-600" },
-  { badge: "border-sky-800 bg-sky-950/40 text-sky-300", accent: "border-l-sky-600" },
-  { badge: "border-violet-800 bg-violet-950/40 text-violet-300", accent: "border-l-violet-600" },
-  { badge: "border-amber-800 bg-amber-950/40 text-amber-300", accent: "border-l-amber-600" },
-  { badge: "border-rose-800 bg-rose-950/40 text-rose-300", accent: "border-l-rose-600" },
-  { badge: "border-cyan-800 bg-cyan-950/40 text-cyan-300", accent: "border-l-cyan-600" },
-  { badge: "border-orange-800 bg-orange-950/40 text-orange-300", accent: "border-l-orange-600" },
-  { badge: "border-fuchsia-800 bg-fuchsia-950/40 text-fuchsia-300", accent: "border-l-fuchsia-600" },
+/** Days cycle through the palette so each one is distinguishable at a glance. */
+const DAY_TONES: Tone[] = [
+  "emerald",
+  "sky",
+  "violet",
+  "amber",
+  "rose",
+  "cyan",
+  "orange",
+  "fuchsia",
 ];
 
-function dayColors(dayIndex: number) {
-  const i = ((dayIndex - 1) % DAY_COLORS.length + DAY_COLORS.length) % DAY_COLORS.length;
-  return DAY_COLORS[i];
+function dayTone(dayIndex: number): Tone {
+  const i = (((dayIndex - 1) % DAY_TONES.length) + DAY_TONES.length) % DAY_TONES.length;
+  return DAY_TONES[i];
 }
 
 function dayDate(tripStartDate: string | null | undefined, dayIndex: number): string | null {
@@ -41,9 +54,9 @@ function bulletLines(text: string | null): string[] {
 
 function BulletList({ text }: { text: string | null }) {
   const lines = bulletLines(text);
-  if (lines.length === 0) return <span className="text-slate-600">—</span>;
+  if (lines.length === 0) return <span className="text-content-subtle">—</span>;
   return (
-    <ul className="list-disc space-y-0.5 pl-4">
+    <ul className="list-disc space-y-0.5 pl-4 marker:text-content-subtle">
       {lines.map((line, i) => (
         <li key={i}>{line}</li>
       ))}
@@ -111,7 +124,7 @@ function TodoList({
     onSaved();
   }
 
-  if (items.length === 0) return <span className="text-slate-600">—</span>;
+  if (items.length === 0) return <span className="text-content-subtle">—</span>;
 
   return (
     <div className="flex flex-col gap-1">
@@ -123,11 +136,12 @@ function TodoList({
             onChange={() => toggle(i)}
             className="h-3.5 w-3.5 shrink-0 accent-emerald-500"
           />
-          <span className={item.done ? "text-slate-600 line-through" : ""}>{item.text}</span>
+          <span className={item.done ? "text-content-subtle line-through" : ""}>{item.text}</span>
           <select
             value={item.assignedTo ?? ""}
             onChange={(e) => assign(i, e.target.value)}
-            className="ml-1 rounded-full border border-slate-700 bg-slate-800/60 px-1.5 py-0 text-[11px] text-slate-400 outline-none"
+            aria-label="Assign to"
+            className="ml-auto rounded-full border border-edge bg-surface-overlay px-1.5 py-0 text-[11px] text-content-muted outline-none"
           >
             <option value="">Unassigned</option>
             {roster.map((r) => (
@@ -216,22 +230,11 @@ export default function ActivitiesSection({
     onChange?.();
   }
 
-  function startEdit(activity: Activity) {
-    setEditingId(activity.id);
-    setDraft(draftFrom(activity));
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setDraft(null);
-  }
-
   async function saveEdit(activity: Activity) {
     if (!draft) return;
     setSaving(true);
     try {
-      const existing = parseTodos(activity.todos);
-      const reconciled = reconcileTodos(existing, bulletLines(draft.todos));
+      const reconciled = reconcileTodos(parseTodos(activity.todos), bulletLines(draft.todos));
       await updateActivity(activity.id, {
         title: draft.title,
         day_index: draft.dayIndex,
@@ -259,224 +262,196 @@ export default function ActivitiesSection({
   ).sort(([a], [b]) => a - b);
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Timeline</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add activity"
-            className="text-slate-500 hover:text-emerald-300"
-          >
+    <Section
+      icon={SECTION_META.timeline.icon}
+      title="Timeline"
+      tone={SECTION_META.timeline.tone}
+      count={groupedByDay.length}
+      actions={
+        !showAdd && (
+          <IconButton onClick={() => setShowAdd(true)} title="Add activity">
             +
-          </button>
-        )}
-      </div>
-
+          </IconButton>
+        )
+      }
+    >
       {showAdd && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-        >
-          <div className="flex items-start justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs text-slate-500">Day #</span>
+        <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label="Day #">
               <input
                 type="number"
                 min={1}
                 autoFocus
                 value={dayIndex}
                 onChange={(e) => setDayIndex(Number(e.target.value))}
-                className="w-20 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+                className={`${inputClass} w-20`}
               />
-            </label>
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-slate-500">Activity</span>
-              <input
-                type="text"
-                placeholder="e.g. Ride the DBBB off-road"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-              />
-            </label>
+            </Field>
+            <div className="flex-1">
+              <Field label="Activity">
+                <input
+                  type="text"
+                  placeholder="e.g. Ride the DBBB off-road"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-slate-500">Details (one bullet per line, optional)</span>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Details (one bullet per line)">
               <textarea
-                rows={2}
+                rows={3}
                 placeholder={"Nada Tunnel\nNatural Bridge hike"}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+                className={inputClass}
               />
-            </label>
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-slate-500">To-Do (one item per line, optional)</span>
+            </Field>
+            <Field label="To-do (one item per line)">
               <textarea
-                rows={2}
+                rows={3}
                 placeholder={"Book Lil Abner's for night 2\nCheck tire pressure"}
                 value={todos}
                 onChange={(e) => setTodos(e.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+                className={inputClass}
               />
-            </label>
+            </Field>
           </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            title="Add"
-            className="w-fit text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-          >
-            ✓
-          </button>
-        </form>
+        </AddForm>
       )}
 
-      {groupedByDay.length === 0 && <p className="text-sm text-slate-500">No activities yet.</p>}
-
-      <div className="flex flex-col gap-3">
-        {groupedByDay.map(([day, dayActivities]) => {
-          const colors = dayColors(day);
-          const date = dayDate(tripStartDate, day);
-          return (
-            <div
-              key={day}
-              className={`overflow-hidden rounded-md border border-slate-800 border-l-4 ${colors.accent}`}
-            >
+      {groupedByDay.length === 0 ? (
+        <EmptyState icon="🗓️" message="No days planned yet — add the first activity." />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {groupedByDay.map(([day, dayActivities]) => {
+            const tone = dayTone(day);
+            const date = dayDate(tripStartDate, day);
+            return (
               <div
-                className={`flex items-center justify-between border-b border-slate-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${colors.badge}`}
+                key={day}
+                className={`overflow-hidden rounded-card border border-edge border-l-4 bg-surface-raised ${TONE_EDGE[tone]}`}
               >
-                <span>
-                  Day {day}
-                  {date && <span className="ml-2 font-normal normal-case text-slate-400">{date}</span>}
-                </span>
-              </div>
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr className="border-t border-slate-800/60 text-left text-xs uppercase tracking-wider text-slate-600">
-                    <th className="w-10 px-2 py-1.5" />
-                    <th className="w-1/4 px-3 py-1.5 font-medium">Activity</th>
-                    <th className="px-3 py-1.5 font-medium">Details</th>
-                    <th className="px-3 py-1.5 font-medium">To-Do</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dayActivities.map((activity) =>
-                    editingId === activity.id && draft ? (
-                      <tr key={activity.id} className="border-t border-slate-800/60 align-top">
-                        <td className="px-2 py-2">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <button
-                              onClick={() => saveEdit(activity)}
-                              disabled={saving}
-                              title="Save"
-                              className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-                            >
-                              ✓
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              title="Cancel"
-                              className="text-slate-500 hover:text-slate-300"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex flex-col gap-1">
-                            <input
-                              type="number"
-                              min={1}
-                              value={draft.dayIndex}
-                              onChange={(e) =>
-                                setDraft({ ...draft, dayIndex: Number(e.target.value) })
-                              }
-                              className="w-16 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                            />
-                            <input
-                              type="text"
-                              value={draft.title}
-                              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                              className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                            />
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          <textarea
-                            rows={3}
-                            value={draft.notes}
-                            onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-                            className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                          />
-                        </td>
-                        <td className="px-3 py-2">
-                          <textarea
-                            rows={3}
-                            value={draft.todos}
-                            onChange={(e) => setDraft({ ...draft, todos: e.target.value })}
-                            className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                          />
-                        </td>
-                      </tr>
-                    ) : (
-                      <tr key={activity.id} className="border-t border-slate-800/60 align-top">
-                        <td className="px-2 py-2">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <button
-                              onClick={() => startEdit(activity)}
-                              title="Edit"
-                              className="text-slate-500 hover:text-emerald-300"
-                            >
-                              ✎
-                            </button>
-                            <button
-                              onClick={() => handleDelete(activity.id)}
-                              title="Remove"
-                              className="text-slate-600 hover:text-red-400"
-                            >
-                              −
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 font-medium text-slate-100">
-                          {activity.title}
-                          {activity.start_time && (
-                            <div className="mt-0.5 text-xs font-normal text-slate-500">
-                              {new Date(activity.start_time).toLocaleTimeString(undefined, {
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-slate-300">
-                          <BulletList text={activity.notes} />
-                        </td>
-                        <td className="px-3 py-2 text-slate-300">
-                          <TodoList activity={activity} roster={roster} onSaved={refresh} />
-                        </td>
-                      </tr>
-                    ),
+                <div
+                  className={`flex items-center gap-2 border-b border-edge px-3 py-2 text-xs font-semibold uppercase tracking-wider ${TONE_SOFT[tone]}`}
+                >
+                  <span>Day {day}</span>
+                  {date && (
+                    <span className="font-normal normal-case opacity-80">{date}</span>
                   )}
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="text-left text-[11px] uppercase tracking-wider text-content-subtle">
+                        <th className="w-12 px-2 py-1.5" />
+                        <th className="w-1/4 px-3 py-1.5 font-medium">Activity</th>
+                        <th className="px-3 py-1.5 font-medium">Details</th>
+                        <th className="px-3 py-1.5 font-medium">To-do</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dayActivities.map((activity) =>
+                        editingId === activity.id && draft ? (
+                          <tr key={activity.id} className="border-t border-edge align-top">
+                            <td className="px-2 py-2">
+                              <div className="flex flex-col items-center gap-1">
+                                <IconButton
+                                  onClick={() => saveEdit(activity)}
+                                  disabled={saving}
+                                  title="Save"
+                                  variant="confirm"
+                                >
+                                  ✓
+                                </IconButton>
+                                <IconButton onClick={() => setEditingId(null)} title="Cancel">
+                                  ×
+                                </IconButton>
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex flex-col gap-1">
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={draft.dayIndex}
+                                  onChange={(e) =>
+                                    setDraft({ ...draft, dayIndex: Number(e.target.value) })
+                                  }
+                                  className={`${inputClass} w-16 py-1 text-xs`}
+                                />
+                                <input
+                                  type="text"
+                                  value={draft.title}
+                                  onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                                  className={`${inputClass} py-1 text-xs`}
+                                />
+                              </div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <textarea
+                                rows={3}
+                                value={draft.notes}
+                                onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+                                className={`${inputClass} py-1 text-xs`}
+                              />
+                            </td>
+                            <td className="px-3 py-2">
+                              <textarea
+                                rows={3}
+                                value={draft.todos}
+                                onChange={(e) => setDraft({ ...draft, todos: e.target.value })}
+                                className={`${inputClass} py-1 text-xs`}
+                              />
+                            </td>
+                          </tr>
+                        ) : (
+                          <tr
+                            key={activity.id}
+                            className="group border-t border-edge align-top transition-colors hover:bg-surface-overlay/50"
+                          >
+                            <td className="px-2 py-2">
+                              <div className="flex flex-col items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                                <IconButton
+                                  onClick={() => {
+                                    setEditingId(activity.id);
+                                    setDraft(draftFrom(activity));
+                                  }}
+                                  title="Edit"
+                                >
+                                  ✎
+                                </IconButton>
+                                <IconButton
+                                  onClick={() => handleDelete(activity.id)}
+                                  title="Remove"
+                                  variant="danger"
+                                >
+                                  −
+                                </IconButton>
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 font-medium text-content">{activity.title}</td>
+                            <td className="px-3 py-2 text-content-muted">
+                              <BulletList text={activity.notes} />
+                            </td>
+                            <td className="px-3 py-2 text-content-muted">
+                              <TodoList activity={activity} roster={roster} onSaved={refresh} />
+                            </td>
+                          </tr>
+                        ),
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Section>
   );
 }

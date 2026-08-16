@@ -1,37 +1,52 @@
 import type { TripType } from "@/api/types";
+import type { Tone } from "@/components/ui";
 
 export const TRIP_TYPE_META: Record<
   TripType,
-  { label: string; icon: string; accent: string; accentBg: string }
+  { label: string; icon: string; tone: Tone; blurb: string }
 > = {
   motocamping: {
     label: "Motocamping",
     icon: "🏍️",
-    accent: "border-l-orange-500",
-    accentBg: "bg-orange-500",
+    tone: "orange",
+    blurb: "Two wheels, tank range, and a tent",
   },
   camping: {
     label: "Camping",
     icon: "🏕️",
-    accent: "border-l-emerald-500",
-    accentBg: "bg-emerald-500",
+    tone: "emerald",
+    blurb: "Reserve the site, plan the meals",
   },
   overlanding: {
     label: "Overlanding",
     icon: "🚙",
-    accent: "border-l-amber-500",
-    accentBg: "bg-amber-500",
+    tone: "amber",
+    blurb: "Rig, recovery, and remote range",
   },
   backpacking: {
     label: "Backpacking",
     icon: "🥾",
-    accent: "border-l-violet-500",
-    accentBg: "bg-violet-500",
+    tone: "violet",
+    blurb: "Every ounce and every water source",
   },
   international: {
     label: "International",
     icon: "✈️",
-    accent: "border-l-fuchsia-500",
-    accentBg: "bg-fuchsia-500",
+    tone: "fuchsia",
+    blurb: "Documents, currency, and time zones",
   },
+};
+
+/** Consistent glyph + hue per trip section, reused across the whole app. */
+export const SECTION_META = {
+  members: { icon: "👥", tone: "cyan" as Tone },
+  timeline: { icon: "🗓️", tone: "emerald" as Tone },
+  files: { icon: "📎", tone: "sky" as Tone },
+  packing: { icon: "🎒", tone: "violet" as Tone },
+  tasks: { icon: "✅", tone: "amber" as Tone },
+  photos: { icon: "📸", tone: "fuchsia" as Tone },
+  notes: { icon: "📝", tone: "orange" as Tone },
+  locations: { icon: "📍", tone: "rose" as Tone },
+  expenses: { icon: "💰", tone: "emerald" as Tone },
+  essentials: { icon: "🧭", tone: "cyan" as Tone },
 };

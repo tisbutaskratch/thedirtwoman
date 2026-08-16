@@ -11,12 +11,12 @@ export default function Skills() {
           return (
             <div
               key={group.category}
-              className={`rounded-lg border border-slate-800 border-l-4 ${colors.border} p-5`}
+              className={`rounded-lg border border-edge border-l-4 ${colors.border} p-5`}
             >
               <h2 className={`mb-3 text-sm font-semibold uppercase tracking-widest ${colors.text}`}>
                 {group.category}
               </h2>
-              <ul className="flex flex-col gap-2 text-slate-300">
+              <ul className="flex flex-col gap-2 text-content-muted">
                 {group.items.map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <span className={`h-1.5 w-1.5 rounded-full ${colors.dot}`} />

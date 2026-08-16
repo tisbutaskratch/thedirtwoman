@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { attachmentUrl, deleteAttachment, listFiles, uploadFile } from "@/api/attachments";
 import type { Attachment } from "@/api/types";
+import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
+
+/** A small visual cue so a GPX doesn't look like a PDF at a glance. */
+function fileGlyph(name: string) {
+  const ext = name.split(".").pop()?.toLowerCase();
+  if (ext === "gpx" || ext === "kml") return "🗺️";
+  if (ext === "pdf") return "📄";
+  if (ext === "csv" || ext === "xlsx") return "📊";
+  if (ext === "zip") return "🗜️";
+  return "📎";
+}
 
 export default function FilesSection({ tripId }: { tripId: number }) {
   const [files, setFiles] = useState<Attachment[]>([]);
@@ -38,100 +50,83 @@ export default function FilesSection({ tripId }: { tripId: number }) {
   }
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Files</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add file"
-            className="text-slate-500 hover:text-emerald-300"
-          >
+    <Section
+      icon={SECTION_META.files.icon}
+      title="Files"
+      tone={SECTION_META.files.tone}
+      count={files.length}
+      actions={
+        !showAdd && (
+          <IconButton onClick={() => setShowAdd(true)} title="Add file">
             +
-          </button>
-        )}
-      </div>
-
+          </IconButton>
+        )
+      }
+    >
       {showAdd && (
-        <form
+        <AddForm
           onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+          onClose={() => setShowAdd(false)}
+          submitting={submitting}
+          submitTitle="Upload"
         >
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <input
-              type="text"
-              autoFocus
-              placeholder="Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-            />
-            <input
-              type="text"
-              placeholder="Description (optional)"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:text-slate-200"
-            />
-            <button
-              type="submit"
-              disabled={submitting}
-              title="Upload"
-              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
-          </div>
-        </form>
+          <input
+            type="text"
+            autoFocus
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            type="text"
+            placeholder="Description (optional)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className={inputClass}
+          />
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="text-sm text-content-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface-sunken file:px-3 file:py-1.5 file:text-xs file:text-content"
+          />
+        </AddForm>
       )}
 
-      <ul className="flex flex-col gap-2">
-        {files.map((file) => (
-          <li
-            key={file.id}
-            className="flex items-center justify-between gap-3 rounded-md border border-slate-800 px-4 py-2"
-          >
-            <a
-              href={attachmentUrl(file)}
-              target="_blank"
-              rel="noreferrer"
-              download={file.original_filename}
-              className="flex-1 truncate"
+      {files.length === 0 ? (
+        <EmptyState icon="📎" message="No files yet." />
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {files.map((file) => (
+            <li
+              key={file.id}
+              className="flex items-center gap-2.5 rounded-md border border-edge bg-surface-raised px-3 py-2"
             >
-              <span className="text-sm text-slate-100 hover:text-emerald-300">{file.title}</span>
-              {file.description && (
-                <span className="ml-2 text-xs text-slate-500">{file.description}</span>
-              )}
-              <span className="ml-2 text-xs text-slate-600">({file.original_filename})</span>
-            </a>
-            <button
-              onClick={() => handleDelete(file.id)}
-              title="Remove"
-              className="shrink-0 text-slate-600 hover:text-red-400"
-            >
-              −
-            </button>
-          </li>
-        ))}
-        {files.length === 0 && <p className="text-sm text-slate-500">No files yet.</p>}
-      </ul>
-    </section>
+              <span aria-hidden className="text-base">
+                {fileGlyph(file.original_filename)}
+              </span>
+              <a
+                href={attachmentUrl(file)}
+                target="_blank"
+                rel="noreferrer"
+                download={file.original_filename}
+                className="min-w-0 flex-1"
+              >
+                <span className="block truncate text-sm text-content hover:text-accent">
+                  {file.title}
+                </span>
+                <span className="block truncate text-xs text-content-subtle">
+                  {file.description ? `${file.description} · ` : ""}
+                  {file.original_filename}
+                </span>
+              </a>
+              <IconButton onClick={() => handleDelete(file.id)} title="Remove" variant="danger">
+                −
+              </IconButton>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
   );
 }

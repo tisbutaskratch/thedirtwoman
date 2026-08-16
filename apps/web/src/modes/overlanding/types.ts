@@ -9,7 +9,13 @@ export interface OverlandingDetail {
   has_recovery_gear: boolean | null;
   comms_plan: string | null;
   emergency_contact: string | null;
+  tire_pressure_offroad_psi: number | null;
+  tire_pressure_highway_psi: number | null;
+  water_capacity_gal: number | null;
+  aux_fuel_gal: number | null;
   est_range_miles: number | null;
+  est_total_range_miles: number | null;
+  water_days_supported: number | null;
 }
 
 export interface OverlandingDetailUpdate {
@@ -21,4 +27,8 @@ export interface OverlandingDetailUpdate {
   has_recovery_gear?: boolean | null;
   comms_plan?: string | null;
   emergency_contact?: string | null;
+  tire_pressure_offroad_psi?: number | null;
+  tire_pressure_highway_psi?: number | null;
+  water_capacity_gal?: number | null;
+  aux_fuel_gal?: number | null;
 }

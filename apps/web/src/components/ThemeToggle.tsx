@@ -8,7 +8,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      className="rounded-md border border-slate-700 px-2.5 py-1.5 text-sm transition-colors hover:border-slate-500"
+      className="rounded-md border border-edge px-2.5 py-1.5 text-sm transition-colors hover:border-edge-strong"
     >
       {theme === "dark" ? "☀️" : "🌙"}
     </button>

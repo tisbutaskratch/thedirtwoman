@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { listCollaborators } from "@/api/sharing";
 import { createTask, deleteTask, listTasks, updateTask } from "@/api/tasks";
 import type { Collaborator, Task } from "@/api/types";
+import { AddForm, Badge, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
 export default function TasksSection({
   tripId,
@@ -64,50 +66,37 @@ export default function TasksSection({
   }
 
   const sorted = [...tasks].sort((a, b) => Number(a.done) - Number(b.done));
+  const remaining = tasks.filter((t) => !t.done).length;
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Prep checklist</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add task"
-            className="text-slate-500 hover:text-emerald-300"
-          >
+    <Section
+      icon={SECTION_META.tasks.icon}
+      title="Prep checklist"
+      tone={SECTION_META.tasks.tone}
+      count={remaining}
+      actions={
+        !showAdd && (
+          <IconButton onClick={() => setShowAdd(true)} title="Add task">
             +
-          </button>
-        )}
-      </div>
-
+          </IconButton>
+        )
+      }
+    >
       {showAdd && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-        >
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="text"
-              autoFocus
-              placeholder="Task (e.g. book campsite)"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-            />
+        <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
+          <input
+            type="text"
+            autoFocus
+            placeholder="Task (e.g. book campsite)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className={inputClass}
+          />
+          <div className="flex flex-wrap gap-2">
             <select
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
-              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} flex-1`}
             >
               <option value="">Unassigned</option>
               {roster.map((c) => (
@@ -120,54 +109,51 @@ export default function TasksSection({
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={`${inputClass} flex-1`}
             />
-            <button
-              type="submit"
-              disabled={submitting}
-              title="Add"
-              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
           </div>
-        </form>
+        </AddForm>
       )}
 
-      <ul className="flex flex-col gap-2">
-        {sorted.map((task) => (
-          <li
-            key={task.id}
-            className="flex items-start gap-3 rounded-md border border-slate-800 px-4 py-2"
-          >
-            <input
-              type="checkbox"
-              checked={task.done}
-              onChange={() => toggleDone(task)}
-              className="mt-0.5 h-4 w-4 accent-emerald-500"
-            />
-            <div className="flex flex-1 flex-wrap items-center gap-2">
-              <span className={task.done ? "text-slate-500 line-through" : "text-slate-100"}>
-                {task.title}
-              </span>
-              {task.assigned_to_user_id !== null && (
-                <span className="rounded-full border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-400">
-                  {nameByUserId.get(task.assigned_to_user_id) ?? "Someone"}
-                </span>
-              )}
-              {task.due_date && <span className="text-xs text-slate-500">Due {task.due_date}</span>}
-            </div>
-            <button
-              onClick={() => handleDelete(task.id)}
-              title="Remove"
-              className="shrink-0 text-slate-600 hover:text-red-400"
+      {tasks.length === 0 ? (
+        <EmptyState icon="✅" message="No prep tasks yet." />
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {sorted.map((task) => (
+            <li
+              key={task.id}
+              className="group flex items-start gap-2.5 rounded-md border border-edge bg-surface-raised px-3 py-2"
             >
-              −
-            </button>
-          </li>
-        ))}
-        {tasks.length === 0 && <p className="text-sm text-slate-500">No prep tasks yet.</p>}
-      </ul>
-    </section>
+              <input
+                type="checkbox"
+                checked={task.done}
+                onChange={() => toggleDone(task)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-emerald-500"
+              />
+              <div className="flex flex-1 flex-wrap items-center gap-2">
+                <span
+                  className={
+                    task.done ? "text-sm text-content-subtle line-through" : "text-sm text-content"
+                  }
+                >
+                  {task.title}
+                </span>
+                {task.assigned_to_user_id !== null && (
+                  <Badge tone="cyan">
+                    {nameByUserId.get(task.assigned_to_user_id) ?? "Someone"}
+                  </Badge>
+                )}
+                {task.due_date && (
+                  <span className="text-xs text-content-subtle">Due {task.due_date}</span>
+                )}
+              </div>
+              <IconButton onClick={() => handleDelete(task.id)} title="Remove" variant="danger">
+                −
+              </IconButton>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Section>
   );
 }

@@ -10,7 +10,27 @@ import {
 } from "@/api/sharing";
 import { ApiError } from "@/api/client";
 import type { Collaborator, PendingMember } from "@/api/types";
+import { AddForm, Badge, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 import { useAuth } from "@/lib/AuthContext";
+
+/** Deterministic avatar tint so each member is visually identifiable. */
+const AVATAR_TONES = [
+  "bg-emerald-950/60 text-emerald-300",
+  "bg-cyan-950/60 text-cyan-300",
+  "bg-violet-950/60 text-violet-300",
+  "bg-amber-950/60 text-amber-300",
+  "bg-rose-950/60 text-rose-300",
+  "bg-sky-950/60 text-sky-300",
+];
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? "")
+    .join("");
+}
 
 export default function MembersSection({ tripId, isOwner }: { tripId: number; isOwner: boolean }) {
   const { user } = useAuth();
@@ -86,148 +106,129 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
   }
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Members</h2>
-        {isOwner && (
+    <Section
+      icon={SECTION_META.members.icon}
+      title="Members"
+      tone={SECTION_META.members.tone}
+      count={members.length + pending.length}
+      actions={
+        isOwner && (
           <>
-            <button
+            <IconButton
               onClick={handleCopyLink}
               disabled={linking}
               title={copied ? "Copied!" : "Copy shareable link"}
-              className="text-slate-500 hover:text-emerald-300 disabled:opacity-50"
             >
               {copied ? "✓" : "🔗"}
-            </button>
+            </IconButton>
             {!showInvite && (
-              <button
-                onClick={() => setShowInvite(true)}
-                title="Invite by email"
-                className="text-slate-500 hover:text-emerald-300"
-              >
+              <IconButton onClick={() => setShowInvite(true)} title="Invite by email">
                 +
-              </button>
+              </IconButton>
             )}
           </>
-        )}
-      </div>
-
+        )
+      }
+    >
       {showInvite && (
-        <form
+        <AddForm
           onSubmit={handleInvite}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+          onClose={() => {
+            setShowInvite(false);
+            setInviteError(null);
+          }}
+          submitting={inviting}
+          submitTitle="Send invite"
         >
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => {
-                setShowInvite(false);
-                setInviteError(null);
-              }}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="email"
-              autoFocus
-              placeholder="rider@example.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-            />
-            <button
-              type="submit"
-              disabled={inviting}
-              title="Send invite"
-              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
-          </div>
-          {inviteError && <p className="text-xs text-red-400">{inviteError}</p>}
-        </form>
+          <input
+            type="email"
+            autoFocus
+            placeholder="rider@example.com"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            className={inputClass}
+          />
+          {inviteError && <p className="text-xs text-rose-400">{inviteError}</p>}
+        </AddForm>
       )}
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col gap-1.5">
         {members.map((c, idx) => {
           const isOwnerRow = idx === 0;
           const isMe = c.user_id === user?.id;
           return (
             <li
               key={c.user_id}
-              className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-slate-800 px-4 py-2"
+              className="flex flex-wrap items-center gap-2.5 rounded-md border border-edge bg-surface-raised px-3 py-2"
             >
-              <span>
-                {c.name} <span className="text-xs text-slate-500">({c.email})</span>
-                {isOwnerRow && <span className="ml-2 text-xs text-slate-500">Owner</span>}
+              <span
+                aria-hidden
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${AVATAR_TONES[idx % AVATAR_TONES.length]}`}
+              >
+                {initials(c.name)}
               </span>
-
-              <div className="flex items-center gap-3">
-                {isMe && editingBike ? (
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="text"
-                      autoFocus
-                      placeholder="Make & model"
-                      value={vehicleDraft}
-                      onChange={(e) => setVehicleDraft(e.target.value)}
-                      className="w-28 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                    />
-                    <input
-                      type="number"
-                      min={0}
-                      placeholder="Range (mi)"
-                      value={rangeDraft}
-                      onChange={(e) => setRangeDraft(e.target.value)}
-                      className="w-24 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                    />
-                    <button
-                      onClick={handleSaveBike}
-                      title="Save"
-                      className="text-emerald-400 hover:text-emerald-300"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={() => setEditingBike(false)}
-                      title="Cancel"
-                      className="text-slate-500 hover:text-slate-300"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ) : isMe ? (
-                  <button
-                    onClick={() => setEditingBike(true)}
-                    className="rounded-full border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-400 hover:border-emerald-600 hover:text-emerald-300"
-                  >
-                    {c.vehicle ?? "Add your bike"}
-                    {c.fuel_range_miles ? ` · ${c.fuel_range_miles} mi range` : ""}
-                  </button>
-                ) : (
-                  (c.vehicle || c.fuel_range_miles) && (
-                    <span className="rounded-full border border-slate-700 bg-slate-800/60 px-2 py-0.5 text-xs text-slate-400">
-                      {c.vehicle}
-                      {c.vehicle && c.fuel_range_miles ? " · " : ""}
-                      {c.fuel_range_miles ? `${c.fuel_range_miles} mi range` : ""}
-                    </span>
-                  )
-                )}
-
-                {isOwner && !isOwnerRow && (
-                  <button
-                    onClick={() => handleRemove(c.user_id)}
-                    title="Remove member"
-                    className="text-slate-500 hover:text-red-400"
-                  >
-                    −
-                  </button>
-                )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-content">
+                  {c.name}
+                  {isOwnerRow && (
+                    <span className="ml-1.5 text-xs font-normal text-content-subtle">Owner</span>
+                  )}
+                </p>
+                <p className="truncate text-xs text-content-subtle">{c.email}</p>
               </div>
+
+              {isMe && editingBike ? (
+                <div className="flex w-full items-center gap-1.5">
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder="Make & model"
+                    value={vehicleDraft}
+                    onChange={(e) => setVehicleDraft(e.target.value)}
+                    className={`${inputClass} flex-1 py-1 text-xs`}
+                  />
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="Range mi"
+                    value={rangeDraft}
+                    onChange={(e) => setRangeDraft(e.target.value)}
+                    className={`${inputClass} w-24 py-1 text-xs`}
+                  />
+                  <IconButton onClick={handleSaveBike} title="Save" variant="confirm">
+                    ✓
+                  </IconButton>
+                  <IconButton onClick={() => setEditingBike(false)} title="Cancel">
+                    ×
+                  </IconButton>
+                </div>
+              ) : isMe ? (
+                <button
+                  onClick={() => setEditingBike(true)}
+                  className="rounded-full border border-edge bg-surface-overlay px-2 py-0.5 text-xs text-content-muted transition-colors hover:border-accent hover:text-accent"
+                >
+                  {c.vehicle ?? "Add your ride"}
+                  {c.fuel_range_miles ? ` · ${c.fuel_range_miles} mi` : ""}
+                </button>
+              ) : (
+                (c.vehicle || c.fuel_range_miles) && (
+                  <Badge tone="amber">
+                    {c.vehicle}
+                    {c.vehicle && c.fuel_range_miles ? " · " : ""}
+                    {c.fuel_range_miles ? `${c.fuel_range_miles} mi` : ""}
+                  </Badge>
+                )
+              )}
+
+              {isOwner && !isOwnerRow && (
+                <IconButton
+                  onClick={() => handleRemove(c.user_id)}
+                  title="Remove member"
+                  variant="danger"
+                >
+                  −
+                </IconButton>
+              )}
             </li>
           );
         })}
@@ -235,27 +236,30 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
         {pending.map((p) => (
           <li
             key={`pending-${p.id}`}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed border-slate-800 px-4 py-2"
+            className="flex flex-wrap items-center gap-2.5 rounded-md border border-dashed border-edge px-3 py-2"
           >
-            <span className="text-slate-400">
-              {p.email}{" "}
-              <span className="ml-2 rounded-full border border-amber-900 bg-amber-950/40 px-2 py-0.5 text-xs text-amber-300">
-                Pending
-              </span>
+            <span
+              aria-hidden
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-overlay text-xs text-content-subtle"
+            >
+              ✉️
             </span>
-            <button
+            <p className="min-w-0 flex-1 truncate text-sm text-content-muted">{p.email}</p>
+            <Badge tone="amber">Pending</Badge>
+            <IconButton
               onClick={() => handleCancelPending(p.id)}
               title="Cancel invite"
-              className="text-slate-500 hover:text-red-400"
+              variant="danger"
             >
               −
-            </button>
+            </IconButton>
           </li>
         ))}
       </ul>
+
       {members.length <= 1 && pending.length === 0 && (
-        <p className="text-sm text-slate-500">Just you so far.</p>
+        <p className="text-sm text-content-subtle">Just you so far — invite the crew.</p>
       )}
-    </section>
+    </Section>
   );
 }
