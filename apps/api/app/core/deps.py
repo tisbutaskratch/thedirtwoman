@@ -75,3 +75,24 @@ def get_accessible_trip(
     if trip is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
     return trip
+
+
+def validate_trip_member(trip: Trip, user_id: Optional[int], db: Session) -> None:
+    """Raise 400 if user_id isn't the trip owner or a collaborator.
+
+    Shared by gear/task assignment so an item can only be assigned to
+    someone who's actually on the trip.
+    """
+    if user_id is None or user_id == trip.user_id:
+        return
+    is_collaborator = (
+        db.query(TripCollaborator)
+        .filter(TripCollaborator.trip_id == trip.id, TripCollaborator.user_id == user_id)
+        .first()
+        is not None
+    )
+    if not is_collaborator:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="assigned_to_user_id must be a trip member",
+        )

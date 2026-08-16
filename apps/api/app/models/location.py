@@ -35,5 +35,7 @@ class Location(Base):
     arrival_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    contact_phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    confirmation_ref: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
 
     trip: Mapped[Trip] = relationship(back_populates="locations")

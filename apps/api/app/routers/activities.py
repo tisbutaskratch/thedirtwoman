@@ -58,3 +58,11 @@ def update_activity(
     db.commit()
     db.refresh(activity)
     return activity
+
+
+@router.delete("/activities/{activity_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_activity(
+    activity: Activity = Depends(get_owned_activity), db: Session = Depends(get_db)
+) -> None:
+    db.delete(activity)
+    db.commit()

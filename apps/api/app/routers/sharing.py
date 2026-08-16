@@ -9,8 +9,19 @@ from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
 from app.models.trip_invite import TripInvite
 from app.models.user import User
-from app.schemas.sharing import CollaboratorRead, InviteAcceptResult, InvitePreviewRead, InviteRead
-from app.services.sharing import get_or_create_invite, revoke_invites, to_collaborator_read
+from app.schemas.sharing import (
+    CollaboratorRead,
+    InviteAcceptResult,
+    InvitePreviewRead,
+    InviteRead,
+    VehicleUpdate,
+)
+from app.services.sharing import (
+    get_or_create_invite,
+    revoke_invites,
+    to_collaborator_read,
+    to_owner_collaborator_read,
+)
 
 router = APIRouter(tags=["sharing"])
 
@@ -31,7 +42,35 @@ def delete_invite(trip: Trip = Depends(get_owned_trip), db: Session = Depends(ge
 
 @router.get("/trips/{trip_id}/collaborators", response_model=list[CollaboratorRead])
 def list_collaborators(trip: Trip = Depends(get_accessible_trip)) -> list[CollaboratorRead]:
-    return [to_collaborator_read(c) for c in trip.collaborators]
+    collaborators = [to_collaborator_read(c) for c in trip.collaborators]
+    return [to_owner_collaborator_read(trip)] + collaborators
+
+
+@router.patch("/trips/{trip_id}/collaborators/me", response_model=CollaboratorRead)
+def update_my_vehicle(
+    payload: VehicleUpdate,
+    trip: Trip = Depends(get_accessible_trip),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CollaboratorRead:
+    if trip.user_id == current_user.id:
+        trip.owner_vehicle = payload.vehicle
+        db.commit()
+        db.refresh(trip)
+        return to_owner_collaborator_read(trip)
+
+    collaborator = (
+        db.query(TripCollaborator)
+        .filter(TripCollaborator.trip_id == trip.id, TripCollaborator.user_id == current_user.id)
+        .first()
+    )
+    if collaborator is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not a trip member")
+
+    collaborator.vehicle = payload.vehicle
+    db.commit()
+    db.refresh(collaborator)
+    return to_collaborator_read(collaborator)
 
 
 @router.delete("/trips/{trip_id}/collaborators/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

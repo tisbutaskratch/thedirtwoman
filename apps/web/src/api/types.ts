@@ -9,6 +9,7 @@ export interface Trip {
   start_date: string | null;
   end_date: string | null;
   status: TripStatus;
+  owner_vehicle: string | null;
   created_at: string;
   percent_planned: number;
 }
@@ -25,6 +26,7 @@ export interface TripUpdate {
   start_date?: string | null;
   end_date?: string | null;
   status?: TripStatus;
+  owner_vehicle?: string | null;
 }
 
 export type LocationKind = "waypoint" | "campsite" | "hotel" | "poi" | "fuel_stop";
@@ -39,6 +41,8 @@ export interface Location {
   arrival_time: string | null;
   notes: string | null;
   order_index: number;
+  contact_phone: string | null;
+  confirmation_ref: string | null;
 }
 
 export interface LocationCreate {
@@ -49,6 +53,20 @@ export interface LocationCreate {
   arrival_time?: string | null;
   notes?: string | null;
   order_index?: number;
+  contact_phone?: string | null;
+  confirmation_ref?: string | null;
+}
+
+export interface LocationUpdate {
+  name?: string;
+  kind?: LocationKind;
+  lat?: number | null;
+  lng?: number | null;
+  arrival_time?: string | null;
+  notes?: string | null;
+  order_index?: number;
+  contact_phone?: string | null;
+  confirmation_ref?: string | null;
 }
 
 export interface Activity {
@@ -59,6 +77,7 @@ export interface Activity {
   start_time: string | null;
   end_time: string | null;
   notes: string | null;
+  todos: string | null;
   location_id: number | null;
 }
 
@@ -68,7 +87,24 @@ export interface ActivityCreate {
   start_time?: string | null;
   end_time?: string | null;
   notes?: string | null;
+  todos?: string | null;
   location_id?: number | null;
+}
+
+export interface ActivityUpdate {
+  title?: string;
+  day_index?: number;
+  start_time?: string | null;
+  end_time?: string | null;
+  notes?: string | null;
+  todos?: string | null;
+  location_id?: number | null;
+}
+
+export interface ExpenseParticipant {
+  user_id: number;
+  settled: boolean;
+  share: number;
 }
 
 export interface Expense {
@@ -79,6 +115,8 @@ export interface Expense {
   amount: number;
   currency: string;
   date: string;
+  paid_by_user_id: number | null;
+  participants: ExpenseParticipant[];
 }
 
 export interface ExpenseCreate {
@@ -87,7 +125,25 @@ export interface ExpenseCreate {
   amount: number;
   currency?: string;
   date: string;
+  paid_by_user_id?: number | null;
+  participant_user_ids?: number[];
 }
+
+export interface ExpenseUpdate {
+  category?: string;
+  description?: string | null;
+  amount?: number;
+  currency?: string;
+  date?: string;
+  paid_by_user_id?: number | null;
+  participant_user_ids?: number[];
+}
+
+export interface SettleUpdate {
+  settled: boolean;
+}
+
+export type GearRequiredLevel = "required" | "suggested" | "optional";
 
 export interface Gear {
   id: number;
@@ -96,6 +152,9 @@ export interface Gear {
   category: string | null;
   weight_oz: number | null;
   packed: boolean;
+  required_level: GearRequiredLevel;
+  assigned_to_user_id: number | null;
+  notes: string | null;
 }
 
 export interface GearCreate {
@@ -103,10 +162,19 @@ export interface GearCreate {
   category?: string | null;
   weight_oz?: number | null;
   packed?: boolean;
+  required_level?: GearRequiredLevel;
+  assigned_to_user_id?: number | null;
+  notes?: string | null;
 }
 
 export interface GearUpdate {
+  name?: string;
+  category?: string | null;
+  weight_oz?: number | null;
   packed?: boolean;
+  required_level?: GearRequiredLevel;
+  assigned_to_user_id?: number | null;
+  notes?: string | null;
 }
 
 export interface Note {
@@ -120,11 +188,57 @@ export interface NoteCreate {
   body: string;
 }
 
+export interface Task {
+  id: number;
+  trip_id: number;
+  title: string;
+  done: boolean;
+  assigned_to_user_id: number | null;
+  due_date: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface TaskCreate {
+  title: string;
+  done?: boolean;
+  assigned_to_user_id?: number | null;
+  due_date?: string | null;
+  notes?: string | null;
+}
+
+export interface TaskUpdate {
+  title?: string;
+  done?: boolean;
+  assigned_to_user_id?: number | null;
+  due_date?: string | null;
+  notes?: string | null;
+}
+
 export interface Collaborator {
   user_id: number;
   name: string;
   email: string;
+  vehicle: string | null;
   joined_at: string;
+}
+
+export interface VehicleUpdate {
+  vehicle: string | null;
+}
+
+export type AttachmentKind = "photo" | "file";
+
+export interface Attachment {
+  id: number;
+  trip_id: number;
+  kind: AttachmentKind;
+  title: string;
+  description: string | null;
+  url: string;
+  original_filename: string;
+  content_type: string;
+  created_at: string;
 }
 
 export interface Invite {

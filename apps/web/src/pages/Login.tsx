@@ -36,10 +36,14 @@ export default function Login() {
     <AuthLayout title="Log in">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
+          <label
+            htmlFor="login-email"
+            className="mb-1 block text-xs uppercase tracking-widest text-slate-500"
+          >
             Email
           </label>
           <input
+            id="login-email"
             type="email"
             required
             value={email}
@@ -48,10 +52,14 @@ export default function Login() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
+          <label
+            htmlFor="login-password"
+            className="mb-1 block text-xs uppercase tracking-widest text-slate-500"
+          >
             Password
           </label>
           <input
+            id="login-password"
             type="password"
             required
             value={password}

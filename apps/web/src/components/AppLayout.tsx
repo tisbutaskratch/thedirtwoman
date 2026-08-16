@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 
 export default function AppLayout() {
@@ -19,6 +20,7 @@ export default function AppLayout() {
           </NavLink>
           <div className="flex items-center gap-4 text-sm">
             <span className="text-slate-400">{user?.name}</span>
+            <ThemeToggle />
             <button
               onClick={handleLogout}
               className="rounded-md border border-slate-700 px-3 py-1.5 text-slate-300 transition-colors hover:border-slate-500"

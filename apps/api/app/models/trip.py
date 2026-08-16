@@ -11,6 +11,7 @@ from app.db.base import Base
 
 if TYPE_CHECKING:
     from app.models.activity import Activity
+    from app.models.attachment import Attachment
     from app.models.backpacking_detail import BackpackingDetail
     from app.models.camping_detail import CampingDetail
     from app.models.expense import Expense
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from app.models.note import Note
     from app.models.overlanding_detail import OverlandingDetail
     from app.models.route import Route
+    from app.models.task import Task
     from app.models.trip_collaborator import TripCollaborator
     from app.models.trip_invite import TripInvite
     from app.models.user import User
@@ -52,6 +54,9 @@ class Trip(Base):
     status: Mapped[TripStatus] = mapped_column(
         Enum(TripStatus, native_enum=False), nullable=False, default=TripStatus.planning
     )
+    # The owner's own vehicle for this trip (collaborators get theirs on
+    # TripCollaborator.vehicle) — real usage always lists a full rider roster.
+    owner_vehicle: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped[User] = relationship(back_populates="trips")
@@ -68,6 +73,12 @@ class Trip(Base):
     gear: Mapped[list[Gear]] = relationship(back_populates="trip", cascade="all, delete-orphan")
     notes: Mapped[list[Note]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", order_by="Note.created_at.desc()"
+    )
+    tasks: Mapped[list[Task]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", order_by="Task.created_at"
+    )
+    attachments: Mapped[list[Attachment]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", order_by="Attachment.created_at.desc()"
     )
     motocamping_detail: Mapped[Optional[MotocampingDetail]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", uselist=False

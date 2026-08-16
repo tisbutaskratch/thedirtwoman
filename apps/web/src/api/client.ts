@@ -1,6 +1,6 @@
 import { clearAuthState, getAuthState, setAuthState } from "@/lib/authStore";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
+export const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "/api";
 
 export async function getHealth(): Promise<{ status: string }> {
   const res = await fetch(`${API_BASE}/health`);
@@ -22,7 +22,11 @@ export class ApiError extends Error {
 
 async function rawRequest(path: string, options: RequestInit, accessToken: string | null) {
   const headers = new Headers(options.headers);
-  headers.set("Content-Type", "application/json");
+  // FormData bodies need the browser to set their own multipart boundary;
+  // setting Content-Type ourselves would drop it and break the upload.
+  if (!(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
   return fetch(`${API_BASE}${path}`, { ...options, headers });
 }

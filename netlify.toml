@@ -1,0 +1,16 @@
+# Netlify build config for the frontend (apps/web). Per the architecture
+# doc, the frontend deploys to Vercel or Netlify — pick one; this file and
+# apps/web/vercel.json can coexist harmlessly if you're undecided.
+#
+# Deploy: connect this repo in the Netlify dashboard; it auto-detects this
+# file. Set VITE_API_BASE_URL in the dashboard's environment variables to
+# your deployed API's URL (e.g. https://adventure-planner-api.onrender.com).
+[build]
+  base = "apps/web"
+  command = "npm run build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

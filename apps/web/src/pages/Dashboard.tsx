@@ -41,7 +41,7 @@ export default function Dashboard() {
             <Link
               key={trip.id}
               to={`/app/trips/${trip.id}`}
-              className="flex flex-col gap-3 rounded-lg border border-slate-800 p-5 transition-colors hover:border-slate-600"
+              className={`flex flex-col gap-3 rounded-lg border border-slate-800 border-l-4 ${meta.accent} p-5 transition-colors hover:border-slate-600`}
             >
               <div className="flex items-center justify-between">
                 <span className="text-2xl">{meta.icon}</span>
@@ -68,7 +68,7 @@ export default function Dashboard() {
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
                   <div
-                    className="h-full bg-emerald-500"
+                    className={`h-full ${meta.accentBg}`}
                     style={{ width: `${trip.percent_planned}%` }}
                   />
                 </div>

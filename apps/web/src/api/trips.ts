@@ -2,15 +2,19 @@ import { apiRequest } from "@/api/client";
 import type {
   Activity,
   ActivityCreate,
+  ActivityUpdate,
   Expense,
   ExpenseCreate,
+  ExpenseUpdate,
   Gear,
   GearCreate,
   GearUpdate,
   Location,
   LocationCreate,
+  LocationUpdate,
   Note,
   NoteCreate,
+  SettleUpdate,
   Trip,
   TripCreate,
   TripUpdate,
@@ -37,6 +41,9 @@ export const createLocation = (tripId: number, payload: LocationCreate) =>
     body: JSON.stringify(payload),
   });
 
+export const updateLocation = (id: number, payload: LocationUpdate) =>
+  apiRequest<Location>(`/locations/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+
 export const deleteLocation = (id: number) =>
   apiRequest<void>(`/locations/${id}`, { method: "DELETE" });
 
@@ -49,11 +56,29 @@ export const createActivity = (tripId: number, payload: ActivityCreate) =>
     body: JSON.stringify(payload),
   });
 
+export const updateActivity = (id: number, payload: ActivityUpdate) =>
+  apiRequest<Activity>(`/activities/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+
+export const deleteActivity = (id: number) =>
+  apiRequest<void>(`/activities/${id}`, { method: "DELETE" });
+
 export const listExpenses = (tripId: number) => apiRequest<Expense[]>(`/trips/${tripId}/expenses`);
 
 export const createExpense = (tripId: number, payload: ExpenseCreate) =>
   apiRequest<Expense>(`/trips/${tripId}/expenses`, {
     method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const updateExpense = (id: number, payload: ExpenseUpdate) =>
+  apiRequest<Expense>(`/expenses/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+
+export const deleteExpense = (id: number) =>
+  apiRequest<void>(`/expenses/${id}`, { method: "DELETE" });
+
+export const settleMyExpenseShare = (id: number, payload: SettleUpdate) =>
+  apiRequest<Expense>(`/expenses/${id}/participants/me`, {
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 

@@ -1,1 +1,241 @@
 @import "tailwindcss";
+
+/*
+ * Dark mode — REI-inspired earth-tone palette (forest, rust, mustard,
+ * denim, plum) over a warm charcoal neutral. Overrides Tailwind's built-in
+ * color scales in place, so every existing bg-emerald-500 / text-rose-300 /
+ * border-violet-800 class across the app repaints without touching
+ * component markup. Light mode below layers a brighter cream variant on
+ * top of these same tokens.
+ */
+@theme {
+  /* Warm charcoal neutral (replaces Tailwind's cool blue-gray slate) —
+     same warm hue family as the light-mode cream, just inverted. */
+  --color-slate-50: #f9f7f6;
+  --color-slate-100: #efebe7;
+  --color-slate-200: #ded7cf;
+  --color-slate-300: #baaea0;
+  --color-slate-400: #968673;
+  --color-slate-500: #746758;
+  --color-slate-600: #594d40;
+  --color-slate-700: #42392e;
+  --color-slate-800: #2e271f;
+  --color-slate-900: #1f1a14;
+  --color-slate-950: #13100b;
+
+  --color-emerald-50: #ddeee4;
+  --color-emerald-100: #bfe3ce;
+  --color-emerald-200: #97d8b2;
+  --color-emerald-300: #6ecf96;
+  --color-emerald-400: #49ca7f;
+  --color-emerald-500: #2fbc6a;
+  --color-emerald-600: #299958;
+  --color-emerald-700: #267346;
+  --color-emerald-800: #1f5134;
+  --color-emerald-900: #183926;
+  --color-emerald-950: #12261a;
+
+  --color-rose-50: #eeddde;
+  --color-rose-100: #e3bfc2;
+  --color-rose-200: #d8979d;
+  --color-rose-300: #cf6e76;
+  --color-rose-400: #ca4954;
+  --color-rose-500: #bc2f3b;
+  --color-rose-600: #992932;
+  --color-rose-700: #73262d;
+  --color-rose-800: #511f23;
+  --color-rose-900: #39181b;
+  --color-rose-950: #261214;
+
+  --color-amber-50: #eee9dd;
+  --color-amber-100: #e3d8bf;
+  --color-amber-200: #d8c497;
+  --color-amber-300: #cfb16e;
+  --color-amber-400: #caa449;
+  --color-amber-500: #bc912f;
+  --color-amber-600: #997729;
+  --color-amber-700: #735c26;
+  --color-amber-800: #51421f;
+  --color-amber-900: #392f18;
+  --color-amber-950: #262012;
+
+  --color-sky-50: #dde8ee;
+  --color-sky-100: #bfd7e3;
+  --color-sky-200: #97c2d8;
+  --color-sky-300: #6eaecf;
+  --color-sky-400: #499fca;
+  --color-sky-500: #2f8dbc;
+  --color-sky-600: #297499;
+  --color-sky-700: #265973;
+  --color-sky-800: #1f4151;
+  --color-sky-900: #182e39;
+  --color-sky-950: #121f26;
+
+  --color-violet-50: #e4ddee;
+  --color-violet-100: #cebfe3;
+  --color-violet-200: #b297d8;
+  --color-violet-300: #966ecf;
+  --color-violet-400: #7f49ca;
+  --color-violet-500: #6a2fbc;
+  --color-violet-600: #582999;
+  --color-violet-700: #462673;
+  --color-violet-800: #341f51;
+  --color-violet-900: #261839;
+  --color-violet-950: #1a1226;
+
+  --color-cyan-50: #ddedee;
+  --color-cyan-100: #bfe0e3;
+  --color-cyan-200: #97d2d8;
+  --color-cyan-300: #6ec6cf;
+  --color-cyan-400: #49bfca;
+  --color-cyan-500: #2fb0bc;
+  --color-cyan-600: #299099;
+  --color-cyan-700: #266c73;
+  --color-cyan-800: #1f4d51;
+  --color-cyan-900: #183639;
+  --color-cyan-950: #122426;
+
+  --color-orange-50: #eee3dd;
+  --color-orange-100: #e3cbbf;
+  --color-orange-200: #d8ad97;
+  --color-orange-300: #cf8e6e;
+  --color-orange-400: #ca7449;
+  --color-orange-500: #bc5e2f;
+  --color-orange-600: #994e29;
+  --color-orange-700: #734026;
+  --color-orange-800: #51301f;
+  --color-orange-900: #392318;
+  --color-orange-950: #261912;
+
+  --color-fuchsia-50: #eedde8;
+  --color-fuchsia-100: #e3bfd7;
+  --color-fuchsia-200: #d897c2;
+  --color-fuchsia-300: #cf6eae;
+  --color-fuchsia-400: #ca499f;
+  --color-fuchsia-500: #bc2f8d;
+  --color-fuchsia-600: #992974;
+  --color-fuchsia-700: #732659;
+  --color-fuchsia-800: #511f41;
+  --color-fuchsia-900: #39182e;
+  --color-fuchsia-950: #26121f;
+}
+
+/*
+ * Light mode — warm cream "notepad" background (solarized-adjacent) with
+ * the same earth-tone hues as dark mode, ramp inverted so low numbers
+ * (used as text) land dark/saturated and high numbers (used as
+ * translucent badge washes) land pale. Saturation kept moderate rather
+ * than neon throughout, so multiple accent colors read as a coherent
+ * palette instead of clashing. Same class names throughout the app
+ * resolve correctly in both themes since components never hardcode hex
+ * values.
+ */
+[data-theme="light"] {
+  --color-slate-950: #fdf6e3;
+  --color-slate-900: #f4ecd8;
+  --color-slate-800: #ddd0ad;
+  --color-slate-700: #c9b98c;
+  --color-slate-600: #8a7c5c;
+  --color-slate-500: #6b5f45;
+  --color-slate-400: #544a35;
+  --color-slate-300: #3d3627;
+  --color-slate-200: #2b2619;
+  --color-slate-100: #1c1810;
+  --color-slate-50: #100e09;
+
+  --color-emerald-50: #112c1c;
+  --color-emerald-100: #18442a;
+  --color-emerald-200: #21633d;
+  --color-emerald-300: #2a844f;
+  --color-emerald-400: #31a561;
+  --color-emerald-500: #39c674;
+  --color-emerald-600: #60c78b;
+  --color-emerald-700: #95d0ae;
+  --color-emerald-800: #c4decf;
+  --color-emerald-900: #e0ebe5;
+  --color-emerald-950: #f0f4f2;
+
+  --color-rose-50: #2c1113;
+  --color-rose-100: #44181c;
+  --color-rose-200: #632127;
+  --color-rose-300: #842a31;
+  --color-rose-400: #a5313b;
+  --color-rose-500: #c63945;
+  --color-rose-600: #c76069;
+  --color-rose-700: #d0959a;
+  --color-rose-800: #dec4c6;
+  --color-rose-900: #ebe0e1;
+  --color-rose-950: #f4f0f1;
+
+  --color-amber-50: #2c2411;
+  --color-amber-100: #443718;
+  --color-amber-200: #635021;
+  --color-amber-300: #84692a;
+  --color-amber-400: #a58231;
+  --color-amber-500: #c69c39;
+  --color-amber-600: #c7a860;
+  --color-amber-700: #d0be95;
+  --color-amber-800: #ded6c4;
+  --color-amber-900: #ebe8e0;
+  --color-amber-950: #f4f3f0;
+
+  --color-sky-50: #11232c;
+  --color-sky-100: #183544;
+  --color-sky-200: #214d63;
+  --color-sky-300: #2a6684;
+  --color-sky-400: #317ea5;
+  --color-sky-500: #3997c6;
+  --color-sky-600: #60a5c7;
+  --color-sky-700: #95bcd0;
+  --color-sky-800: #c4d5de;
+  --color-sky-900: #e0e7eb;
+  --color-sky-950: #f0f3f4;
+
+  --color-violet-50: #1c112c;
+  --color-violet-100: #2a1844;
+  --color-violet-200: #3d2163;
+  --color-violet-300: #4f2a84;
+  --color-violet-400: #6131a5;
+  --color-violet-500: #7439c6;
+  --color-violet-600: #8b60c7;
+  --color-violet-700: #ae95d0;
+  --color-violet-800: #cfc4de;
+  --color-violet-900: #e5e0eb;
+  --color-violet-950: #f2f0f4;
+
+  --color-cyan-50: #112a2c;
+  --color-cyan-100: #184044;
+  --color-cyan-200: #215e63;
+  --color-cyan-300: #2a7c84;
+  --color-cyan-400: #319ba5;
+  --color-cyan-500: #39bac6;
+  --color-cyan-600: #60bfc7;
+  --color-cyan-700: #95cbd0;
+  --color-cyan-800: #c4dcde;
+  --color-cyan-900: #e0eaeb;
+  --color-cyan-950: #f0f4f4;
+
+  --color-orange-50: #2c1a11;
+  --color-orange-100: #442718;
+  --color-orange-200: #633721;
+  --color-orange-300: #84482a;
+  --color-orange-400: #a55831;
+  --color-orange-500: #c66839;
+  --color-orange-600: #c78360;
+  --color-orange-700: #d0a995;
+  --color-orange-800: #decdc4;
+  --color-orange-900: #ebe4e0;
+  --color-orange-950: #f4f2f0;
+
+  --color-fuchsia-50: #2c1123;
+  --color-fuchsia-100: #441835;
+  --color-fuchsia-200: #63214d;
+  --color-fuchsia-300: #842a66;
+  --color-fuchsia-400: #a5317e;
+  --color-fuchsia-500: #c63997;
+  --color-fuchsia-600: #c760a5;
+  --color-fuchsia-700: #d095bc;
+  --color-fuchsia-800: #dec4d5;
+  --color-fuchsia-900: #ebe0e7;
+  --color-fuchsia-950: #f4f0f3;
+}

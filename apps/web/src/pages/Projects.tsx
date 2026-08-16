@@ -1,12 +1,16 @@
 import { projects } from "@/lib/profile";
+import { neonAt } from "@/lib/neonPalette";
 
 export default function Projects() {
   return (
     <section className="flex flex-col gap-8">
       <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
       <div className="flex flex-col gap-6">
-        {projects.map((project) => (
-          <article key={project.title} className="rounded-lg border border-slate-800 p-5">
+        {projects.map((project, i) => (
+          <article
+            key={project.title}
+            className={`rounded-lg border border-slate-800 border-l-4 ${neonAt(i).border} p-5`}
+          >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-lg font-semibold">{project.title}</h2>
               <span

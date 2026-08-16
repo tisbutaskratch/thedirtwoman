@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
+from app.core.deps import (
+    get_accessible_trip,
+    get_current_user,
+    trip_access_filter,
+    validate_trip_member,
+)
 from app.db.session import get_db
 from app.models.gear import Gear
 from app.models.trip import Trip
@@ -36,6 +41,7 @@ def list_gear(trip: Trip = Depends(get_accessible_trip)) -> list[Gear]:
 def create_gear(
     payload: GearCreate, trip: Trip = Depends(get_accessible_trip), db: Session = Depends(get_db)
 ) -> Gear:
+    validate_trip_member(trip, payload.assigned_to_user_id, db)
     gear = Gear(trip_id=trip.id, **payload.model_dump())
     db.add(gear)
     db.commit()
@@ -47,7 +53,10 @@ def create_gear(
 def update_gear(
     payload: GearUpdate, gear: Gear = Depends(get_owned_gear), db: Session = Depends(get_db)
 ) -> Gear:
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    updates = payload.model_dump(exclude_unset=True)
+    if "assigned_to_user_id" in updates:
+        validate_trip_member(gear.trip, updates["assigned_to_user_id"], db)
+    for field, value in updates.items():
         setattr(gear, field, value)
     db.commit()
     db.refresh(gear)

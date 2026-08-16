@@ -1,15 +1,21 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class CollaboratorRead(BaseModel):
     user_id: int
     name: str
     email: str
+    vehicle: Optional[str]
     joined_at: datetime
+
+
+class VehicleUpdate(BaseModel):
+    vehicle: Optional[str] = Field(default=None, max_length=255)
 
 
 class InviteRead(BaseModel):

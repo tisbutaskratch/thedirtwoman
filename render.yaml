@@ -1,0 +1,34 @@
+# Render Blueprint for the API — https://render.com/docs/blueprint-spec
+#
+# Deploy: connect this repo in the Render dashboard and it will detect this
+# file automatically ("New +" -> "Blueprint"). After the first deploy, set
+# CORS_ORIGINS in the dashboard to your deployed frontend's URL (Vercel or
+# Netlify), e.g. ["https://your-app.vercel.app"].
+#
+# The frontend (apps/web) isn't listed here — per the architecture doc it
+# deploys to Vercel or Netlify instead (see apps/web/vercel.json and
+# netlify.toml at the repo root).
+services:
+  - type: web
+    name: adventure-planner-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: ./apps/api
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: adventure-planner-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        sync: false
+
+databases:
+  - name: adventure-planner-db
+    plan: free
+    databaseName: adventure_planner
+    user: adventure_planner

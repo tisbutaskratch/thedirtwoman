@@ -8,10 +8,11 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class ActivityCreate(BaseModel):
     title: str = Field(min_length=1, max_length=255)
-    day_index: int = 0
+    day_index: int = 1
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     notes: Optional[str] = None
+    todos: Optional[str] = None
     location_id: Optional[int] = None
 
 
@@ -21,6 +22,7 @@ class ActivityUpdate(BaseModel):
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
     notes: Optional[str] = None
+    todos: Optional[str] = None
     location_id: Optional[int] = None
 
 
@@ -34,4 +36,5 @@ class ActivityRead(BaseModel):
     start_time: Optional[datetime]
     end_time: Optional[datetime]
     notes: Optional[str]
+    todos: Optional[str]
     location_id: Optional[int]

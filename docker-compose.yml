@@ -20,6 +20,10 @@ services:
     build:
       context: ./apps/api
     restart: unless-stopped
+    # Dockerfile defaults to a non-root user for production; local dev bind-mounts
+    # the host source below, and host/container UID mismatches on that mount can
+    # cause permission errors, so run as root here (compose/local dev only).
+    user: root
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/adventure_planner
       CORS_ORIGINS: '["http://localhost:5173"]'
@@ -36,6 +40,8 @@ services:
     build:
       context: ./apps/web
     restart: unless-stopped
+    # Same bind-mount UID concern as api above.
+    user: root
     environment:
       VITE_API_BASE_URL: http://localhost:8000
     ports:

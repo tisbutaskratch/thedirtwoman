@@ -4,10 +4,13 @@ import { deleteTrip, getTrip, updateTrip } from "@/api/trips";
 import type { Trip, TripStatus } from "@/api/types";
 import ActivitiesSection from "@/components/trip/ActivitiesSection";
 import ExpensesSection from "@/components/trip/ExpensesSection";
+import FilesSection from "@/components/trip/FilesSection";
 import GearSection from "@/components/trip/GearSection";
 import LocationsSection from "@/components/trip/LocationsSection";
 import NotesSection from "@/components/trip/NotesSection";
+import PhotosSection from "@/components/trip/PhotosSection";
 import ShareSection from "@/components/trip/ShareSection";
+import TasksSection from "@/components/trip/TasksSection";
 import { useAuth } from "@/lib/AuthContext";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
@@ -96,7 +99,7 @@ export default function TripDetail() {
           <span>{trip.percent_planned}%</span>
         </div>
         <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-          <div className="h-full bg-emerald-500" style={{ width: `${trip.percent_planned}%` }} />
+          <div className={`h-full ${meta.accentBg}`} style={{ width: `${trip.percent_planned}%` }} />
         </div>
       </div>
 
@@ -120,12 +123,15 @@ export default function TripDetail() {
       <ActivitiesSection
         tripId={id}
         onChange={refreshTrip}
-        groupByDay={trip.trip_type === "backpacking" || trip.trip_type === "overlanding"}
+        tripStartDate={trip.start_date}
         dailyTargetMiles={motoDetail?.daily_ride_target_miles}
       />
+      <TasksSection tripId={id} onChange={refreshTrip} />
       <NotesSection tripId={id} onChange={refreshTrip} />
       <ExpensesSection tripId={id} />
       <GearSection tripId={id} onChange={refreshTrip} />
+      <PhotosSection tripId={id} />
+      <FilesSection tripId={id} />
     </section>
   );
 }

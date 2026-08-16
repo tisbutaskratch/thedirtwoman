@@ -12,6 +12,18 @@ from app.models.trip_invite import TripInvite
 from app.schemas.sharing import CollaboratorRead
 
 
+def to_owner_collaborator_read(trip: Trip) -> CollaboratorRead:
+    """The trip owner isn't a TripCollaborator row, but the roster should
+    still show them alongside everyone else."""
+    return CollaboratorRead(
+        user_id=trip.user_id,
+        name=trip.user.name,
+        email=trip.user.email,
+        vehicle=trip.owner_vehicle,
+        joined_at=trip.created_at,
+    )
+
+
 def get_or_create_invite(db: Session, trip: Trip, created_by_user_id: int) -> TripInvite:
     now = datetime.now(timezone.utc)
     existing = (
@@ -45,5 +57,6 @@ def to_collaborator_read(collaborator: TripCollaborator) -> CollaboratorRead:
         user_id=collaborator.user_id,
         name=collaborator.user.name,
         email=collaborator.user.email,
+        vehicle=collaborator.vehicle,
         joined_at=collaborator.created_at,
     )

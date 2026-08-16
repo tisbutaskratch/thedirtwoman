@@ -1,5 +1,11 @@
 import { apiRequest } from "@/api/client";
-import type { Collaborator, Invite, InviteAcceptResult, InvitePreview } from "@/api/types";
+import type {
+  Collaborator,
+  Invite,
+  InviteAcceptResult,
+  InvitePreview,
+  VehicleUpdate,
+} from "@/api/types";
 
 export const getOrCreateInvite = (tripId: number) =>
   apiRequest<Invite>(`/trips/${tripId}/invite`, { method: "POST" });
@@ -12,6 +18,12 @@ export const listCollaborators = (tripId: number) =>
 
 export const removeCollaborator = (tripId: number, userId: number) =>
   apiRequest<void>(`/trips/${tripId}/collaborators/${userId}`, { method: "DELETE" });
+
+export const updateMyVehicle = (tripId: number, payload: VehicleUpdate) =>
+  apiRequest<Collaborator>(`/trips/${tripId}/collaborators/me`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 
 export const getInvitePreview = (token: string) => apiRequest<InvitePreview>(`/invites/${token}`);
 

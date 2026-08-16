@@ -64,6 +64,7 @@ def to_trip_read(trip: Trip) -> TripRead:
         start_date=trip.start_date,
         end_date=trip.end_date,
         status=trip.status,
+        owner_vehicle=trip.owner_vehicle,
         created_at=trip.created_at,
         percent_planned=compute_percent_planned(trip),
     )

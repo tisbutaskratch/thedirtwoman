@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navItems = [
   { to: "/", label: "Home", end: true },
@@ -16,25 +17,28 @@ export default function Layout() {
           <NavLink to="/" className="text-lg font-bold tracking-tight">
             Samwise Gamgee
           </NavLink>
-          <ul className="flex flex-wrap gap-1">
-            {navItems.map((item) => (
-              <li key={item.to}>
-                <NavLink
-                  to={item.to}
-                  end={item.end}
-                  className={({ isActive }) =>
-                    `rounded-md px-3 py-1.5 text-sm transition-colors ${
-                      isActive
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "text-slate-400 hover:text-slate-100"
-                    }`
-                  }
-                >
-                  {item.label}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-wrap items-center gap-3">
+            <ul className="flex flex-wrap gap-1">
+              {navItems.map((item) => (
+                <li key={item.to}>
+                  <NavLink
+                    to={item.to}
+                    end={item.end}
+                    className={({ isActive }) =>
+                      `rounded-md px-3 py-1.5 text-sm transition-colors ${
+                        isActive
+                          ? "bg-emerald-500/10 text-emerald-400"
+                          : "text-slate-400 hover:text-slate-100"
+                      }`
+                    }
+                  >
+                    {item.label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <ThemeToggle />
+          </div>
         </nav>
       </header>
 

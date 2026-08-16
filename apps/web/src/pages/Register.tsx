@@ -37,10 +37,14 @@ export default function Register() {
     <AuthLayout title="Create an account">
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
+          <label
+            htmlFor="register-name"
+            className="mb-1 block text-xs uppercase tracking-widest text-slate-500"
+          >
             Name
           </label>
           <input
+            id="register-name"
             type="text"
             required
             value={name}
@@ -49,10 +53,14 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
+          <label
+            htmlFor="register-email"
+            className="mb-1 block text-xs uppercase tracking-widest text-slate-500"
+          >
             Email
           </label>
           <input
+            id="register-email"
             type="email"
             required
             value={email}
@@ -61,10 +69,14 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs uppercase tracking-widest text-slate-500">
+          <label
+            htmlFor="register-password"
+            className="mb-1 block text-xs uppercase tracking-widest text-slate-500"
+          >
             Password
           </label>
           <input
+            id="register-password"
             type="password"
             required
             minLength={8}
