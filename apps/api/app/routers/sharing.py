@@ -11,13 +11,19 @@ from app.models.trip_invite import TripInvite
 from app.models.user import User
 from app.schemas.sharing import (
     CollaboratorRead,
+    EmailInviteCreate,
     InviteAcceptResult,
     InvitePreviewRead,
     InviteRead,
+    PendingMemberRead,
     VehicleUpdate,
 )
 from app.services.sharing import (
+    cancel_email_invite,
+    create_email_invite,
     get_or_create_invite,
+    is_email_already_member,
+    list_pending_invites,
     revoke_invites,
     to_collaborator_read,
     to_owner_collaborator_read,
@@ -46,6 +52,36 @@ def list_collaborators(trip: Trip = Depends(get_accessible_trip)) -> list[Collab
     return [to_owner_collaborator_read(trip)] + collaborators
 
 
+@router.post("/trips/{trip_id}/invites/email", response_model=PendingMemberRead)
+def invite_by_email(
+    payload: EmailInviteCreate,
+    trip: Trip = Depends(get_owned_trip),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> PendingMemberRead:
+    if is_email_already_member(db, trip, payload.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Already a member of this trip"
+        )
+    invite = create_email_invite(db, trip, current_user.id, payload.email)
+    return PendingMemberRead(id=invite.id, email=invite.invitee_email, invited_at=invite.created_at)
+
+
+@router.get("/trips/{trip_id}/pending-invites", response_model=list[PendingMemberRead])
+def get_pending_invites(
+    trip: Trip = Depends(get_accessible_trip), db: Session = Depends(get_db)
+) -> list[PendingMemberRead]:
+    return list_pending_invites(db, trip)
+
+
+@router.delete("/trips/{trip_id}/invites/email/{invite_id}", status_code=status.HTTP_204_NO_CONTENT)
+def cancel_pending_invite(
+    invite_id: int, trip: Trip = Depends(get_owned_trip), db: Session = Depends(get_db)
+) -> None:
+    if not cancel_email_invite(db, trip, invite_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Invite not found")
+
+
 @router.patch("/trips/{trip_id}/collaborators/me", response_model=CollaboratorRead)
 def update_my_vehicle(
     payload: VehicleUpdate,
@@ -55,6 +91,7 @@ def update_my_vehicle(
 ) -> CollaboratorRead:
     if trip.user_id == current_user.id:
         trip.owner_vehicle = payload.vehicle
+        trip.owner_fuel_range_miles = payload.fuel_range_miles
         db.commit()
         db.refresh(trip)
         return to_owner_collaborator_read(trip)
@@ -68,6 +105,7 @@ def update_my_vehicle(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not a trip member")
 
     collaborator.vehicle = payload.vehicle
+    collaborator.fuel_range_miles = payload.fuel_range_miles
     db.commit()
     db.refresh(collaborator)
     return to_collaborator_read(collaborator)
@@ -137,6 +175,11 @@ def accept_invite(
     )
     if already_member is None:
         db.add(TripCollaborator(trip_id=trip.id, user_id=current_user.id))
-        db.commit()
+
+    if invite.invitee_email is not None:
+        # Targeted invite consumed on acceptance — it stops showing as pending.
+        db.delete(invite)
+
+    db.commit()
 
     return InviteAcceptResult(trip_id=trip.id)

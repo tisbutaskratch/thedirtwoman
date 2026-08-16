@@ -7,17 +7,15 @@ import ExpensesSection from "@/components/trip/ExpensesSection";
 import FilesSection from "@/components/trip/FilesSection";
 import GearSection from "@/components/trip/GearSection";
 import LocationsSection from "@/components/trip/LocationsSection";
+import MembersSection from "@/components/trip/MembersSection";
 import NotesSection from "@/components/trip/NotesSection";
 import PhotosSection from "@/components/trip/PhotosSection";
-import ShareSection from "@/components/trip/ShareSection";
 import TasksSection from "@/components/trip/TasksSection";
 import { useAuth } from "@/lib/AuthContext";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
 import CampingPanel from "@/modes/camping/CampingPanel";
 import InternationalPanel from "@/modes/international/InternationalPanel";
-import MotocampingPanel from "@/modes/motocamping/MotocampingPanel";
-import type { MotocampingDetail } from "@/modes/motocamping/types";
 import OverlandingPanel from "@/modes/overlanding/OverlandingPanel";
 
 const STATUS_OPTIONS: TripStatus[] = ["planning", "active", "completed"];
@@ -29,7 +27,6 @@ export default function TripDetail() {
   const { user } = useAuth();
   const [trip, setTrip] = useState<Trip | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [motoDetail, setMotoDetail] = useState<MotocampingDetail | null>(null);
 
   const refreshTrip = useCallback(() => {
     getTrip(id)
@@ -93,19 +90,6 @@ export default function TripDetail() {
         </div>
       </div>
 
-      <div>
-        <div className="mb-1 flex justify-between text-xs text-slate-500">
-          <span>Planned</span>
-          <span>{trip.percent_planned}%</span>
-        </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-          <div className={`h-full ${meta.accentBg}`} style={{ width: `${trip.percent_planned}%` }} />
-        </div>
-      </div>
-
-      {trip.trip_type === "motocamping" && (
-        <MotocampingPanel tripId={id} onChange={refreshTrip} onDetailChange={setMotoDetail} />
-      )}
       {trip.trip_type === "backpacking" && (
         <BackpackingPanel tripId={id} onChange={refreshTrip} />
       )}
@@ -117,21 +101,15 @@ export default function TripDetail() {
         <InternationalPanel tripId={id} onChange={refreshTrip} />
       )}
 
-      <ShareSection tripId={id} isOwner={isOwner} />
-
-      <LocationsSection tripId={id} onChange={refreshTrip} />
-      <ActivitiesSection
-        tripId={id}
-        onChange={refreshTrip}
-        tripStartDate={trip.start_date}
-        dailyTargetMiles={motoDetail?.daily_ride_target_miles}
-      />
-      <TasksSection tripId={id} onChange={refreshTrip} />
-      <NotesSection tripId={id} onChange={refreshTrip} />
-      <ExpensesSection tripId={id} />
-      <GearSection tripId={id} onChange={refreshTrip} />
-      <PhotosSection tripId={id} />
+      <MembersSection tripId={id} isOwner={isOwner} />
+      <ActivitiesSection tripId={id} onChange={refreshTrip} tripStartDate={trip.start_date} />
       <FilesSection tripId={id} />
+      <GearSection tripId={id} onChange={refreshTrip} />
+      <TasksSection tripId={id} onChange={refreshTrip} />
+      <PhotosSection tripId={id} />
+      <NotesSection tripId={id} onChange={refreshTrip} />
+      <LocationsSection tripId={id} onChange={refreshTrip} />
+      <ExpensesSection tripId={id} />
     </section>
   );
 }

@@ -18,6 +18,7 @@ class LocationCreate(BaseModel):
     order_index: int = 0
     contact_phone: Optional[str] = Field(default=None, max_length=50)
     confirmation_ref: Optional[str] = Field(default=None, max_length=255)
+    address: Optional[str] = Field(default=None, max_length=500)
 
 
 class LocationUpdate(BaseModel):
@@ -30,6 +31,7 @@ class LocationUpdate(BaseModel):
     order_index: Optional[int] = None
     contact_phone: Optional[str] = Field(default=None, max_length=50)
     confirmation_ref: Optional[str] = Field(default=None, max_length=255)
+    address: Optional[str] = Field(default=None, max_length=500)
 
 
 class LocationRead(BaseModel):
@@ -46,3 +48,4 @@ class LocationRead(BaseModel):
     order_index: int
     contact_phone: Optional[str]
     confirmation_ref: Optional[str]
+    address: Optional[str]

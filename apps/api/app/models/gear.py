@@ -14,11 +14,7 @@ if TYPE_CHECKING:
 
 
 class GearRequiredLevel(str, enum.Enum):
-    """Matches the group packing lists' 3-level column: Yes / No / No
-    (strongly suggested)."""
-
     required = "required"
-    suggested = "suggested"
     optional = "optional"
 
 

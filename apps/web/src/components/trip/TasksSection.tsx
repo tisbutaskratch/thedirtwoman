@@ -12,6 +12,7 @@ export default function TasksSection({
 }) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [roster, setRoster] = useState<Collaborator[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -66,7 +67,73 @@ export default function TasksSection({
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold">Prep checklist</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold">Prep checklist</h2>
+        {!showAdd && (
+          <button
+            onClick={() => setShowAdd(true)}
+            title="Add task"
+            className="text-slate-500 hover:text-emerald-300"
+          >
+            +
+          </button>
+        )}
+      </div>
+
+      {showAdd && (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+        >
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setShowAdd(false)}
+              title="Close"
+              className="text-slate-500 hover:text-slate-300"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="text"
+              autoFocus
+              placeholder="Task (e.g. book campsite)"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <select
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            >
+              <option value="">Unassigned</option>
+              {roster.map((c) => (
+                <option key={c.user_id} value={c.user_id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              title="Add"
+              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+            >
+              ✓
+            </button>
+          </div>
+        </form>
+      )}
+
       <ul className="flex flex-col gap-2">
         {sorted.map((task) => (
           <li
@@ -92,48 +159,15 @@ export default function TasksSection({
             </div>
             <button
               onClick={() => handleDelete(task.id)}
-              className="shrink-0 text-xs text-slate-500 hover:text-red-400"
+              title="Remove"
+              className="shrink-0 text-slate-600 hover:text-red-400"
             >
-              Remove
+              −
             </button>
           </li>
         ))}
         {tasks.length === 0 && <p className="text-sm text-slate-500">No prep tasks yet.</p>}
       </ul>
-      <form onSubmit={handleSubmit} className="flex flex-wrap gap-2">
-        <input
-          type="text"
-          placeholder="Task (e.g. book campsite)"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-        />
-        <select
-          value={assignedTo}
-          onChange={(e) => setAssignedTo(e.target.value)}
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-        >
-          <option value="">Unassigned</option>
-          {roster.map((c) => (
-            <option key={c.user_id} value={c.user_id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
-        >
-          Add
-        </button>
-      </form>
     </section>
   );
 }

@@ -90,6 +90,8 @@ export const createGear = (tripId: number, payload: GearCreate) =>
 export const updateGear = (id: number, payload: GearUpdate) =>
   apiRequest<Gear>(`/gear/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
 
+export const deleteGear = (id: number) => apiRequest<void>(`/gear/${id}`, { method: "DELETE" });
+
 export const listNotes = (tripId: number) => apiRequest<Note[]>(`/trips/${tripId}/notes`);
 
 export const createNote = (tripId: number, payload: NoteCreate) =>

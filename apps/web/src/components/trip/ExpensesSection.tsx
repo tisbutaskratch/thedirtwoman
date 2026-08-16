@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { listCollaborators } from "@/api/sharing";
-import { createExpense, listExpenses, settleMyExpenseShare } from "@/api/trips";
+import { createExpense, deleteExpense, listExpenses, settleMyExpenseShare } from "@/api/trips";
 import type { Collaborator, Expense } from "@/api/types";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -8,6 +8,7 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [roster, setRoster] = useState<Collaborator[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -68,16 +69,118 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
     refresh();
   }
 
+  async function handleDelete(id: number) {
+    await deleteExpense(id);
+    refresh();
+  }
+
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   return (
     <section className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Expenses</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-semibold">Expenses</h2>
+          {!showAdd && (
+            <button
+              onClick={() => setShowAdd(true)}
+              title="Add expense"
+              className="text-slate-500 hover:text-emerald-300"
+            >
+              +
+            </button>
+          )}
+        </div>
         {expenses.length > 0 && (
           <span className="text-sm text-slate-500">Total: {total.toFixed(2)}</span>
         )}
       </div>
+
+      {showAdd && (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+        >
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setShowAdd(false)}
+              title="Close"
+              className="text-slate-500 hover:text-slate-300"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="text"
+              autoFocus
+              placeholder="Category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-32 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="w-28 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={paidBy}
+              onChange={(e) => setPaidBy(e.target.value)}
+              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            >
+              <option value="">Who paid?</option>
+              {roster.map((c) => (
+                <option key={c.user_id} value={c.user_id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+              <span>Split with:</span>
+              {roster.map((c) => (
+                <label key={c.user_id} className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    checked={participantIds.has(c.user_id)}
+                    onChange={() => toggleParticipant(c.user_id)}
+                    className="h-3.5 w-3.5 accent-emerald-500"
+                  />
+                  {c.name}
+                </label>
+              ))}
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              title="Add"
+              className="ml-auto text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+            >
+              ✓
+            </button>
+          </div>
+        </form>
+      )}
+
       <ul className="flex flex-col gap-2">
         {expenses.map((expense) => {
           const myShare = expense.participants.find((p) => p.user_id === user?.id);
@@ -93,9 +196,18 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
                   </span>
                   {expense.description}
                 </span>
-                <span className="text-sm text-slate-300">
-                  {expense.amount.toFixed(2)} {expense.currency}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-slate-300">
+                    {expense.amount.toFixed(2)} {expense.currency}
+                  </span>
+                  <button
+                    onClick={() => handleDelete(expense.id)}
+                    title="Remove"
+                    className="text-slate-600 hover:text-red-400"
+                  >
+                    −
+                  </button>
+                </div>
               </div>
 
               {(expense.paid_by_user_id !== null || expense.participants.length > 0) && (
@@ -141,77 +253,6 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
         })}
         {expenses.length === 0 && <p className="text-sm text-slate-500">No expenses yet.</p>}
       </ul>
-
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-      >
-        <div className="flex flex-wrap gap-2">
-          <input
-            type="text"
-            placeholder="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-32 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          />
-          <input
-            type="text"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          />
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            className="w-28 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          />
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          />
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={paidBy}
-            onChange={(e) => setPaidBy(e.target.value)}
-            className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          >
-            <option value="">Who paid?</option>
-            {roster.map((c) => (
-              <option key={c.user_id} value={c.user_id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-            <span>Split with:</span>
-            {roster.map((c) => (
-              <label key={c.user_id} className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={participantIds.has(c.user_id)}
-                  onChange={() => toggleParticipant(c.user_id)}
-                  className="h-3.5 w-3.5 accent-emerald-500"
-                />
-                {c.name}
-              </label>
-            ))}
-          </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="ml-auto rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
-          >
-            Add
-          </button>
-        </div>
-      </form>
     </section>
   );
 }

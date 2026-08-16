@@ -10,6 +10,7 @@ export interface Trip {
   end_date: string | null;
   status: TripStatus;
   owner_vehicle: string | null;
+  owner_fuel_range_miles: number | null;
   created_at: string;
   percent_planned: number;
 }
@@ -27,6 +28,7 @@ export interface TripUpdate {
   end_date?: string | null;
   status?: TripStatus;
   owner_vehicle?: string | null;
+  owner_fuel_range_miles?: number | null;
 }
 
 export type LocationKind = "waypoint" | "campsite" | "hotel" | "poi" | "fuel_stop";
@@ -43,6 +45,7 @@ export interface Location {
   order_index: number;
   contact_phone: string | null;
   confirmation_ref: string | null;
+  address: string | null;
 }
 
 export interface LocationCreate {
@@ -55,6 +58,7 @@ export interface LocationCreate {
   order_index?: number;
   contact_phone?: string | null;
   confirmation_ref?: string | null;
+  address?: string | null;
 }
 
 export interface LocationUpdate {
@@ -67,6 +71,7 @@ export interface LocationUpdate {
   order_index?: number;
   contact_phone?: string | null;
   confirmation_ref?: string | null;
+  address?: string | null;
 }
 
 export interface Activity {
@@ -143,7 +148,7 @@ export interface SettleUpdate {
   settled: boolean;
 }
 
-export type GearRequiredLevel = "required" | "suggested" | "optional";
+export type GearRequiredLevel = "required" | "optional";
 
 export interface Gear {
   id: number;
@@ -220,11 +225,23 @@ export interface Collaborator {
   name: string;
   email: string;
   vehicle: string | null;
+  fuel_range_miles: number | null;
   joined_at: string;
 }
 
 export interface VehicleUpdate {
   vehicle: string | null;
+  fuel_range_miles: number | null;
+}
+
+export interface EmailInviteCreate {
+  email: string;
+}
+
+export interface PendingMember {
+  id: number;
+  email: string;
+  invited_at: string;
 }
 
 export type AttachmentKind = "photo" | "file";

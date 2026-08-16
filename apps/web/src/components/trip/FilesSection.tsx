@@ -4,6 +4,7 @@ import type { Attachment } from "@/api/types";
 
 export default function FilesSection({ tripId }: { tripId: number }) {
   const [files, setFiles] = useState<Attachment[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -38,7 +39,69 @@ export default function FilesSection({ tripId }: { tripId: number }) {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold">Files</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold">Files</h2>
+        {!showAdd && (
+          <button
+            onClick={() => setShowAdd(true)}
+            title="Add file"
+            className="text-slate-500 hover:text-emerald-300"
+          >
+            +
+          </button>
+        )}
+      </div>
+
+      {showAdd && (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+        >
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setShowAdd(false)}
+              title="Close"
+              className="text-slate-500 hover:text-slate-300"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="text"
+              autoFocus
+              placeholder="Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <input
+              type="text"
+              placeholder="Description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:text-slate-200"
+            />
+            <button
+              type="submit"
+              disabled={submitting}
+              title="Upload"
+              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+            >
+              ✓
+            </button>
+          </div>
+        </form>
+      )}
+
       <ul className="flex flex-col gap-2">
         {files.map((file) => (
           <li
@@ -60,49 +123,15 @@ export default function FilesSection({ tripId }: { tripId: number }) {
             </a>
             <button
               onClick={() => handleDelete(file.id)}
-              className="shrink-0 text-xs text-slate-500 hover:text-red-400"
+              title="Remove"
+              className="shrink-0 text-slate-600 hover:text-red-400"
             >
-              Remove
+              −
             </button>
           </li>
         ))}
         {files.length === 0 && <p className="text-sm text-slate-500">No files yet.</p>}
       </ul>
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-      >
-        <div className="flex flex-wrap gap-2">
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          />
-          <input
-            type="text"
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-          />
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:text-slate-200"
-          />
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
-          >
-            Upload
-          </button>
-        </div>
-      </form>
     </section>
   );
 }

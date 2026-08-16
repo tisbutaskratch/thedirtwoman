@@ -4,7 +4,7 @@ import enum
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, func
+from sqlalchemy import Date, DateTime, Enum, Float, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -57,6 +57,9 @@ class Trip(Base):
     # The owner's own vehicle for this trip (collaborators get theirs on
     # TripCollaborator.vehicle) — real usage always lists a full rider roster.
     owner_vehicle: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    # Owner's tank range in miles (full to empty) — collaborators get theirs
+    # on TripCollaborator.fuel_range_miles.
+    owner_fuel_range_miles: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped[User] = relationship(back_populates="trips")

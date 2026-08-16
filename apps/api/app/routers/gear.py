@@ -61,3 +61,9 @@ def update_gear(
     db.commit()
     db.refresh(gear)
     return gear
+
+
+@router.delete("/gear/{gear_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_gear(gear: Gear = Depends(get_owned_gear), db: Session = Depends(get_db)) -> None:
+    db.delete(gear)
+    db.commit()

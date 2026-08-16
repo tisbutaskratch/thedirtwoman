@@ -1,9 +1,11 @@
 import { apiRequest } from "@/api/client";
 import type {
   Collaborator,
+  EmailInviteCreate,
   Invite,
   InviteAcceptResult,
   InvitePreview,
+  PendingMember,
   VehicleUpdate,
 } from "@/api/types";
 
@@ -24,6 +26,18 @@ export const updateMyVehicle = (tripId: number, payload: VehicleUpdate) =>
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+
+export const inviteByEmail = (tripId: number, payload: EmailInviteCreate) =>
+  apiRequest<PendingMember>(`/trips/${tripId}/invites/email`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+export const listPendingInvites = (tripId: number) =>
+  apiRequest<PendingMember[]>(`/trips/${tripId}/pending-invites`);
+
+export const cancelPendingInvite = (tripId: number, inviteId: number) =>
+  apiRequest<void>(`/trips/${tripId}/invites/email/${inviteId}`, { method: "DELETE" });
 
 export const getInvitePreview = (token: string) => apiRequest<InvitePreview>(`/invites/${token}`);
 

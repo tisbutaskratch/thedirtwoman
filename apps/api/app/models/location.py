@@ -37,5 +37,6 @@ class Location(Base):
     order_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     contact_phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     confirmation_ref: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    address: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     trip: Mapped[Trip] = relationship(back_populates="locations")

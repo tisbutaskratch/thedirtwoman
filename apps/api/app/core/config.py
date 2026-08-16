@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,6 +16,15 @@ class Settings(BaseSettings):
     trip_invite_expire_days: int = 7
     cors_origins: list[str] = ["http://localhost:5173"]
     media_root: str = "media"
+    frontend_base_url: str = "http://localhost:5173"
+
+    # Email invites: if smtp_host is unset, invite emails are logged instead
+    # of sent (safe default for local dev with no provider configured).
+    smtp_host: Optional[str] = None
+    smtp_port: int = 587
+    smtp_user: Optional[str] = None
+    smtp_password: Optional[str] = None
+    smtp_from_email: str = "noreply@adventureplanner.local"
 
     @field_validator("database_url")
     @classmethod

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class CollaboratorRead(BaseModel):
@@ -11,11 +11,23 @@ class CollaboratorRead(BaseModel):
     name: str
     email: str
     vehicle: Optional[str]
+    fuel_range_miles: Optional[float]
     joined_at: datetime
 
 
 class VehicleUpdate(BaseModel):
     vehicle: Optional[str] = Field(default=None, max_length=255)
+    fuel_range_miles: Optional[float] = Field(default=None, ge=0)
+
+
+class EmailInviteCreate(BaseModel):
+    email: EmailStr
+
+
+class PendingMemberRead(BaseModel):
+    id: int
+    email: str
+    invited_at: datetime
 
 
 class InviteRead(BaseModel):

@@ -61,18 +61,6 @@ export default function Dashboard() {
               <p className="text-sm text-slate-500">
                 {trip.start_date ?? "No start date"} — {trip.end_date ?? "No end date"}
               </p>
-              <div>
-                <div className="mb-1 flex justify-between text-xs text-slate-500">
-                  <span>Planned</span>
-                  <span>{trip.percent_planned}%</span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-800">
-                  <div
-                    className={`h-full ${meta.accentBg}`}
-                    style={{ width: `${trip.percent_planned}%` }}
-                  />
-                </div>
-              </div>
             </Link>
           );
         })}

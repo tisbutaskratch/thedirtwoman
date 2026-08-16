@@ -4,6 +4,12 @@ import type { Location, LocationKind } from "@/api/types";
 
 const KIND_OPTIONS: LocationKind[] = ["waypoint", "campsite", "hotel", "poi", "fuel_stop"];
 
+interface Draft {
+  address: string;
+  contactPhone: string;
+  confirmationRef: string;
+}
+
 export default function LocationsSection({
   tripId,
   onChange,
@@ -12,12 +18,12 @@ export default function LocationsSection({
   onChange?: () => void;
 }) {
   const [locations, setLocations] = useState<Location[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
   const [kind, setKind] = useState<LocationKind>("waypoint");
   const [submitting, setSubmitting] = useState(false);
-  const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [phoneDraft, setPhoneDraft] = useState("");
-  const [confirmationDraft, setConfirmationDraft] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
 
   function refresh() {
     listLocations(tripId).then(setLocations);
@@ -45,115 +51,174 @@ export default function LocationsSection({
     onChange?.();
   }
 
-  function toggleExpanded(location: Location) {
-    if (expandedId === location.id) {
-      setExpandedId(null);
-      return;
-    }
-    setExpandedId(location.id);
-    setPhoneDraft(location.contact_phone ?? "");
-    setConfirmationDraft(location.confirmation_ref ?? "");
+  function startEdit(location: Location) {
+    setEditingId(location.id);
+    setDraft({
+      address: location.address ?? "",
+      contactPhone: location.contact_phone ?? "",
+      confirmationRef: location.confirmation_ref ?? "",
+    });
   }
 
-  async function handleSaveReservation(id: number) {
+  function cancelEdit() {
+    setEditingId(null);
+    setDraft(null);
+  }
+
+  async function saveEdit(id: number) {
+    if (!draft) return;
     await updateLocation(id, {
-      contact_phone: phoneDraft.trim() || null,
-      confirmation_ref: confirmationDraft.trim() || null,
+      address: draft.address.trim() || null,
+      contact_phone: draft.contactPhone.trim() || null,
+      confirmation_ref: draft.confirmationRef.trim() || null,
     });
-    setExpandedId(null);
+    setEditingId(null);
+    setDraft(null);
     refresh();
   }
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-xl font-semibold">Locations</h2>
-      <ul className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold">Locations</h2>
+        {!showAdd && (
+          <button
+            onClick={() => setShowAdd(true)}
+            title="Add location"
+            className="text-slate-500 hover:text-emerald-300"
+          >
+            +
+          </button>
+        )}
+      </div>
+
+      {showAdd && (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
+        >
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => setShowAdd(false)}
+              title="Close"
+              className="text-slate-500 hover:text-slate-300"
+            >
+              ×
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              autoFocus
+              placeholder="Location name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            />
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value as LocationKind)}
+              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+            >
+              {KIND_OPTIONS.map((k) => (
+                <option key={k} value={k}>
+                  {k}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              disabled={submitting}
+              title="Add"
+              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+            >
+              ✓
+            </button>
+          </div>
+        </form>
+      )}
+
+      {locations.length === 0 && <p className="text-sm text-slate-500">No locations yet.</p>}
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {locations.map((location) => (
-          <li key={location.id} className="rounded-md border border-slate-800 px-4 py-2">
-            <div className="flex items-center justify-between">
-              <span>
-                <span className="mr-2 text-xs uppercase tracking-widest text-slate-500">
+          <div key={location.id} className="rounded-lg border border-slate-800 p-4">
+            <div className="mb-1 flex items-start justify-between gap-2">
+              <div>
+                <span className="text-xs uppercase tracking-widest text-slate-500">
                   {location.kind}
                 </span>
-                {location.name}
-                {(location.contact_phone || location.confirmation_ref) && (
-                  <span className="ml-2 text-xs text-slate-500">
-                    {location.contact_phone && `☎ ${location.contact_phone}`}
-                    {location.contact_phone && location.confirmation_ref && " · "}
-                    {location.confirmation_ref && `Conf# ${location.confirmation_ref}`}
-                  </span>
-                )}
-              </span>
-              <div className="flex items-center gap-3">
+                <h3 className="font-medium text-slate-100">{location.name}</h3>
+              </div>
+              <div className="flex shrink-0 gap-2">
                 <button
-                  onClick={() => toggleExpanded(location)}
-                  className="text-xs text-slate-500 hover:text-emerald-300"
+                  onClick={() => startEdit(location)}
+                  title="Edit"
+                  className="text-slate-500 hover:text-emerald-300"
                 >
-                  Reservation info
+                  ✎
                 </button>
                 <button
                   onClick={() => handleDelete(location.id)}
-                  className="text-xs text-slate-500 hover:text-red-400"
+                  title="Delete"
+                  className="text-slate-600 hover:text-red-400"
                 >
-                  Remove
+                  −
                 </button>
               </div>
             </div>
-            {expandedId === location.id && (
-              <div className="mt-2 flex flex-wrap gap-2">
+
+            {editingId === location.id && draft ? (
+              <div className="mt-2 flex flex-col gap-1.5">
+                <input
+                  type="text"
+                  placeholder="Address"
+                  value={draft.address}
+                  onChange={(e) => setDraft({ ...draft, address: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                />
                 <input
                   type="text"
                   placeholder="Contact phone"
-                  value={phoneDraft}
-                  onChange={(e) => setPhoneDraft(e.target.value)}
-                  className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                  value={draft.contactPhone}
+                  onChange={(e) => setDraft({ ...draft, contactPhone: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
                 />
                 <input
                   type="text"
                   placeholder="Confirmation #"
-                  value={confirmationDraft}
-                  onChange={(e) => setConfirmationDraft(e.target.value)}
-                  className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                  value={draft.confirmationRef}
+                  onChange={(e) => setDraft({ ...draft, confirmationRef: e.target.value })}
+                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
                 />
-                <button
-                  onClick={() => handleSaveReservation(location.id)}
-                  className="rounded-md bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-slate-950 hover:bg-emerald-400"
-                >
-                  Save
-                </button>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => saveEdit(location.id)}
+                    title="Save"
+                    className="text-emerald-400 hover:text-emerald-300"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    title="Cancel"
+                    className="text-slate-500 hover:text-slate-300"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-1 flex flex-col gap-0.5 text-xs text-slate-500">
+                {location.address && <span>📍 {location.address}</span>}
+                {location.contact_phone && <span>☎ {location.contact_phone}</span>}
+                {location.confirmation_ref && <span>Conf# {location.confirmation_ref}</span>}
               </div>
             )}
-          </li>
+          </div>
         ))}
-        {locations.length === 0 && <p className="text-sm text-slate-500">No locations yet.</p>}
-      </ul>
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          placeholder="Location name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-        />
-        <select
-          value={kind}
-          onChange={(e) => setKind(e.target.value as LocationKind)}
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
-        >
-          {KIND_OPTIONS.map((k) => (
-            <option key={k} value={k}>
-              {k}
-            </option>
-          ))}
-        </select>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
-        >
-          Add
-        </button>
-      </form>
+      </div>
     </section>
   );
 }

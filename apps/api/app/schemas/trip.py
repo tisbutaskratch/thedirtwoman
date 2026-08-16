@@ -21,6 +21,7 @@ class TripUpdate(BaseModel):
     end_date: Optional[date] = None
     status: Optional[TripStatus] = None
     owner_vehicle: Optional[str] = Field(default=None, max_length=255)
+    owner_fuel_range_miles: Optional[float] = Field(default=None, ge=0)
 
 
 class TripRead(BaseModel):
@@ -34,5 +35,6 @@ class TripRead(BaseModel):
     end_date: Optional[date]
     status: TripStatus
     owner_vehicle: Optional[str]
+    owner_fuel_range_miles: Optional[float]
     created_at: datetime
     percent_planned: int

@@ -20,6 +20,8 @@ function makeTrip(overrides: Partial<Trip> = {}): Trip {
     start_date: null,
     end_date: null,
     status: "planning",
+    owner_vehicle: null,
+    owner_fuel_range_miles: null,
     created_at: "2026-01-01",
     percent_planned: 0,
     ...overrides,
