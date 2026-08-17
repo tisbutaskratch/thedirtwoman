@@ -138,7 +138,9 @@
   /* Content. */
   --color-content: oklch(0.95 0.005 80);
   --color-content-muted: oklch(0.68 0.011 80);
-  --color-content-subtle: oklch(0.52 0.012 80);
+  /* Was 0.52, which measured 3.6:1 on the dark surface. Small uppercase
+     labels use this token, so it needs to clear 4.5:1 too. */
+  --color-content-subtle: oklch(0.62 0.012 80);
 
   /* Accent — the 10%. */
   --color-accent: oklch(0.68 0.15 155);
@@ -269,12 +271,20 @@
 
   --color-content: oklch(0.20 0.015 70);
   --color-content-muted: oklch(0.50 0.014 70);
-  --color-content-subtle: oklch(0.62 0.012 70);
+  /* Was 0.62, which measured 3.4:1 on the cream surface. Small uppercase
+     labels use this, so it has to clear 4.5:1 like any other body text. */
+  --color-content-subtle: oklch(0.52 0.012 70);
 
-  --color-accent: oklch(0.58 0.16 155);
-  --color-accent-hover: oklch(0.50 0.17 155);
-  --color-accent-muted: oklch(0.93 0.05 155);
-  --color-on-accent: oklch(0.99 0.01 155);
+  /*
+   * Accent doubles as link text on cream and as a solid button fill, and the
+   * old value cleared neither: 3.3:1 as text on the active nav pill, 3.8:1
+   * for white on the button. Darkened until both pass 4.5:1, which costs a
+   * little vibrancy and buys legibility for everyone.
+   */
+  --color-accent: oklch(0.48 0.15 155);
+  --color-accent-hover: oklch(0.41 0.15 155);
+  --color-accent-muted: oklch(0.94 0.04 155);
+  --color-on-accent: oklch(1 0 0);
 }
 
 /* Keep the page background painted even before a theme is chosen. */

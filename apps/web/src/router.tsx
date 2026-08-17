@@ -5,6 +5,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AcceptInvite from "@/pages/AcceptInvite";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import Experience from "@/pages/Experience";
 import Dashboard from "@/pages/Dashboard";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", element: <Home /> },
       { path: "/about", element: <About /> },
+      { path: "/experience", element: <Experience /> },
       { path: "/skills", element: <Skills /> },
       { path: "/projects", element: <Projects /> },
       { path: "/contact", element: <Contact /> },

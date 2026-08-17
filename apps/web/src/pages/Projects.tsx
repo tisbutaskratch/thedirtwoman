@@ -1,39 +1,82 @@
-import { projects } from "@/lib/profile";
-import { neonAt } from "@/lib/neonPalette";
+import { Link } from "react-router-dom";
+import Critter, { type CritterName } from "@/art/critters";
+import { Badge, Card, Icon, type Tone } from "@/components/ui";
+import { projects, type Project } from "@/lib/profile";
+
+const STATUS_TONE: Record<Project["status"], Tone> = {
+  Shipped: "emerald",
+  "In flight": "amber",
+  "Side project": "violet",
+};
+
+const PROJECT_CRITTERS: CritterName[] = ["crab", "bee", "turtle", "moth", "penguin"];
 
 export default function Projects() {
   return (
-    <section className="flex flex-col gap-8">
-      <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
-      <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
+      <header className="relative">
+        <Critter
+          name="crab"
+          size={42}
+          className="absolute -top-2 right-0 hidden text-accent opacity-100 sm:block"
+        />
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Projects</h1>
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-content-muted">
+          The work I would actually want to talk through in an interview. One of these you can open
+          and click around in right now.
+        </p>
+      </header>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {projects.map((project, i) => (
-          <article
+          <Card
             key={project.title}
-            className={`rounded-lg border border-edge border-l-4 ${neonAt(i).border} p-5`}
+            className={`relative flex flex-col gap-4 ${project.href ? "lg:col-span-2" : ""}`}
           >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-lg font-semibold">{project.title}</h2>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                  project.status === "Completed"
-                    ? "bg-emerald-500/10 text-accent"
-                    : "bg-amber-500/10 text-amber-400"
-                }`}
-              >
-                {project.status}
-              </span>
+            <Critter
+              name={PROJECT_CRITTERS[i % PROJECT_CRITTERS.length]}
+              size={28}
+              className="absolute right-4 top-4 text-accent opacity-100"
+            />
+
+            <div className="pr-10">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-lg font-semibold text-content">{project.title}</h2>
+                <Badge tone={STATUS_TONE[project.status]}>{project.status}</Badge>
+              </div>
+              <p className="mt-0.5 text-sm text-content-subtle">
+                {project.role} · {project.period}
+              </p>
             </div>
-            <p className="mt-1 text-sm text-content-subtle">{project.role}</p>
-            <p className="mt-3 text-content-muted">{project.description}</p>
+
+            <p className="text-sm leading-relaxed text-content-muted">{project.description}</p>
+
             {project.outcome && (
-              <p className="mt-3 text-sm text-content-muted">
-                <span className="font-medium text-content-muted">Outcome: </span>
+              <p className="border-l-2 border-accent/50 pl-3 text-sm italic leading-relaxed text-content-subtle">
                 {project.outcome}
               </p>
             )}
-          </article>
+
+            <div className="flex flex-wrap gap-1.5">
+              {project.tags.map((tag) => (
+                <Badge key={tag} tone="cyan">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
+            {project.href && (
+              <Link
+                to={project.href}
+                className="inline-flex w-fit items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
+              >
+                <Icon name="share" size={15} />
+                {project.linkLabel}
+              </Link>
+            )}
+          </Card>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

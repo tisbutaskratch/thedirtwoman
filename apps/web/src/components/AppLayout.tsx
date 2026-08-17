@@ -2,11 +2,13 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import SupportFooter from "@/components/SupportFooter";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Emoji } from "@/components/ui";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  useDocumentTitle("Adventure Planner");
 
   function handleLogout() {
     logout();

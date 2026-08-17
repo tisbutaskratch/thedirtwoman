@@ -48,7 +48,14 @@ export type CritterName =
   | "frog"
   | "raccoon"
   | "squirrel"
-  | "hamster";
+  | "hamster"
+  // Residents of the personal site
+  | "otter"
+  | "koala"
+  | "deer"
+  | "crab"
+  | "dragonfly"
+  | "puffin";
 
 interface CritterProps {
   size?: number;
@@ -602,6 +609,133 @@ export function Raccoon({ size, className }: CritterProps) {
   );
 }
 
+/* ------------------------------------------- personal-site residents --- */
+
+/** Otter: floating on its back, entirely content. */
+export function Otter({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* the water it's lying in */}
+      <path d="M1 26 Q6 23.5 11 26 T21 26 T31 26" stroke="currentColor" strokeWidth="1.3" opacity="0.5" />
+      {/* body, floating */}
+      <path d="M6 24 Q5 16 15 16 Q25 16 24 24 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* head at the near end */}
+      <circle cx="24" cy="14" r="5.5" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      <circle cx="21.5" cy="10.5" r="2" stroke="currentColor" strokeWidth="1.2" />
+      <circle cx="27" cy="10.5" r="2" stroke="currentColor" strokeWidth="1.2" />
+      <circle cx="22.3" cy="13.5" r="1.1" fill="currentColor" />
+      <circle cx="26" cy="13.5" r="1.1" fill="currentColor" />
+      <path d="M24.2 16 L24.2 17" stroke="currentColor" strokeWidth="1.3" />
+      {/* paws folded on its chest */}
+      <path d="M16 17 L19 20 M20 17 L17.5 20" stroke="currentColor" strokeWidth="1.4" />
+      {/* tail trailing off */}
+      <path d="M6 21 Q0 20 1 15" stroke="currentColor" strokeWidth="2" />
+    </Body>
+  );
+}
+
+/** Koala: clinging to a branch, unhurried. */
+export function Koala({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* branch */}
+      <path d="M1 24 L31 24" stroke="currentColor" strokeWidth="2.2" />
+      {/* fluffy ears */}
+      <circle cx="7.5" cy="10" r="5" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={0.28} />
+      <circle cx="24.5" cy="10" r="5" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={0.28} />
+      {/* head */}
+      <circle cx="16" cy="13" r="8" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      <Eyes cx={16} cy={12} spread={3.6} r={1.3} />
+      {/* the nose, which is the whole koala */}
+      <ellipse cx="16" cy="16" rx="2.6" ry="3.4" fill="currentColor" fillOpacity={0.75} stroke="currentColor" strokeWidth="1.1" />
+      {/* arms over the branch */}
+      <path d="M9 20 L7 24 M23 20 L25 24" stroke="currentColor" strokeWidth={OUTLINE} />
+      <path d="M5 24 L9 24 M23 24 L27 24" stroke="currentColor" strokeWidth="1.5" />
+    </Body>
+  );
+}
+
+/** Deer: alert, mid-step, antlers up. */
+export function Deer({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* antlers */}
+      <path d="M11 9 L9 3 M11 6 L7.5 5 M21 9 L23 3 M21 6 L24.5 5" stroke="currentColor" strokeWidth="1.4" />
+      {/* ears */}
+      <ellipse cx="8" cy="12" rx="3" ry="2" transform="rotate(-25 8 12)" stroke="currentColor" strokeWidth="1.3" fill="currentColor" fillOpacity={0.25} />
+      <ellipse cx="24" cy="12" rx="3" ry="2" transform="rotate(25 24 12)" stroke="currentColor" strokeWidth="1.3" fill="currentColor" fillOpacity={0.25} />
+      {/* head, long and narrow */}
+      <path d="M12 11 Q16 9 20 11 L18.5 21 Q16 23 13.5 21 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      <circle cx="13.6" cy="14.5" r="1.3" fill="currentColor" />
+      <circle cx="18.4" cy="14.5" r="1.3" fill="currentColor" />
+      <ellipse cx="16" cy="21" rx="2" ry="1.4" fill="currentColor" fillOpacity={0.7} stroke="currentColor" strokeWidth="1" />
+      {/* a suggestion of neck */}
+      <path d="M13.5 23 L13 28 M18.5 23 L19 28" stroke="currentColor" strokeWidth="1.4" />
+    </Body>
+  );
+}
+
+/** Crab: sideways, claws up, spoiling for something. */
+export function Crab({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      <path d="M5 21 Q5 13 16 13 Q27 13 27 21 Q16 25 5 21 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* eyes on stalks */}
+      <path d="M12 13 L11 7 M20 13 L21 7" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="10.8" cy="6" r="1.6" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.4} />
+      <circle cx="21.2" cy="6" r="1.6" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.4} />
+      {/* claws */}
+      <path d="M5 17 L1 13 L4 11" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M27 17 L31 13 L28 11" stroke="currentColor" strokeWidth="1.5" />
+      {/* legs */}
+      <path d="M8 22 L5 27 M13 24 L11 29 M19 24 L21 29 M24 22 L27 27" stroke="currentColor" strokeWidth="1.3" />
+      {/* a small unimpressed mouth */}
+      <path d="M13.5 19 L18.5 19" stroke="currentColor" strokeWidth="1.2" />
+    </Body>
+  );
+}
+
+/** Dragonfly: four wings, hovering. */
+export function Dragonfly({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* wings */}
+      <ellipse cx="8" cy="11" rx="7" ry="2.6" transform="rotate(-18 8 11)" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.12} />
+      <ellipse cx="24" cy="11" rx="7" ry="2.6" transform="rotate(18 24 11)" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.12} />
+      <ellipse cx="9" cy="17" rx="6" ry="2.2" transform="rotate(12 9 17)" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.12} />
+      <ellipse cx="23" cy="17" rx="6" ry="2.2" transform="rotate(-12 23 17)" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.12} />
+      {/* head */}
+      <circle cx="16" cy="8" r="3.4" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      <circle cx="14.6" cy="7.4" r="1" fill="currentColor" />
+      <circle cx="17.4" cy="7.4" r="1" fill="currentColor" />
+      {/* segmented tail */}
+      <path d="M16 11.5 L16 27" stroke="currentColor" strokeWidth="2.4" />
+      <path d="M13.8 16 L18.2 16 M13.8 20 L18.2 20 M14.2 24 L17.8 24" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+    </Body>
+  );
+}
+
+/** Puffin: formal, faintly ridiculous, entirely serious about it. */
+export function Puffin({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      <path d="M7 26 Q6 9 16 9 Q26 9 25 26 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* pale front */}
+      <path d="M11 25 Q10 14 16 14 Q22 14 21 25 Z" stroke="currentColor" strokeWidth="1.2" />
+      {/* face patches */}
+      <circle cx="12.5" cy="14" r="2.6" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.1} />
+      <circle cx="19.5" cy="14" r="2.6" stroke="currentColor" strokeWidth="1.2" fill="currentColor" fillOpacity={0.1} />
+      <circle cx="12.5" cy="14" r="1.1" fill="currentColor" />
+      <circle cx="19.5" cy="14" r="1.1" fill="currentColor" />
+      {/* the beak, striped */}
+      <path d="M13 18 Q16 22.5 19 18 Q16 16.5 13 18 Z" stroke="currentColor" strokeWidth="1.3" fill="currentColor" fillOpacity={0.45} />
+      <path d="M15 17.6 L15.6 20.8 M17 17.6 L16.6 20.8" stroke="currentColor" strokeWidth="0.9" opacity="0.7" />
+      {/* feet */}
+      <path d="M12 26 Q10 29 14 29 M20 26 Q22 29 18 29" stroke="currentColor" strokeWidth="1.3" />
+    </Body>
+  );
+}
+
 export const CRITTERS: Record<CritterName, (p: CritterProps) => JSX.Element> = {
   sprout: Sprout,
   shelly: Shelly,
@@ -628,6 +762,12 @@ export const CRITTERS: Record<CritterName, (p: CritterProps) => JSX.Element> = {
   raccoon: Raccoon,
   squirrel: Squirrel,
   hamster: Hamster,
+  otter: Otter,
+  koala: Koala,
+  deer: Deer,
+  crab: Crab,
+  dragonfly: Dragonfly,
+  puffin: Puffin,
 };
 
 /**

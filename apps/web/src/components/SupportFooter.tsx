@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Critter from "@/art/critters";
 import { Icon } from "@/components/ui";
 import { AUTHOR, CREATED, DONATION_URL, FEEDBACK_URL, SHARE_TEXT } from "@/lib/support";
@@ -106,8 +107,14 @@ export default function SupportFooter() {
           </div>
         </div>
 
+        {/* The byline is also the way back to the resume: someone who finds
+            the app first should be able to find out who wrote it. */}
         <p className="shrink-0 text-xs text-content-subtle">
-          Built by {AUTHOR} · {CREATED}
+          Built by{" "}
+          <Link to="/" className="font-medium text-content-muted underline-offset-4 hover:text-accent hover:underline">
+            {AUTHOR}
+          </Link>{" "}
+          · {CREATED}
         </p>
       </div>
     </footer>

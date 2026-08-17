@@ -1,100 +1,506 @@
-// Mock content for Phase 2 (personal site). Swap for real content later.
+/*
+ * Real content for the personal site.
+ *
+ * Sourced from the 2025-2026 work retrospective and the three resume
+ * variants. Two things this data deliberately gets right that the PDFs
+ * don't, because the PDFs are stale:
+ *
+ *  1. The current role is Software Engineer, not Engineering Manager. The
+ *     management chapter is history, and it ended by choice.
+ *  2. Numbers are the ones with a source behind them. Nothing here is
+ *     rounded up for effect.
+ */
 
 export const profile = {
-  name: "Samwise Gamgee",
-  title: "Gardener · Ring-bearer's Companion · Ninth Walker",
-  tagline: "I grow things, carry heavy loads, and finish what I start.",
-  location: "Bag End, Hobbiton, The Shire",
+  name: "Saba Wilhelm",
+  // Jira and GitLab still carry the maiden name; worth being findable under both.
+  alsoKnownAs: "Saba Dasadawala",
+  title: "Software Engineer",
+  tagline: "I went back to building on purpose.",
+  location: "Kansas City, MO · Remote",
+  summary:
+    "I thrive on turning ideas into live products, driving the whole software development lifecycle from conception through planning, coding, releasing, and maintaining. Today that means owning carrier integrations and label generation on Loop Returns' shipping and logistics team. I spent two and a half years as an engineering manager and chose to come back to building, and I brought the manager's view of scope, risk, and stakeholders with me.",
 };
+
+/** The one-liner a recruiter should leave with. */
+export const positioning =
+  "Ten years building production software, two and a half of them managing engineers, now deliberately hands-on again. Architecture-first, ships in small reversible slices, and owns what breaks.";
 
 export const about = {
   paragraphs: [
-    "I'm a gardener by trade, first for old Mr. Bilbo Baggins and then for Mr. Frodo, and I like to think I know a thing or two about coaxing something good out of stubborn ground.",
-    "A while back I got talked into a rather longer walk than I'd planned: out of the Shire, through Moria, over the mountains, and eventually up a very unpleasant hill in Mordor. I carried what needed carrying, cooked what needed cooking, and made sure Mr. Frodo got where he was going, even the last bit when I had to carry him too.",
-    "These days I'm back to gardening, mostly. Replanted the Party Tree, brought the Shire back after the Troubles, that sort of thing. I also serve as Mayor, which mostly means I'm good at listening to complaints and handing out potatoes.",
-    "I keep good notes. I finish what I start. And I've found that most problems get smaller once you've had a proper breakfast.",
+    "I build backend systems for returns and logistics at Loop Returns. My team owns carrier integrations, label generation, and the shipping half of a return: the unglamorous machinery that decides how a package gets from a shopper's door back to a warehouse.",
+    "I started at Cerner in 2016 on healthcare software, where the stakes made me careful in a way I've never lost. Nursing workflows, infusion pump interfaces, medication charting. Code that a bad day makes somebody else's bad day.",
+    "I joined Loop as an engineer, became a tech lead, and then spent two and a half years as an engineering manager running teams across three product areas. I was good at it. I ran hackathons, built a mentorship program that got four junior engineers promoted early, and kept a product area at 99.99% uptime.",
+    "Then I went back to being an engineer, on purpose. What I want to be doing day to day is the work itself: the depth of a hard problem, and the satisfaction of a design that still holds up a year later. Management is a genuinely different job that happens to sit near code, and I wanted to be closer to the building.",
+    "It turned out to be the right call. Since coming back I have owned the architecture on a customer-facing feature end to end and led a platform migration across three legacy integrations, which is exactly the work I wanted. The management years did not go to waste either: I scope, sequence, and communicate like someone who has had to answer for a roadmap.",
+    "I write design docs before code, ship behind flags and then delete the flags, and write down the alternatives I rejected so the next person knows why. I carry the support load for what I build. When a bug turns out not to be mine, I prove it and hand it over cleanly rather than guessing.",
   ],
 };
 
+/* -------------------------------------------------- experience --------- */
+
+export interface Role {
+  title: string;
+  company: string;
+  location: string;
+  start: string;
+  end: string;
+  /** Present roles get highlighted rather than sorted differently. */
+  current?: boolean;
+  summary: string;
+  highlights: string[];
+  /** The shape of the work, for scanning. */
+  tags: string[];
+}
+
+export const roles: Role[] = [
+  {
+    title: "Software Engineer",
+    company: "Loop Returns",
+    location: "Remote · Kansas City, MO",
+    start: "Mar 2025",
+    end: "Present",
+    current: true,
+    summary:
+      "Shipping and logistics: carrier integrations, label generation, and the shipping side of returns. Architecture ownership on a customer-facing feature and a platform migration, carried alongside the support rotation for everything I ship.",
+    highlights: [
+      "Designed and built Carrier Choice, letting EU and UK shoppers pick their own return carrier. Wrote the provider-agnostic interface a year before the build started; it survived a PRD, a formal spec, and implementation without changing shape.",
+      "Built it as a four-layer domain module shipped one layer per merge request, with observability split into three separately releasable changes so a metrics bug could never be mistaken for a behaviour regression.",
+      "Led the Nucleus to Synks migration, consolidating three legacy 3PL and warehouse integrations off an aging Node layer. Authored the execution plan, sequenced by risk rather than size, and went on site to pair with the platform's original author.",
+      "Designed a Strategy-pattern destination rules engine, then argued that shipping shouldn't own destinations at all. Took the pushback, made the case, and handed the domain to the team it belonged to.",
+      "Root-caused a partner bug clawing back real customer money, tracing it to a redundant API call that had been latent since 2021. Separately proved a similar-looking bug was not ours and handed the other team an unambiguous, actionable investigation.",
+      "Remediated roughly 37,800 shipping labels in one campaign, reworked into batched, rate-limit-aware jobs with a status doc so stakeholders could follow along without asking.",
+      "Ran the release train end to end and led a carrier incident through investigation, comms, and a completed root-cause analysis.",
+    ],
+    tags: ["PHP / Laravel", "Domain-driven design", "Carrier APIs", "Architecture", "Incident response"],
+  },
+  {
+    title: "Engineering Manager",
+    company: "Loop Returns",
+    location: "Remote · Kansas City, MO",
+    start: "Oct 2022",
+    end: "Feb 2025",
+    summary:
+      "Led cross-functional teams across three product areas: shopper portal, point of sale, and the merchant administration platform.",
+    highlights: [
+      "Took Loop into physical retail with an in-store iPad returns app, adding 82,000 returns and reaching 197 merchants.",
+      "Cut bug tickets on the Exchanges feature by 80% by paying down technical debt and fixing the onboarding path rather than triaging symptoms.",
+      "Held the product area at 99.99% uptime.",
+      "Scored highest in engineering on employee experience surveys, with a 100% team engagement rating.",
+      "Ran bi-annual hackathons at 95% engineering participation: 22 prototypes in 2024, 16 of which shipped as real features.",
+      "Built a mentorship program pairing engineers for onboarding and career growth; four junior engineers earned accelerated promotions.",
+      "Championed the Women in Engineering and Women at Loop employee resource groups, taking the case for career growth directly to executive leadership.",
+    ],
+    tags: ["Team leadership", "Roadmap planning", "Mentorship", "Stakeholder management"],
+  },
+  {
+    title: "Software Engineer, Tech Lead",
+    company: "Loop Returns",
+    location: "Remote · Kansas City, MO",
+    start: "Nov 2021",
+    end: "Oct 2022",
+    summary:
+      "Technical lead for Loop's point of sale iOS application, from architecture through release process.",
+    highlights: [
+      "Led development of the POS iOS app, owning the architectural decisions and setting the coding standards.",
+      "Introduced design patterns, CI/CD pipelines, versioning, and testing principles to a codebase that had none.",
+      "Built observability for scale: Datadog log dashboards, Hex dashboards for business metrics, and real-user-monitoring for platform performance.",
+      "Replaced manual client-success setup with automated merchant onboarding.",
+      "Built internal tooling: an automated release bot, an in-house feature flag interface, and a configurable account type UI for plan changes.",
+      "Automated the finance team's billing with a Lambda that reads return volumes, calculates what's owed, and files it to the billing platform for monthly invoicing.",
+    ],
+    tags: ["iOS", "CI/CD", "Observability", "Internal tooling"],
+  },
+  {
+    title: "Software Engineer",
+    company: "Cerner Corporation (Oracle Health)",
+    location: "Kansas City, MO",
+    start: "Jan 2016",
+    end: "Nov 2021",
+    summary:
+      "Six years on clinical software: nursing applications, medication workflows, and device interfaces where correctness is not negotiable.",
+    highlights: [
+      "Drove unit test coverage to 100% across roughly 150 files, each over 2,000 lines.",
+      "Owned high-visibility work on the infusion pump interface.",
+      "Subject matter expert for badge scanning, workflow auditing, code caching to cut database reads, and medication charting.",
+      "Migrated a native Android application to React for cross-platform reach.",
+      "Built insurance claims, encounter modification, and medication transaction functionality on Java microservices with an Android front end.",
+      "Mentored new associates through code review, development practices, and the release process.",
+    ],
+    tags: ["Java", "Android", "React", "Microservices", "Healthcare"],
+  },
+];
+
+/* -------------------------------------------------- skills ------------- */
+
 export interface SkillGroup {
   category: string;
+  glyph: string;
   items: string[];
 }
 
 export const skills: SkillGroup[] = [
   {
-    category: "Core Skills",
+    category: "Languages",
+    glyph: "⌨️",
     items: [
-      "Gardening & Horticulture",
-      "Cooking & Provisioning",
-      "Wilderness Navigation",
-      "Loyalty Under Pressure",
-      "Load-Bearing (literal)",
+      "PHP",
+      "TypeScript",
+      "JavaScript",
+      "Python",
+      "Java",
+      "Swift / iOS",
+      "SQL",
+      "HTML",
+      "CSS",
     ],
   },
   {
-    category: "Tools",
-    items: ["Trowel", "Cooking Pot", "Sting (borrowed)", "Elven Rope", "Mithril Vest (borrowed)"],
+    category: "Frameworks",
+    glyph: "🧱",
+    items: [
+      "Laravel",
+      "React 19",
+      "Vue.js",
+      "Node.js",
+      "React Native",
+      "FastAPI",
+      "Pydantic",
+      "SQLAlchemy",
+      "Tailwind CSS",
+      "Vite",
+      "Shopify",
+    ],
   },
   {
-    category: "Languages",
-    items: ["Westron (native)", "Sindarin (conversational)", "Entish (listening only)"],
+    category: "Architecture",
+    glyph: "📐",
+    items: [
+      "Domain-driven design",
+      "Event-driven systems",
+      "Strategy & factory patterns",
+      "Capability interfaces",
+      "Feature-flag lifecycle",
+    ],
   },
   {
-    category: "Leadership",
-    items: ["Mayor of the Shire (7 terms)", "Deputy Ring-bearer", "Master of Bag End"],
+    category: "Data",
+    glyph: "🗄️",
+    items: [
+      "MySQL",
+      "PostgreSQL",
+      "MongoDB",
+      "DynamoDB",
+      "Alembic migrations",
+      "Schema design",
+      "Snowflake-adjacent analytics contracts",
+    ],
+  },
+  {
+    category: "Platform",
+    glyph: "☁️",
+    items: [
+      "AWS Lambda",
+      "Docker",
+      "GitHub Actions",
+      "GitLab CI",
+      "Gradle",
+      "Maven",
+      "Feature flags",
+      "Release management",
+    ],
+  },
+  {
+    category: "Observability",
+    glyph: "📊",
+    items: ["Datadog", "Segment", "CloudWatch", "Hex", "Real-user monitoring"],
+  },
+  {
+    category: "Testing & quality",
+    glyph: "🧪",
+    items: [
+      "PHPUnit",
+      "Pytest",
+      "Vitest",
+      "JUnit",
+      "Mockito",
+      "Jest",
+      "WebdriverIO",
+      "PHPStan",
+      "Ruff",
+      "ESLint",
+      "Postman",
+    ],
+  },
+  {
+    category: "Craft",
+    glyph: "🛠️",
+    items: [
+      "Design docs and ADRs",
+      "Incident response and RCA",
+      "Code review at depth",
+      "Mentorship",
+      "WCAG contrast",
+      "Accessible components",
+    ],
+  },
+  {
+    category: "Integrations",
+    glyph: "🔌",
+    items: ["EasyPost", "Sendcloud", "UPS", "InPost", "Salesforce", "3PL / WMS platforms"],
   },
 ];
+
+/* -------------------------------------------------- projects ----------- */
 
 export interface Project {
   title: string;
   role: string;
-  status: "Completed" | "Ongoing";
+  period: string;
+  status: "Shipped" | "In flight" | "Side project";
   description: string;
   outcome?: string;
+  /** Set for the project you can actually go and use. */
+  href?: string;
+  linkLabel?: string;
+  tags: string[];
 }
 
 export const projects: Project[] = [
   {
-    title: "Fellowship of the Ring",
-    role: "Logistics & Support",
-    status: "Completed",
+    title: "Adventure Planner",
+    role: "Solo, design through deploy",
+    period: "2026",
+    status: "Side project",
     description:
-      "Escorted the Ring-bearer from the Shire to Rivendell and beyond, handling provisions, camp setup, and morale.",
-    outcome: "Fellowship formed; journey continued south.",
+      "A trip planner for motocamping, camping, overlanding, backpacking, and travel. Each trip type asks the questions that discipline actually needs: tank range and fuel stops for a motorcycle, water carry against the longest dry stretch for a thru-hike, seat reservations versus rail passes for a train. Editor and viewer roles enforced server side, a private per-trip journal, print-to-PDF export, and a cast of hand-drawn critters hiding in the margins. This portfolio site is the same codebase and the same design system.",
+    outcome:
+      "Live and usable. The same instincts as the day job: domain modules, hand-reviewed migrations smoke-tested up and down, features behind flags, and accessibility checked by measurement rather than by eye.",
+    href: "/app/dashboard",
+    linkLabel: "Open the app",
+    tags: [
+      "React 19",
+      "TypeScript",
+      "Vite",
+      "Tailwind v4",
+      "React Router",
+      "FastAPI",
+      "SQLAlchemy 2.0",
+      "Alembic",
+      "Pydantic",
+      "PostgreSQL",
+      "JWT auth",
+      "Vitest",
+      "Pytest",
+      "Docker",
+    ],
   },
   {
-    title: "Destruction of the One Ring",
-    role: "Co-lead, Final Ascent",
-    status: "Completed",
+    title: "Carrier Choice",
+    role: "Architect and lead engineer",
+    period: "2025 - 2026",
+    status: "Shipped",
     description:
-      "Co-led the final push up Mount Doom. Carried Mr. Frodo the last stretch when he couldn't walk any further.",
-    outcome: "The Ring was destroyed. Sauron defeated.",
+      "Let EU and UK shoppers choose their own return carrier instead of having one picked for them. A provider-agnostic domain interface designed a full year before the build, then formalised into a four-layer module shipped one layer at a time.",
+    outcome:
+      "Unblocked merchant launches that had been waiting on it. The original interface never needed to change.",
+    tags: ["Domain-driven design", "Sendcloud", "InPost", "Observability"],
   },
   {
-    title: "Restoration of the Shire",
-    role: "Lead Gardener",
-    status: "Completed",
+    title: "Nucleus to Synks Migration",
+    role: "Execution plan author and migrating engineer",
+    period: "2025 - present",
+    status: "In flight",
     description:
-      "Replanted the Party Tree and restored the Shire after the Troubles, using a gift of soil and a mallorn seed from the Lady Galadriel.",
-    outcome: "1420 became the most remarkable year for produce on record.",
+      "Consolidating three legacy 3PL and warehouse integrations off an aging Node integration layer onto a newer platform. Sequenced by risk rather than size, piloting on the lowest-variance integration first, and fixing known debt during the move instead of relocating it.",
+    outcome:
+      "Became the person who documents and standardises a system I did not previously own.",
+    tags: ["Migration", "SOAP / REST / GraphQL", "Integration platforms"],
   },
   {
-    title: "The Red Book of Westmarch",
-    role: "Author / Editor",
-    status: "Ongoing",
-    description: "Completing Bilbo and Frodo's memoirs, with my own account added at the end.",
+    title: "Native Label Customizations",
+    role: "Architect and lead engineer",
+    period: "2025 - present",
+    status: "In flight",
+    description:
+      "Replacing per-carrier hardcoded label fields with a provider-agnostic customization model. Ran a discovery and audit phase before writing any schema, and published a written library assessment with a reproducible test harness before committing to a build.",
+    outcome:
+      "Required a formal security review before adopting any third-party label library, and self-hosting rather than a hosted renderer, because these labels carry customer data.",
+    tags: ["Schema design", "Security review", "ZPL", "Capability framework"],
+  },
+  {
+    title: "In-Store Returns iPad App",
+    role: "Engineering manager",
+    period: "2022 - 2024",
+    status: "Shipped",
+    description:
+      "Took Loop from online-only into physical retail with a point-of-sale returns application for in-store staff.",
+    outcome: "82,000 additional returns processed, across 197 merchants.",
+    tags: ["iOS", "Point of sale", "Retail"],
   },
 ];
+
+/* -------------------------------------------------- competencies ------- */
+
+export interface Competency {
+  name: string;
+  glyph: string;
+  /** What the bar actually means, in plain terms. */
+  meaning: string;
+  /** Concrete things that happened, not adjectives. */
+  evidence: string[];
+}
+
+/**
+ * The senior / staff / tech-lead case, made with evidence instead of
+ * adjectives. Each row is a competency, what it means, and what actually
+ * happened.
+ *
+ * Deliberately no performance-review ratings or manager quotes: those come
+ * out of private HR documents, and citing your own review on a public page
+ * reads as boasting even when it's true. The work stands on its own.
+ */
+export const competencies: Competency[] = [
+  {
+    name: "System design ownership",
+    glyph: "📐",
+    meaning: "Owning the architecture of a real slice of the system, not just the tickets inside it.",
+    evidence: [
+      "Designed the Carrier Choice interface a full year before the build, and it never needed to change through a PRD, a formal spec, and implementation.",
+      "Owns two domain modules end to end, each built layer by layer with boundaries the tooling enforces rather than boundaries people are asked to respect.",
+      "Caught an architectural violation mid-build and fixed the foundation before building on top of it, instead of working around it.",
+    ],
+  },
+  {
+    name: "Turning ambiguity into a plan",
+    glyph: "🧭",
+    meaning: "Taking a vague problem and producing a sequenced, de-risked plan instead of waiting to be told the shape.",
+    evidence: [
+      "Ran a discovery and audit phase before writing any schema for label customizations, and published a written library assessment with a reproducible test harness first.",
+      "Authored a full migration execution plan for a platform I did not own: abstract, risks, named tech debt, three phases, and a timeline.",
+      "Root-caused why a cancelled feature had failed, then came back a year later with a different design that shipped.",
+    ],
+  },
+  {
+    name: "Documented technical judgment",
+    glyph: "⚖️",
+    meaning: "Making real tradeoffs and writing down the options you rejected, so the next person inherits the reasoning.",
+    evidence: [
+      "Weighed a decorator seam against caller orchestration and recorded why both were wrong for the situation, rather than silently picking one.",
+      "Required a security review before adopting a third-party label library, and insisted on self-hosting because those labels can carry customer data.",
+      "Kept the design docs from a cancelled attempt on record so the successor explicitly supersedes them.",
+    ],
+  },
+  {
+    name: "Influence across team boundaries",
+    glyph: "🤝",
+    meaning: "Changing what another team believes it owns, with an argument rather than authority.",
+    evidence: [
+      "Argued that shipping should not own destination routing at all, absorbed live pushback, made the counter-case, and got the room to commit to a decision.",
+      "Followed it through to an actual handoff with a technical design and a recorded walkthrough, not just a meeting that went well.",
+      "Posted schema changes to other teams before merging and explicitly invited objections while the change was still cheap.",
+    ],
+  },
+  {
+    name: "Operational ownership",
+    glyph: "🚨",
+    meaning: "Owning what happens when the thing you built breaks at 2am, not just whether it shipped.",
+    evidence: [
+      "Roughly a quarter of hands-on ticket load is support for my own domain, and it spikes right after my own launches because I pick it up.",
+      "Ran the release train end to end: monitoring, coordinating merges, working pipeline failures with infra, clean handoff.",
+      "Led a carrier incident through investigation, stakeholder comms, and a completed root-cause analysis before closing it out.",
+    ],
+  },
+  {
+    name: "Decomposition at scale",
+    glyph: "🧩",
+    meaning: "Breaking a multi-month initiative into shippable, individually reversible pieces.",
+    evidence: [
+      "A feature shipped as seven independently mergeable, flag-gated slices, with one throwaway draft used purely to preview the whole stack first.",
+      "Observability split into three changes that each ship on their own.",
+      "Feature flags added, verified in production, then deleted in a dedicated follow-up so they never rot into permanent complexity.",
+    ],
+  },
+  {
+    name: "Multiplying other engineers",
+    glyph: "🌱",
+    meaning: "Raising the bar for people who are not you: review depth, tooling, standards others adopt.",
+    evidence: [
+      "Four times the team's review volume in a quarter, with more than double the comments.",
+      "Proposed a dry-run-first standard for any script touching production data, built the templates, and engineers on other teams used them.",
+      "Built self-serve internal tooling that took engineering out of a recurring support loop entirely, then followed up to confirm it was actually used.",
+      "As a manager, built the mentorship program that got four junior engineers promoted early.",
+    ],
+  },
+  {
+    name: "Written communication",
+    glyph: "📝",
+    meaning: "Documents that let someone else pick the work up without booking a meeting.",
+    evidence: [
+      "Three design documents across one project's life, each tighter than the last as ambiguity resolved.",
+      "Formal design and decision records attached to every sub-ticket of a cross-cutting initiative.",
+      "A written handoff doc, branch and commits and reviewer status included, for a teammate taking over mid-stream.",
+    ],
+  },
+];
+
+/* -------------------------------------------------- numbers ------------ */
+
+export interface Stat {
+  label: string;
+  value: string;
+  hint?: string;
+}
+
+/** Only numbers with a real source behind them. */
+export const stats: Stat[] = [
+  { label: "Years building", value: "10+", hint: "Healthcare, then commerce" },
+  { label: "Code reviews", value: "4x", hint: "Team average, most recent quarter" },
+  { label: "Labels remediated", value: "37.8k", hint: "Single campaign" },
+  { label: "Uptime held", value: "99.99%", hint: "As engineering manager" },
+];
+
+/* -------------------------------------------------- contact ------------ */
 
 export interface ContactLink {
   label: string;
   value: string;
   href: string;
+  icon: "feedback" | "share" | "address" | "phone";
+  external?: boolean;
 }
 
 export const contactLinks: ContactLink[] = [
-  { label: "Email", value: "samwise@bagend.shire", href: "mailto:samwise@bagend.shire" },
-  { label: "GitHub", value: "github.com/samwise-gamgee", href: "https://github.com/samwise-gamgee" },
-  { label: "Location", value: "Bag End, Hobbiton, The Shire", href: "#" },
+  {
+    label: "Email",
+    value: "sabacareer@proton.me",
+    href: "mailto:sabacareer@proton.me",
+    icon: "feedback",
+  },
+  {
+    label: "LinkedIn",
+    value: "linkedin.com/in/sabawilhelm",
+    href: "https://www.linkedin.com/in/sabawilhelm",
+    icon: "share",
+    external: true,
+  },
+  {
+    label: "Phone",
+    value: "816-514-1816",
+    href: "tel:+18165141816",
+    icon: "phone",
+  },
+  {
+    label: "Location",
+    value: "Kansas City, MO · Remote",
+    href: "#",
+    icon: "address",
+  },
 ];
+
+export const education = {
+  degree: "Master of Science, Computer Science",
+  school: "Illinois Institute of Technology",
+  location: "Chicago, Illinois",
+  year: "2015",
+};
