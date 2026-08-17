@@ -14,6 +14,7 @@ class GearCreate(BaseModel):
     packed: bool = False
     required_level: GearRequiredLevel = GearRequiredLevel.required
     assigned_to_user_id: Optional[int] = None
+    assigned_to_all: bool = False
     notes: Optional[str] = None
 
 
@@ -24,6 +25,7 @@ class GearUpdate(BaseModel):
     packed: Optional[bool] = None
     required_level: Optional[GearRequiredLevel] = None
     assigned_to_user_id: Optional[int] = None
+    assigned_to_all: Optional[bool] = None
     notes: Optional[str] = None
 
 
@@ -38,4 +40,5 @@ class GearRead(BaseModel):
     packed: bool
     required_level: GearRequiredLevel
     assigned_to_user_id: Optional[int]
+    assigned_to_all: bool
     notes: Optional[str]

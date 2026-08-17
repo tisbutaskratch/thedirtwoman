@@ -90,14 +90,12 @@ export default function InternationalPanel({
 
   return (
     <Section
-      icon="✈️"
+      glyph="✈️"
       title="Documents & logistics"
       tone="fuchsia"
       actions={
         !editing && (
-          <IconButton onClick={() => setEditing(true)} title="Edit travel documents">
-            ✎
-          </IconButton>
+          <IconButton onClick={() => setEditing(true)} title="Edit travel documents" icon="edit" />
         )
       }
     >
@@ -107,9 +105,7 @@ export default function InternationalPanel({
           className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
         >
           <div className="flex justify-end">
-            <IconButton onClick={() => setEditing(false)} title="Cancel">
-              ×
-            </IconButton>
+            <IconButton onClick={() => setEditing(false)} title="Cancel" icon="close" />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Passport expiry">
@@ -211,9 +207,7 @@ export default function InternationalPanel({
             </Field>
           </div>
           <div className="flex justify-end">
-            <IconButton type="submit" title="Save" variant="confirm" disabled={saving}>
-              ✓
-            </IconButton>
+            <IconButton type="submit" title="Save" variant="confirm" disabled={saving} icon="confirm" />
           </div>
         </form>
       ) : (
@@ -228,7 +222,7 @@ export default function InternationalPanel({
             />
             <StatTile
               label="Passport margin"
-              value={margin !== null ? margin : "—"}
+              value={margin}
               unit={margin !== null ? "days" : undefined}
               hint={
                 detail.passport_valid_for_trip === null
@@ -251,14 +245,14 @@ export default function InternationalPanel({
               value={
                 detail.destination_currencies?.length
                   ? detail.destination_currencies.join(" · ")
-                  : "—"
+                  : null
               }
               hint={detail.home_currency ? `from ${detail.home_currency}` : "Set home currency"}
               tone="violet"
             />
             <StatTile
               label="Timezone"
-              value={detail.primary_timezone?.split("/").pop()?.replace("_", " ") ?? "—"}
+              value={detail.primary_timezone?.split("/").pop()?.replace("_", " ") ?? null}
               hint={detail.primary_timezone ?? "Not set"}
               tone="sky"
             />

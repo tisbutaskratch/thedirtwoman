@@ -1,4 +1,9 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import Critter, { critterFor } from "@/art/critters";
+import { Emoji, Icon, type IconName } from "@/components/ui/icons";
+
+export { Emoji, Icon } from "@/components/ui/icons";
+export type { IconName } from "@/components/ui/icons";
 
 /*
  * Shared UI primitives.
@@ -63,27 +68,33 @@ export function Card({
   );
 }
 
-/** Section heading with an emoji glyph, optional count, and an action slot. */
+/** Section heading with a decorative glyph, optional count, and action slot. */
 export function SectionHeader({
-  icon,
+  glyph,
   title,
   count,
+  meta,
   tone = "emerald",
   actions,
 }: {
-  icon: string;
+  glyph: string;
   title: string;
   count?: number;
+  /**
+   * A small derived fact that belongs to the heading rather than the body —
+   * total pack weight, tasks left. Deliberately quiet: it is context, not a
+   * metric worth its own card.
+   */
+  meta?: ReactNode;
   tone?: Tone;
   actions?: ReactNode;
 }) {
   return (
     <div className="flex items-center gap-2">
       <span
-        aria-hidden
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-base ${TONE_SOFT[tone]}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${TONE_SOFT[tone]}`}
       >
-        {icon}
+        <Emoji glyph={glyph} size="md" />
       </span>
       <h2 className="text-lg font-semibold tracking-tight text-content">{title}</h2>
       {count !== undefined && count > 0 && (
@@ -91,29 +102,42 @@ export function SectionHeader({
           {count}
         </span>
       )}
+      {meta && <span className="text-xs text-content-subtle">{meta}</span>}
+      {/*
+       * A resident critter loiters in the gap between the heading and its
+       * controls. Same one every time for a given section — they live here.
+       * Hidden on small screens, where there is no gap to loiter in.
+       */}
+      <Critter
+        name={critterFor(title)}
+        size={24}
+        className={`ml-2 hidden sm:block ${TONE_TEXT[tone]}`}
+      />
       <div className="ml-auto flex items-center gap-1">{actions}</div>
     </div>
   );
 }
 
 export function IconButton({
+  icon,
   onClick,
   title,
-  children,
   variant = "ghost",
   disabled,
   type = "button",
+  size = 16,
 }: {
+  icon: IconName;
   onClick?: () => void;
   title: string;
-  children: ReactNode;
   variant?: "ghost" | "confirm" | "danger";
   disabled?: boolean;
   type?: "button" | "submit";
+  size?: number;
 }) {
   const variants = {
     ghost: "text-content-subtle hover:text-content hover:bg-surface-overlay",
-    confirm: "text-accent hover:text-accent-hover hover:bg-accent-muted text-lg",
+    confirm: "text-accent hover:text-accent-hover hover:bg-accent-muted",
     danger: "text-content-subtle hover:text-rose-400 hover:bg-rose-950/40",
   };
   return (
@@ -123,9 +147,9 @@ export function IconButton({
       disabled={disabled}
       title={title}
       aria-label={title}
-      className={`flex h-7 w-7 items-center justify-center rounded-md leading-none transition-colors disabled:opacity-40 ${variants[variant]}`}
+      className={`flex h-7 w-7 items-center justify-center rounded-md transition-colors disabled:opacity-40 ${variants[variant]}`}
     >
-      {children}
+      <Icon name={icon} size={size} />
     </button>
   );
 }
@@ -140,6 +164,7 @@ export function StatTile({
   status,
 }: {
   label: string;
+  /** `null` means "nothing recorded" and renders as words, never a dash. */
   value: ReactNode;
   unit?: string;
   hint?: string;
@@ -152,13 +177,18 @@ export function StatTile({
       : status === "warn"
         ? "ring-1 ring-amber-600/60"
         : "";
+  const isBlank = value === null || value === undefined || value === "";
   return (
     <div className={`rounded-card border border-edge bg-surface-raised p-3 ${statusRing}`}>
       <p className="text-[11px] font-medium uppercase tracking-wider text-content-subtle">{label}</p>
-      <p className={`mt-1 text-xl font-semibold tabular-nums ${TONE_TEXT[tone]}`}>
-        {value}
-        {unit && <span className="ml-1 text-xs font-normal text-content-muted">{unit}</span>}
-      </p>
+      {isBlank ? (
+        <p className="mt-1 text-base font-normal italic text-content-subtle">Not set</p>
+      ) : (
+        <p className={`mt-1 text-xl font-semibold tabular-nums ${TONE_TEXT[tone]}`}>
+          {value}
+          {unit && <span className="ml-1 text-xs font-normal text-content-muted">{unit}</span>}
+        </p>
+      )}
       {hint && <p className="mt-0.5 text-[11px] leading-snug text-content-subtle">{hint}</p>}
     </div>
   );
@@ -175,7 +205,7 @@ export function Badge({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${
         soft ? TONE_SOFT[tone] : `border-edge bg-surface-overlay text-content-muted`
       }`}
     >
@@ -206,44 +236,64 @@ export function Field({
   );
 }
 
-export function EmptyState({ icon, message }: { icon: string; message: string }) {
+export function EmptyState({ glyph, message }: { glyph: string; message: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-1 rounded-card border border-dashed border-edge px-4 py-8 text-center">
-      <span aria-hidden className="text-2xl opacity-60">
-        {icon}
-      </span>
+      <Emoji glyph={glyph} size="xl" className="opacity-60" />
       <p className="text-sm text-content-subtle">{message}</p>
     </div>
   );
 }
 
-/** Wrapper that gives every section the same rhythm and reveal-form behaviour. */
+/**
+ * Placeholder for an empty cell. Deliberately a word rather than a dash —
+ * a "–" sitting in a table reads as the remove control.
+ */
+export function EmptyHint({ children = "Nothing yet" }: { children?: ReactNode }) {
+  return <span className="text-xs italic text-content-subtle">{children}</span>;
+}
+
 export function Section({
-  icon,
+  glyph,
   title,
   count,
+  meta,
   tone = "emerald",
   actions,
   children,
   className = "",
 }: {
-  icon: string;
+  glyph: string;
   title: string;
   count?: number;
+  meta?: ReactNode;
   tone?: Tone;
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={`flex flex-col gap-3 ${className}`}>
-      <SectionHeader icon={icon} title={title} count={count} tone={tone} actions={actions} />
+    <section className={`group/section flex flex-col gap-3 ${className}`}>
+      <SectionHeader
+        glyph={glyph}
+        title={title}
+        count={count}
+        meta={meta}
+        tone={tone}
+        actions={actions}
+      />
       {children}
     </section>
   );
 }
 
-/** The collapsible add-form shell: × top-right, content, ✓ to submit. */
+/**
+ * Collapsible add-form shell.
+ *
+ * Cancel and confirm sit together on one compact row aligned right, rather
+ * than a close button eating a full row at the top and the submit stranded
+ * at the bottom.
+ */
 export function AddForm({
   onSubmit,
   onClose,
@@ -260,19 +310,88 @@ export function AddForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
+      className="flex flex-col gap-2 rounded-card border border-edge bg-surface-overlay p-3"
     >
-      <div className="flex justify-end">
-        <IconButton onClick={onClose} title="Close">
-          ×
-        </IconButton>
-      </div>
       {children}
-      <div className="flex justify-end">
-        <IconButton type="submit" title={submitTitle} variant="confirm" disabled={submitting}>
-          ✓
-        </IconButton>
+      <div className="flex items-center justify-end gap-1">
+        <IconButton onClick={onClose} title="Cancel" icon="close" />
+        {/* The confirm reads a touch larger — it's the action you actually want. */}
+        <IconButton
+          type="submit"
+          title={submitTitle}
+          variant="confirm"
+          icon="confirm"
+          size={19}
+          disabled={submitting}
+        />
       </div>
     </form>
+  );
+}
+
+/** Modal confirmation for destructive or hard-to-undo actions. */
+export function ConfirmDialog({
+  open,
+  title,
+  body,
+  confirmLabel,
+  tone = "rose",
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  body: string;
+  confirmLabel: string;
+  tone?: "rose" | "amber";
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onCancel]);
+
+  if (!open) return null;
+
+  const confirmClass =
+    tone === "rose"
+      ? "bg-rose-600 hover:bg-rose-500 text-white"
+      : "bg-amber-600 hover:bg-amber-500 text-white";
+
+  return (
+    <div
+      role="dialog"
+      aria-modal
+      aria-label={title}
+      onClick={onCancel}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-sm rounded-card border border-edge bg-surface-raised p-5 shadow-xl"
+      >
+        <h3 className="text-base font-semibold text-content">{title}</h3>
+        <p className="mt-1.5 text-sm text-content-muted">{body}</p>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={onCancel}
+            className="rounded-md border border-edge px-3 py-1.5 text-sm text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`rounded-md px-3 py-1.5 text-sm font-semibold transition-colors ${confirmClass}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

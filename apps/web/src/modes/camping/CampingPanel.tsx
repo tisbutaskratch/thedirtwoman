@@ -81,14 +81,12 @@ export default function CampingPanel({
 
   return (
     <Section
-      icon="🏕️"
+      glyph="🏕️"
       title="Campground"
       tone="emerald"
       actions={
         !editing && (
-          <IconButton onClick={() => setEditing(true)} title="Edit campground details">
-            ✎
-          </IconButton>
+          <IconButton onClick={() => setEditing(true)} title="Edit campground details" icon="edit" />
         )
       }
     >
@@ -98,9 +96,7 @@ export default function CampingPanel({
           className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
         >
           <div className="flex justify-end">
-            <IconButton onClick={() => setEditing(false)} title="Cancel">
-              ×
-            </IconButton>
+            <IconButton onClick={() => setEditing(false)} title="Cancel" icon="close" />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Reservation #">
@@ -177,9 +173,7 @@ export default function CampingPanel({
             </Field>
           </div>
           <div className="flex justify-end">
-            <IconButton type="submit" title="Save" variant="confirm" disabled={saving}>
-              ✓
-            </IconButton>
+            <IconButton type="submit" title="Save" variant="confirm" disabled={saving} icon="confirm" />
           </div>
         </form>
       ) : (
@@ -187,14 +181,14 @@ export default function CampingPanel({
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile
               label="Nights"
-              value={detail.nights ?? "—"}
+              value={detail.nights ?? null}
               hint={detail.nights !== null ? `${detail.nights + 1} days on site` : "Set trip dates"}
               tone="emerald"
             />
             <StatTile label="Party" value={detail.party_size} unit="people" tone="cyan" />
             <StatTile
               label="Water to pack"
-              value={needsHauledWater ? (detail.est_water_needed_gal ?? "—") : "0"}
+              value={needsHauledWater ? (detail.est_water_needed_gal ?? null) : "0"}
               unit={needsHauledWater ? "gal" : undefined}
               hint={
                 detail.potable_water_available === null
@@ -208,7 +202,7 @@ export default function CampingPanel({
             />
             <StatTile
               label="Reservation"
-              value={detail.campground_reservation_ref ?? "—"}
+              value={detail.campground_reservation_ref ?? null}
               hint={detail.check_in_time ? `Check in ${detail.check_in_time}` : "No check-in time"}
               tone="violet"
             />

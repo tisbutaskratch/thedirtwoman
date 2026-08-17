@@ -97,4 +97,7 @@ export const listNotes = (tripId: number) => apiRequest<Note[]>(`/trips/${tripId
 export const createNote = (tripId: number, payload: NoteCreate) =>
   apiRequest<Note>(`/trips/${tripId}/notes`, { method: "POST", body: JSON.stringify(payload) });
 
+export const updateNote = (id: number, payload: NoteCreate) =>
+  apiRequest<Note>(`/notes/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
+
 export const deleteNote = (id: number) => apiRequest<void>(`/notes/${id}`, { method: "DELETE" });

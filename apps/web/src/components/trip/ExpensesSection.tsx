@@ -84,14 +84,12 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
 
   return (
     <Section
-      icon={SECTION_META.expenses.icon}
+      glyph={SECTION_META.expenses.glyph}
       title="Expenses"
       tone={SECTION_META.expenses.tone}
       actions={
         !showAdd && (
-          <IconButton onClick={() => setShowAdd(true)} title="Add expense">
-            +
-          </IconButton>
+          <IconButton onClick={() => setShowAdd(true)} title="Add expense" icon="add" />
         )
       }
     >
@@ -120,42 +118,44 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
 
       {showAdd && (
         <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-[8rem_minmax(0,1fr)]">
             <input
               type="text"
               autoFocus
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className={`${inputClass} w-32`}
+              className={inputClass}
             />
             <input
               type="text"
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)]">
             <input
               type="number"
               step="0.01"
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className={`${inputClass} w-28`}
+              className={inputClass}
             />
             <input
               type="date"
+              aria-label="Date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             />
             <select
               value={paidBy}
+              aria-label="Paid by"
               onChange={(e) => setPaidBy(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             >
               <option value="">Who paid?</option>
               {roster.map((c) => (
@@ -183,7 +183,7 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
       )}
 
       {expenses.length === 0 ? (
-        <EmptyState icon="💰" message="No expenses yet." />
+        <EmptyState glyph="💰" message="No expenses yet." />
       ) : (
         <ul className="flex flex-col gap-2">
           {expenses.map((expense) => {
@@ -211,9 +211,8 @@ export default function ExpensesSection({ tripId }: { tripId: number }) {
                       onClick={() => handleDelete(expense.id)}
                       title="Remove"
                       variant="danger"
-                    >
-                      −
-                    </IconButton>
+                      icon="remove"
+                    />
                   </div>
                 </div>
 

@@ -5,7 +5,8 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.trip import TripStatus, TripType
+from app.models.common import TripRole
+from app.models.trip import TripType
 
 
 class TripCreate(BaseModel):
@@ -19,7 +20,7 @@ class TripUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1, max_length=255)
     start_date: Optional[date] = None
     end_date: Optional[date] = None
-    status: Optional[TripStatus] = None
+    archived: Optional[bool] = None
     owner_vehicle: Optional[str] = Field(default=None, max_length=255)
     owner_fuel_range_miles: Optional[float] = Field(default=None, ge=0)
 
@@ -33,8 +34,11 @@ class TripRead(BaseModel):
     trip_type: TripType
     start_date: Optional[date]
     end_date: Optional[date]
-    status: TripStatus
+    archived_at: Optional[datetime]
     owner_vehicle: Optional[str]
     owner_fuel_range_miles: Optional[float]
     created_at: datetime
     percent_planned: int
+    # The requesting user's access level, so the UI can hide edit controls
+    # from the audience rather than letting them fail on submit.
+    my_role: TripRole = TripRole.editor

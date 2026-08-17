@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
+import { Emoji } from "@/components/ui";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -19,9 +20,7 @@ export default function AppLayout() {
             to="/app/dashboard"
             className="flex items-center gap-2 text-base font-bold tracking-tight"
           >
-            <span aria-hidden className="text-lg">
-              🧭
-            </span>
+            <Emoji glyph="🧭" size="lg" />
             Adventure Planner
           </NavLink>
           <div className="flex items-center gap-2 text-sm">

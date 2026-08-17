@@ -93,18 +93,16 @@ export default function OverlandingPanel({
   const tirePressures =
     detail.tire_pressure_offroad_psi && detail.tire_pressure_highway_psi
       ? `${detail.tire_pressure_offroad_psi} → ${detail.tire_pressure_highway_psi}`
-      : (detail.tire_pressure_offroad_psi ?? detail.tire_pressure_highway_psi ?? "—");
+      : (detail.tire_pressure_offroad_psi ?? detail.tire_pressure_highway_psi ?? null);
 
   return (
     <Section
-      icon="🚙"
+      glyph="🚙"
       title="Rig & range"
       tone="amber"
       actions={
         !editing && (
-          <IconButton onClick={() => setEditing(true)} title="Edit rig details">
-            ✎
-          </IconButton>
+          <IconButton onClick={() => setEditing(true)} title="Edit rig details" icon="edit" />
         )
       }
     >
@@ -114,9 +112,7 @@ export default function OverlandingPanel({
           className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
         >
           <div className="flex justify-end">
-            <IconButton onClick={() => setEditing(false)} title="Cancel">
-              ×
-            </IconButton>
+            <IconButton onClick={() => setEditing(false)} title="Cancel" icon="close" />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Vehicle">
@@ -241,9 +237,7 @@ export default function OverlandingPanel({
             </Field>
           </div>
           <div className="flex justify-end">
-            <IconButton type="submit" title="Save" variant="confirm" disabled={saving}>
-              ✓
-            </IconButton>
+            <IconButton type="submit" title="Save" variant="confirm" disabled={saving} icon="confirm" />
           </div>
         </form>
       ) : (
@@ -251,7 +245,7 @@ export default function OverlandingPanel({
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile
               label="Range on main"
-              value={detail.est_range_miles ?? "—"}
+              value={detail.est_range_miles ?? null}
               unit={detail.est_range_miles ? "mi" : undefined}
               hint={
                 detail.fuel_capacity_gal && detail.fuel_economy_mpg
@@ -262,14 +256,14 @@ export default function OverlandingPanel({
             />
             <StatTile
               label="With jerry cans"
-              value={detail.est_total_range_miles ?? "—"}
+              value={detail.est_total_range_miles ?? null}
               unit={detail.est_total_range_miles ? "mi" : undefined}
               hint={detail.aux_fuel_gal ? `+${detail.aux_fuel_gal} gal aux` : "No aux fuel logged"}
               tone="orange"
             />
             <StatTile
               label="Water supply"
-              value={detail.water_days_supported ?? "—"}
+              value={detail.water_days_supported ?? null}
               unit={detail.water_days_supported ? "days" : undefined}
               hint={
                 detail.water_capacity_gal

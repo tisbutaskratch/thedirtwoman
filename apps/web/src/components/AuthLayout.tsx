@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Emoji } from "@/components/ui";
 
 export default function AuthLayout({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -23,9 +24,7 @@ export default function AuthLayout({ title, children }: { title: string; childre
           to="/"
           className="mb-6 flex items-center justify-center gap-2 text-lg font-bold tracking-tight"
         >
-          <span aria-hidden className="text-xl">
-            🧭
-          </span>
+          <Emoji glyph="🧭" size="lg" />
           Adventure Planner
         </Link>
         <div className="rounded-card border border-edge bg-surface-raised p-6 shadow-xl">

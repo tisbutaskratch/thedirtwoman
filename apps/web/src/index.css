@@ -147,6 +147,7 @@
   --color-on-accent: oklch(0.16 0.02 155);
 
   --radius-card: 0.75rem;
+  --font-emoji: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
 }
 
 [data-theme="light"] {
@@ -291,3 +292,175 @@ body {
   color: var(--color-content);
 }
 
+
+/*
+ * Print / "Download PDF".
+ *
+ * Exporting through the browser's own print-to-PDF keeps the text
+ * selectable and lets the engine handle pagination — far better output
+ * than rasterising the DOM to canvas, and no extra dependency.
+ */
+/*
+ * Trip-open animation: the traveller crosses once, right to left, in about
+ * a second. `forwards` parks it off-screen so it can't loop distractingly if
+ * the trip is slow to load.
+ */
+@keyframes trip-traveller-cross {
+  from {
+    transform: translateX(120px);
+  }
+  to {
+    transform: translateX(-90px);
+  }
+}
+
+.trip-loader-traveller {
+  animation: trip-traveller-cross 1s cubic-bezier(0.4, 0, 0.5, 1) forwards;
+}
+
+/* Each cat bobs on its own beat, so the parade doesn't march in lockstep. */
+@keyframes trip-cat-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+.trip-cat {
+  animation: trip-cat-bob 0.32s ease-in-out infinite;
+}
+
+/* A small settle for the trip header art when a trip opens. */
+@keyframes trip-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.trip-rise {
+  animation: trip-rise 0.35s ease-out both;
+}
+
+/*
+ * Motion is decoration here, never information — anyone who has asked the
+ * system to calm down gets the same content, held still.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .trip-loader-traveller,
+  .trip-cat,
+  .trip-rise {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media print {
+  /* Force the light palette so nobody prints a black page. */
+  :root {
+    --color-surface: #ffffff;
+    --color-surface-raised: #ffffff;
+    --color-surface-overlay: #ffffff;
+    --color-surface-sunken: #ffffff;
+    --color-edge: #d4d4d4;
+    --color-edge-strong: #a3a3a3;
+    --color-content: #111111;
+    --color-content-muted: #444444;
+    --color-content-subtle: #666666;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  /* Interactive chrome has no meaning on paper. */
+  .print\:hidden,
+  header nav,
+  button,
+  input[type="file"],
+  form {
+    display: none !important;
+  }
+
+  /*
+   * Selects stay, because their value is real content — who a todo is
+   * assigned to, how required an item is. Only the widget chrome goes.
+   */
+  select {
+    appearance: none !important;
+    background-image: none !important;
+    padding: 0 !important;
+  }
+
+  /* Checkboxes print as hollow boxes rather than vanishing. */
+  input[type="checkbox"] {
+    appearance: none !important;
+    width: 0.7em;
+    height: 0.7em;
+    border: 1px solid #666;
+    border-radius: 2px;
+  }
+
+  input[type="checkbox"]:checked {
+    background: #666;
+  }
+
+  /* Everything claims full width: multi-column splits waste a printed page. */
+  .lg\:col-span-4,
+  .lg\:col-span-5,
+  .lg\:col-span-7,
+  .lg\:col-span-8,
+  .lg\:col-span-12 {
+    grid-column: span 12 / span 12 !important;
+  }
+
+  .lg\:grid-cols-2,
+  .lg\:grid-cols-3,
+  .lg\:grid-cols-4,
+  .lg\:grid-cols-12,
+  .sm\:grid-cols-2,
+  .xl\:grid-cols-4 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  /* Summary tiles are the exception — they read better as a strip. */
+  .grid-cols-2 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  section,
+  article,
+  li,
+  table {
+    break-inside: avoid;
+  }
+
+  h1,
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  /* Sticky headers stack badly in print. */
+  .sticky {
+    position: static !important;
+  }
+
+  a[href]::after {
+    content: "";
+  }
+}

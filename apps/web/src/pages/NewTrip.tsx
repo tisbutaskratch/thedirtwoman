@@ -3,10 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { createTrip } from "@/api/trips";
 import type { TripType } from "@/api/types";
-import { Field, TONE_SOFT, inputClass } from "@/components/ui";
-import { TRIP_TYPE_META } from "@/lib/tripTypes";
-
-const TRIP_TYPES = Object.keys(TRIP_TYPE_META) as TripType[];
+import { Field, Icon, TONE_SOFT, inputClass } from "@/components/ui";
+import TripMark from "@/art/tripMarks";
+import { TRIP_TYPE_META, TRIP_TYPES } from "@/lib/tripTypes";
 
 export default function NewTrip() {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ export default function NewTrip() {
           to="/app/dashboard"
           className="inline-flex items-center gap-1.5 text-sm text-content-muted transition-colors hover:text-accent"
         >
-          <span aria-hidden>←</span> All trips
+          <Icon name="back" size={14} /> All trips
         </Link>
         <h1 className="mt-2 text-3xl font-bold tracking-tight">Plan a new trip</h1>
         <p className="mt-1 text-sm text-content-muted">
@@ -76,9 +75,7 @@ export default function NewTrip() {
                       : "border-edge bg-surface-raised text-content-muted hover:border-edge-strong"
                   }`}
                 >
-                  <span aria-hidden className="text-2xl">
-                    {meta.icon}
-                  </span>
+                  <TripMark type={type} size={30} />
                   <span className="text-sm font-medium">{meta.label}</span>
                   <span className="text-[11px] leading-snug text-content-subtle">{meta.blurb}</span>
                 </button>

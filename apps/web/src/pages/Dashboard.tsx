@@ -1,16 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listTrips } from "@/api/trips";
-import type { Trip, TripStatus } from "@/api/types";
-import { Badge, EmptyState, TONE_EDGE, TONE_SOFT } from "@/components/ui";
+import type { Trip } from "@/api/types";
+import { Badge, EmptyState, Icon, TONE_EDGE, TONE_SOFT } from "@/components/ui";
 import { useAuth } from "@/lib/AuthContext";
+import TripMark from "@/art/tripMarks";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
-
-const STATUS_TONE: Record<TripStatus, "sky" | "emerald" | "violet"> = {
-  planning: "sky",
-  active: "emerald",
-  completed: "violet",
-};
 
 function formatRange(start: string | null, end: string | null) {
   if (!start && !end) return "No dates yet";
@@ -51,16 +46,21 @@ export default function Dashboard() {
   }, []);
 
   // Upcoming trips first (soonest departure), then undated, then past.
-  const sorted = useMemo(() => {
-    if (!trips) return null;
-    return [...trips].sort((a, b) => {
+  // Archived trips are filed separately rather than mixed into the list.
+  const { current, archived } = useMemo(() => {
+    if (!trips) return { current: null, archived: null };
+    const byDate = [...trips].sort((a, b) => {
       if (!a.start_date) return 1;
       if (!b.start_date) return -1;
       return a.start_date.localeCompare(b.start_date);
     });
+    return {
+      current: byDate.filter((t) => t.archived_at === null),
+      archived: byDate.filter((t) => t.archived_at !== null),
+    };
   }, [trips]);
 
-  const nextUp = sorted?.find((t) => countdown(t.start_date) !== null);
+  const nextUp = current?.find((t) => countdown(t.start_date) !== null);
 
   return (
     <section className="flex flex-col gap-6">
@@ -95,53 +95,75 @@ export default function Dashboard() {
         </div>
       )}
       {trips?.length === 0 && (
-        <EmptyState icon="🧭" message="No trips yet. Start planning your first adventure." />
+        <EmptyState glyph="🧭" message="No trips yet. Start planning your first adventure." />
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sorted?.map((trip) => {
-          const meta = TRIP_TYPE_META[trip.trip_type];
-          const days = countdown(trip.start_date);
-          return (
-            <Link
-              key={trip.id}
-              to={`/app/trips/${trip.id}`}
-              className={`group flex flex-col gap-3 rounded-card border border-edge border-l-4 bg-surface-raised p-4 transition-all hover:-translate-y-0.5 hover:border-edge-strong hover:shadow-lg ${TONE_EDGE[meta.tone]}`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span
-                  aria-hidden
-                  className={`flex h-11 w-11 items-center justify-center rounded-card border text-xl ${TONE_SOFT[meta.tone]}`}
-                >
-                  {meta.icon}
-                </span>
-                <div className="flex flex-wrap justify-end gap-1.5">
-                  {trip.user_id !== user?.id && <Badge tone="cyan">Shared</Badge>}
-                  <Badge tone={STATUS_TONE[trip.status]}>
-                    <span className="capitalize">{trip.status}</span>
-                  </Badge>
-                </div>
-              </div>
+      {current && current.length > 0 && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {current.map((trip) => (
+            <TripCard key={trip.id} trip={trip} shared={trip.user_id !== user?.id} />
+          ))}
+        </div>
+      )}
 
-              <div>
-                <h2 className="font-semibold leading-snug text-content transition-colors group-hover:text-accent">
-                  {trip.title}
-                </h2>
-                <p className="mt-0.5 text-xs text-content-subtle">{meta.blurb}</p>
-              </div>
-
-              <div className="mt-auto flex items-center justify-between border-t border-edge pt-2.5 text-xs">
-                <span className="text-content-muted">
-                  {formatRange(trip.start_date, trip.end_date)}
-                </span>
-                {days !== null && (
-                  <span className="font-medium tabular-nums text-accent">in {days}d</span>
-                )}
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      {archived && archived.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h2 className="flex items-center gap-2 border-t border-edge pt-6 text-sm font-medium uppercase tracking-wider text-content-subtle">
+            <Icon name="archive" size={14} /> Archived
+            <span className="rounded-full bg-surface-overlay px-2 py-0.5 text-xs normal-case tracking-normal">
+              {archived.length}
+            </span>
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {archived.map((trip) => (
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                shared={trip.user_id !== user?.id}
+                dimmed
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </section>
+  );
+}
+
+function TripCard({ trip, shared, dimmed }: { trip: Trip; shared: boolean; dimmed?: boolean }) {
+  const meta = TRIP_TYPE_META[trip.trip_type];
+  const days = countdown(trip.start_date);
+  return (
+    <Link
+      to={`/app/trips/${trip.id}`}
+      // Hand the type across so the trip page can play the right opener
+      // before its own fetch resolves.
+      state={{ tripType: trip.trip_type }}
+      className={`group flex flex-col gap-3 rounded-card border border-edge border-l-4 bg-surface-raised p-4 transition-all hover:-translate-y-0.5 hover:border-edge-strong hover:shadow-lg ${TONE_EDGE[meta.tone]} ${dimmed ? "opacity-70 hover:opacity-100" : ""}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <span
+          className={`flex h-11 w-11 items-center justify-center rounded-card border ${TONE_SOFT[meta.tone]}`}
+        >
+          <TripMark type={trip.trip_type} size={24} />
+        </span>
+        <div className="flex flex-wrap justify-end gap-1.5">
+          {shared && <Badge tone="cyan">Shared</Badge>}
+          <Badge tone={meta.tone}>{meta.label}</Badge>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold leading-snug text-content transition-colors group-hover:text-accent">
+          {trip.title}
+        </h3>
+        <p className="mt-0.5 text-xs text-content-subtle">{meta.blurb}</p>
+      </div>
+
+      <div className="mt-auto flex items-center justify-between border-t border-edge pt-2.5 text-xs">
+        <span className="text-content-muted">{formatRange(trip.start_date, trip.end_date)}</span>
+        {days !== null && <span className="font-medium tabular-nums text-accent">in {days}d</span>}
+      </div>
+    </Link>
   );
 }

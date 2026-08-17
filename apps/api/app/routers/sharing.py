@@ -3,8 +3,9 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_accessible_trip, get_current_user, get_owned_trip
+from app.core.deps import get_accessible_trip, get_current_user, get_editable_trip, get_owned_trip
 from app.db.session import get_db
+from app.models.common import TripRole
 from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
 from app.models.trip_invite import TripInvite
@@ -16,6 +17,7 @@ from app.schemas.sharing import (
     InvitePreviewRead,
     InviteRead,
     PendingMemberRead,
+    RoleUpdate,
     VehicleUpdate,
 )
 from app.services.sharing import (
@@ -34,11 +36,12 @@ router = APIRouter(tags=["sharing"])
 
 @router.post("/trips/{trip_id}/invite", response_model=InviteRead)
 def create_invite(
+    role: TripRole = TripRole.editor,
     trip: Trip = Depends(get_owned_trip),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> TripInvite:
-    return get_or_create_invite(db, trip, current_user.id)
+    return get_or_create_invite(db, trip, current_user.id, role)
 
 
 @router.delete("/trips/{trip_id}/invite", status_code=status.HTTP_204_NO_CONTENT)
@@ -63,8 +66,13 @@ def invite_by_email(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Already a member of this trip"
         )
-    invite = create_email_invite(db, trip, current_user.id, payload.email)
-    return PendingMemberRead(id=invite.id, email=invite.invitee_email, invited_at=invite.created_at)
+    invite = create_email_invite(db, trip, current_user.id, payload.email, payload.role)
+    return PendingMemberRead(
+        id=invite.id,
+        email=invite.invitee_email,
+        role=invite.role,
+        invited_at=invite.created_at,
+    )
 
 
 @router.get("/trips/{trip_id}/pending-invites", response_model=list[PendingMemberRead])
@@ -85,7 +93,7 @@ def cancel_pending_invite(
 @router.patch("/trips/{trip_id}/collaborators/me", response_model=CollaboratorRead)
 def update_my_vehicle(
     payload: VehicleUpdate,
-    trip: Trip = Depends(get_accessible_trip),
+    trip: Trip = Depends(get_editable_trip),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> CollaboratorRead:
@@ -106,6 +114,33 @@ def update_my_vehicle(
 
     collaborator.vehicle = payload.vehicle
     collaborator.fuel_range_miles = payload.fuel_range_miles
+    db.commit()
+    db.refresh(collaborator)
+    return to_collaborator_read(collaborator)
+
+
+@router.patch("/trips/{trip_id}/collaborators/{user_id}/role", response_model=CollaboratorRead)
+def update_collaborator_role(
+    user_id: int,
+    payload: RoleUpdate,
+    trip: Trip = Depends(get_owned_trip),
+    db: Session = Depends(get_db),
+) -> CollaboratorRead:
+    # The creator always keeps edit rights — otherwise a trip could be left
+    # with nobody able to change it.
+    if user_id == trip.user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The trip's creator always has edit access",
+        )
+    collaborator = (
+        db.query(TripCollaborator)
+        .filter(TripCollaborator.trip_id == trip.id, TripCollaborator.user_id == user_id)
+        .first()
+    )
+    if collaborator is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Not a trip member")
+    collaborator.role = payload.role
     db.commit()
     db.refresh(collaborator)
     return to_collaborator_read(collaborator)
@@ -151,7 +186,8 @@ def preview_invite(
         trip_id=trip.id,
         trip_title=trip.title,
         trip_type=trip.trip_type.value,
-        owner_name=trip.user.name,
+        invited_by_name=trip.user.name,
+        role=invite.role,
         already_member=already_member,
     )
 
@@ -174,7 +210,11 @@ def accept_invite(
         .first()
     )
     if already_member is None:
-        db.add(TripCollaborator(trip_id=trip.id, user_id=current_user.id))
+        db.add(TripCollaborator(trip_id=trip.id, user_id=current_user.id, role=invite.role))
+    elif already_member.role != invite.role and invite.role == TripRole.editor:
+        # Accepting an editor invite upgrades a viewer; the reverse would let
+        # a stale read-only link silently strip someone's edit rights.
+        already_member.role = TripRole.editor
 
     if invite.invitee_email is not None:
         # Targeted invite consumed on acceptance — it stops showing as pending.

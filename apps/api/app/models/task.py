@@ -3,10 +3,11 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.common import RequiredLevel
 
 if TYPE_CHECKING:
     from app.models.trip import Trip
@@ -22,9 +23,18 @@ class Task(Base):
     trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     done: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Same required/optional split as the packing list — "book the campsite"
+    # is not the same kind of task as "practise the off-road section".
+    required_level: Mapped[RequiredLevel] = mapped_column(
+        Enum(RequiredLevel, native_enum=False, name="taskrequiredlevel"),
+        nullable=False,
+        default=RequiredLevel.required,
+    )
     assigned_to_user_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
+    # "Everyone does this one" — distinct from unassigned.
+    assigned_to_all: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     due_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

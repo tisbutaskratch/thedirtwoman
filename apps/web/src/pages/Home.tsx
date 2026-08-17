@@ -1,15 +1,16 @@
 import { Link } from "react-router-dom";
+import { Emoji } from "@/components/ui";
 import { profile, projects, skills } from "@/lib/profile";
 import { neonAt } from "@/lib/neonPalette";
 
 export default function Home() {
   const highlights = [
-    { label: "Skill areas", value: skills.length, icon: "🌿" },
-    { label: "Projects", value: projects.length, icon: "🗺️" },
+    { label: "Skill areas", value: skills.length, glyph: "🌿" },
+    { label: "Projects", value: projects.length, glyph: "🗺️" },
     {
       label: "Completed",
       value: projects.filter((p) => p.status === "Completed").length,
-      icon: "✅",
+      glyph: "✅",
     },
   ];
 
@@ -55,9 +56,7 @@ export default function Home() {
               key={item.label}
               className={`rounded-card border border-edge border-l-4 bg-surface-raised p-5 ${colors.border}`}
             >
-              <span aria-hidden className="text-2xl">
-                {item.icon}
-              </span>
+              <Emoji glyph={item.glyph} size="xl" />
               <p className={`mt-2 text-3xl font-bold tabular-nums ${colors.text}`}>{item.value}</p>
               <p className="text-sm text-content-subtle">{item.label}</p>
             </div>

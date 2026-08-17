@@ -53,15 +53,13 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
 
   return (
     <Section
-      icon={SECTION_META.photos.icon}
-      title="Photos"
-      tone={SECTION_META.photos.tone}
+      glyph={SECTION_META.screenshots.glyph}
+      title="Screenshots"
+      tone={SECTION_META.screenshots.tone}
       count={photos.length}
       actions={
         !showAdd && (
-          <IconButton onClick={() => setShowAdd(true)} title="Add photo">
-            +
-          </IconButton>
+          <IconButton onClick={() => setShowAdd(true)} title="Add screenshot" icon="add" />
         )
       }
     >
@@ -72,21 +70,21 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
           submitting={submitting}
           submitTitle="Upload"
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <input
               type="text"
               autoFocus
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             />
             <input
               type="text"
               placeholder="Short summary (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             />
           </div>
           <input
@@ -99,7 +97,7 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
       )}
 
       {photos.length === 0 ? (
-        <EmptyState icon="📸" message="No photos yet." />
+        <EmptyState glyph="📷" message="No screenshots yet." />
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           {photos.map((photo) => (
@@ -151,12 +149,9 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
                   onClick={() => handleDelete(viewing.id)}
                   title="Delete"
                   variant="danger"
-                >
-                  −
-                </IconButton>
-                <IconButton onClick={() => setViewing(null)} title="Close">
-                  ×
-                </IconButton>
+                  icon="remove"
+                />
+                <IconButton onClick={() => setViewing(null)} title="Close" icon="close" />
               </div>
             </div>
           </div>

@@ -5,6 +5,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from app.models.domestic_detail import DomesticTravelMode
+
 
 class TripDetailUpdate(BaseModel):
     """Superset of every mode's editable detail fields.
@@ -64,3 +66,24 @@ class TripDetailUpdate(BaseModel):
     travel_insurance_ref: Optional[str] = Field(default=None, max_length=255)
     embassy_contact: Optional[str] = Field(default=None, max_length=255)
     step_enrolled: Optional[bool] = None
+
+    # domestic
+    travel_mode: Optional[DomesticTravelMode] = None
+    booking_ref: Optional[str] = Field(default=None, max_length=100)
+    origin: Optional[str] = Field(default=None, max_length=255)
+    destination: Optional[str] = Field(default=None, max_length=255)
+    is_rental: Optional[bool] = None
+    rental_company: Optional[str] = Field(default=None, max_length=255)
+    vehicle_mpg: Optional[float] = Field(default=None, ge=0)
+    fuel_price_per_gallon: Optional[float] = Field(default=None, ge=0)
+    rail_operator: Optional[str] = Field(default=None, max_length=255)
+    rail_pass_type: Optional[str] = Field(default=None, max_length=255)
+    seat_reservation_required: Optional[bool] = None
+    seat_reservations_booked: Optional[bool] = None
+    airline: Optional[str] = Field(default=None, max_length=255)
+    checked_bags: Optional[int] = Field(default=None, ge=0)
+    carry_on_only: Optional[bool] = None
+    separate_tickets: Optional[bool] = None
+    layover_notes: Optional[str] = None
+    lodging_type: Optional[str] = Field(default=None, max_length=50)
+    lodging_ref: Optional[str] = Field(default=None, max_length=255)

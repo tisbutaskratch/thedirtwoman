@@ -4,7 +4,7 @@ import { ApiError } from "@/api/client";
 import { acceptInvite, getInvitePreview } from "@/api/sharing";
 import type { InvitePreview } from "@/api/types";
 import { useAuth } from "@/lib/AuthContext";
-import { TRIP_TYPE_META } from "@/lib/tripTypes";
+import TripMark from "@/art/tripMarks";
 
 export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
@@ -70,10 +70,15 @@ export default function AcceptInvite() {
         {!error && !preview && <p className="text-sm text-content-subtle">Loading…</p>}
         {preview && (
           <>
-            <p className="mb-1 text-3xl">{TRIP_TYPE_META[preview.trip_type].icon}</p>
+            <div className="mb-1 flex justify-center text-accent">
+              <TripMark type={preview.trip_type} size={36} />
+            </div>
             <h1 className="mb-1 text-xl font-semibold">{preview.trip_title}</h1>
             <p className="mb-6 text-sm text-content-muted">
-              {preview.owner_name} invited you to plan this trip together.
+              {preview.invited_by_name} invited you
+              {preview.role === "viewer"
+                ? " to follow along with this trip."
+                : " to plan this trip together."}
             </p>
             {preview.already_member ? (
               <button

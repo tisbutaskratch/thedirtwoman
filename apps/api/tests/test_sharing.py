@@ -62,7 +62,8 @@ def test_invite_preview_shows_trip_and_owner(client, auth_headers):
     assert response.status_code == 200
     body = response.json()
     assert body["trip_id"] == trip_id
-    assert body["owner_name"] == "Samwise Gamgee"
+    assert body["invited_by_name"] == "Samwise Gamgee"
+    assert body["role"] == "editor"
     assert body["already_member"] is False
 
 
@@ -100,7 +101,7 @@ def test_collaborator_can_edit_but_not_delete_trip(client, auth_headers):
 
     # can edit trip metadata
     response = client.patch(
-        f"/trips/{trip_id}", json={"status": "active"}, headers=collaborator_headers
+        f"/trips/{trip_id}", json={"archived": True}, headers=collaborator_headers
     )
     assert response.status_code == 200
 

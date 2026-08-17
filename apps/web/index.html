@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adventure Planner</title>
+    <!--
+      Android's emoji set, so the decorative glyphs render identically on
+      every platform instead of Apple on macOS / Segoe on Windows. Loaded
+      here rather than via @import so it isn't ordered after Tailwind's
+      rules (which browsers then ignore).
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="root"></div>

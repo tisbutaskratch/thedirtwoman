@@ -2,20 +2,14 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { listCollaborators } from "@/api/sharing";
 import { createGear, deleteGear, listGear, updateGear } from "@/api/trips";
 import type { Collaborator, Gear, GearRequiredLevel } from "@/api/types";
-import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { AddForm, Emoji, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import AssigneeSelect from "@/components/trip/AssigneeSelect";
+import RequiredLevelChip, {
+  REQUIRED_LEVELS,
+  REQUIRED_LEVEL_LABEL,
+} from "@/components/trip/RequiredLevelChip";
+import { assigneeValue, assignmentPayload } from "@/lib/assignment";
 import { SECTION_META } from "@/lib/tripTypes";
-
-const REQUIRED_LEVELS: GearRequiredLevel[] = ["required", "optional"];
-
-const REQUIRED_LEVEL_LABEL: Record<GearRequiredLevel, string> = {
-  required: "Required",
-  optional: "Optional",
-};
-
-const REQUIRED_LEVEL_STYLE: Record<GearRequiredLevel, string> = {
-  required: "border-rose-800/60 bg-rose-950/50 text-rose-300",
-  optional: "border-amber-800/60 bg-amber-950/50 text-amber-300",
-};
 
 const UNCATEGORIZED = "Uncategorized";
 
@@ -83,6 +77,11 @@ export default function GearSection({
   }, [gear]);
 
   const packedCount = gear.filter((g) => g.packed).length;
+  // Weighed items only — an unweighed item shouldn't silently count as 0 oz,
+  // so the heading says how many are still missing a weight.
+  const weighed = gear.filter((g) => g.weight_oz !== null);
+  const totalOz = weighed.reduce((sum, g) => sum + (g.weight_oz ?? 0), 0);
+  const missingWeight = gear.length - weighed.length;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -94,7 +93,7 @@ export default function GearSection({
         category: category.trim() || null,
         weight_oz: weightOz ? Number(weightOz) : null,
         required_level: requiredLevel,
-        assigned_to_user_id: assignedTo ? Number(assignedTo) : null,
+        ...assignmentPayload(assignedTo),
         notes: notes.trim() || null,
       });
       setName("");
@@ -134,34 +133,31 @@ export default function GearSection({
 
   return (
     <Section
-      icon={SECTION_META.packing.icon}
+      glyph={SECTION_META.packing.glyph}
       title="Packing list"
       tone={SECTION_META.packing.tone}
+      count={gear.length}
+      meta={
+        gear.length > 0
+          ? `${packedCount} packed · ${(totalOz / 16).toFixed(1)} lb${
+              missingWeight > 0 ? ` (${missingWeight} unweighed)` : ""
+            }`
+          : undefined
+      }
       actions={
-        <>
-          {gear.length > 0 && (
-            <span className="mr-1 text-xs tabular-nums text-content-subtle">
-              {packedCount}/{gear.length} packed
-            </span>
-          )}
-          {!showAdd && (
-            <IconButton onClick={() => setShowAdd(true)} title="Add gear">
-              +
-            </IconButton>
-          )}
-        </>
+        !showAdd && <IconButton onClick={() => setShowAdd(true)} title="Add gear" icon="add" />
       }
     >
       {showAdd && (
         <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_5rem]">
             <input
               type="text"
               autoFocus
               placeholder="Gear item"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             />
             <input
               type="text"
@@ -169,7 +165,7 @@ export default function GearSection({
               placeholder="Category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className={`${inputClass} w-40`}
+              className={inputClass}
             />
             <datalist id="gear-categories">
               {categories
@@ -183,16 +179,18 @@ export default function GearSection({
               min={0}
               step="0.1"
               placeholder="oz"
+              aria-label="Weight in ounces"
               value={weightOz}
               onChange={(e) => setWeightOz(e.target.value)}
-              className={`${inputClass} w-20`}
+              className={inputClass}
             />
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-[8rem_9rem_minmax(0,1fr)]">
             <select
               value={requiredLevel}
+              aria-label="Required level"
               onChange={(e) => setRequiredLevel(e.target.value as GearRequiredLevel)}
-              className={`${inputClass} w-32`}
+              className={inputClass}
             >
               {REQUIRED_LEVELS.map((level) => (
                 <option key={level} value={level}>
@@ -200,31 +198,20 @@ export default function GearSection({
                 </option>
               ))}
             </select>
-            <select
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-              className={`${inputClass} w-36`}
-            >
-              <option value="">Unassigned</option>
-              {roster.map((c) => (
-                <option key={c.user_id} value={c.user_id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <AssigneeSelect value={assignedTo} onChange={setAssignedTo} roster={roster} />
             <input
               type="text"
               placeholder="Notes (optional)"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className={`${inputClass} flex-1`}
+              className={inputClass}
             />
           </div>
         </AddForm>
       )}
 
       {grouped.length === 0 ? (
-        <EmptyState icon="🎒" message="Nothing on the packing list yet." />
+        <EmptyState glyph="🎒" message="Nothing on the packing list yet." />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {grouped.map(([categoryName, items]) => (
@@ -233,7 +220,7 @@ export default function GearSection({
               className="flex flex-col gap-2 rounded-card border border-edge bg-surface-raised p-3"
             >
               <h3 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-content-muted">
-                <span aria-hidden>{categoryGlyph(categoryName)}</span>
+                <Emoji glyph={categoryGlyph(categoryName)} size="sm" />
                 {categoryName}
                 <span className="ml-auto font-normal tabular-nums text-content-subtle">
                   {items.filter((i) => i.packed).length}/{items.length}
@@ -249,22 +236,23 @@ export default function GearSection({
                         onChange={(e) => setDraft({ ...draft, name: e.target.value })}
                         className={`${inputClass} py-1 text-xs`}
                       />
-                      <div className="flex gap-1.5">
+                      <div className="grid grid-cols-[minmax(0,1fr)_4rem] gap-1.5">
                         <input
                           type="text"
                           placeholder="Category"
                           value={draft.category}
                           onChange={(e) => setDraft({ ...draft, category: e.target.value })}
-                          className={`${inputClass} flex-1 py-1 text-xs`}
+                          className={`${inputClass} py-1 text-xs`}
                         />
                         <input
                           type="number"
                           min={0}
                           step="0.1"
                           placeholder="oz"
+                          aria-label="Weight in ounces"
                           value={draft.weightOz}
                           onChange={(e) => setDraft({ ...draft, weightOz: e.target.value })}
-                          className={`${inputClass} w-16 py-1 text-xs`}
+                          className={`${inputClass} py-1 text-xs`}
                         />
                       </div>
                       <input
@@ -275,12 +263,8 @@ export default function GearSection({
                         className={`${inputClass} py-1 text-xs`}
                       />
                       <div className="flex justify-end gap-1">
-                        <IconButton onClick={() => saveEdit(item.id)} title="Save" variant="confirm">
-                          ✓
-                        </IconButton>
-                        <IconButton onClick={() => setEditingId(null)} title="Cancel">
-                          ×
-                        </IconButton>
+                        <IconButton onClick={() => saveEdit(item.id)} title="Save" variant="confirm" icon="confirm" />
+                        <IconButton onClick={() => setEditingId(null)} title="Cancel" icon="close" />
                       </div>
                     </li>
                   ) : (
@@ -309,39 +293,19 @@ export default function GearSection({
                           <p className="truncate text-xs italic text-content-subtle">{item.notes}</p>
                         )}
                         <div className="mt-1 flex flex-wrap items-center gap-1">
-                          <select
+                          <RequiredLevelChip
                             value={item.required_level}
-                            onChange={(e) =>
-                              updateGear(item.id, {
-                                required_level: e.target.value as GearRequiredLevel,
-                              }).then(refresh)
+                            onChange={(level) =>
+                              updateGear(item.id, { required_level: level }).then(refresh)
                             }
-                            className={`rounded-full border px-1.5 py-0 text-[11px] outline-none ${REQUIRED_LEVEL_STYLE[item.required_level]}`}
-                          >
-                            {REQUIRED_LEVELS.map((level) => (
-                              <option key={level} value={level} className="bg-surface text-content">
-                                {REQUIRED_LEVEL_LABEL[level]}
-                              </option>
-                            ))}
-                          </select>
-                          <select
-                            value={item.assigned_to_user_id ?? ""}
-                            onChange={(e) =>
-                              updateGear(item.id, {
-                                assigned_to_user_id: e.target.value
-                                  ? Number(e.target.value)
-                                  : null,
-                              }).then(refresh)
-                            }
-                            className="rounded-full border border-edge bg-surface-overlay px-1.5 py-0 text-[11px] text-content-muted outline-none"
-                          >
-                            <option value="">Unassigned</option>
-                            {roster.map((c) => (
-                              <option key={c.user_id} value={c.user_id}>
-                                {c.name}
-                              </option>
-                            ))}
-                          </select>
+                          />
+                          <AssigneeSelect
+                            value={assigneeValue(item)}
+                            onChange={(v) => updateGear(item.id, assignmentPayload(v)).then(refresh)}
+                            roster={roster}
+                            variant="chip"
+                            highlighted={item.assigned_to_all}
+                          />
                         </div>
                       </div>
                       <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
@@ -356,16 +320,14 @@ export default function GearSection({
                             });
                           }}
                           title="Edit"
-                        >
-                          ✎
-                        </IconButton>
+                          icon="edit"
+                        />
                         <IconButton
                           onClick={() => handleDelete(item.id)}
                           title="Delete"
                           variant="danger"
-                        >
-                          −
-                        </IconButton>
+                          icon="remove"
+                        />
                       </div>
                     </li>
                   ),

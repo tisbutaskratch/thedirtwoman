@@ -6,11 +6,12 @@ import {
   listCollaborators,
   listPendingInvites,
   removeCollaborator,
+  setCollaboratorRole,
   updateMyVehicle,
 } from "@/api/sharing";
 import { ApiError } from "@/api/client";
-import type { Collaborator, PendingMember } from "@/api/types";
-import { AddForm, Badge, IconButton, Section, inputClass } from "@/components/ui";
+import type { Collaborator, PendingMember, TripRole } from "@/api/types";
+import { AddForm, Badge, Emoji, EmptyHint, IconButton, Section, inputClass } from "@/components/ui";
 import { SECTION_META } from "@/lib/tripTypes";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -43,8 +44,12 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
   const [editingBike, setEditingBike] = useState(false);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<TripRole>("editor");
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
+  // The roster sits above the timeline, so it collapses to a single avatar
+  // strip once you know who's coming and want the schedule back at the top.
+  const [collapsed, setCollapsed] = useState(false);
 
   function refresh() {
     listCollaborators(tripId).then((list) => {
@@ -67,10 +72,17 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
     refresh();
   }
 
+  async function handleRoleChange(userId: number, role: TripRole) {
+    await setCollaboratorRole(tripId, userId, role);
+    refresh();
+  }
+
   async function handleCopyLink() {
     setLinking(true);
     try {
-      const invite = await getOrCreateInvite(tripId);
+      // The link grants whatever the invite dropdown is currently set to,
+      // so a read-only link can never hand out edit rights by accident.
+      const invite = await getOrCreateInvite(tripId, inviteRole);
       await navigator.clipboard.writeText(`${window.location.origin}/invite/${invite.token}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -90,7 +102,7 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
     setInviting(true);
     setInviteError(null);
     try {
-      await inviteByEmail(tripId, { email: inviteEmail.trim() });
+      await inviteByEmail(tripId, { email: inviteEmail.trim(), role: inviteRole });
       setInviteEmail("");
       refresh();
     } catch (err) {
@@ -105,29 +117,43 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
     refresh();
   }
 
+  // Everyone who can change the plan is a collaborator; everyone who can
+  // only watch is the audience. Nobody is an "owner".
+  const collaborators = members.filter((c) => c.role === "editor");
+  const audience = members.filter((c) => c.role === "viewer");
+
   return (
     <Section
-      icon={SECTION_META.members.icon}
-      title="Members"
+      glyph={SECTION_META.members.glyph}
+      title="Crew"
       tone={SECTION_META.members.tone}
       count={members.length + pending.length}
+      meta={
+        audience.length > 0
+          ? `${collaborators.length} collaborating · ${audience.length} watching`
+          : undefined
+      }
       actions={
-        isOwner && (
-          <>
-            <IconButton
-              onClick={handleCopyLink}
-              disabled={linking}
-              title={copied ? "Copied!" : "Copy shareable link"}
-            >
-              {copied ? "✓" : "🔗"}
-            </IconButton>
-            {!showInvite && (
-              <IconButton onClick={() => setShowInvite(true)} title="Invite by email">
-                +
-              </IconButton>
-            )}
-          </>
-        )
+        <>
+          {isOwner && (
+            <>
+              <IconButton
+                onClick={handleCopyLink}
+                disabled={linking}
+                title={copied ? "Copied!" : "Copy shareable link"}
+                icon={copied ? "confirm" : "share"}
+              />
+              {!showInvite && (
+                <IconButton onClick={() => setShowInvite(true)} title="Invite by email" icon="add" />
+              )}
+            </>
+          )}
+          <IconButton
+            onClick={() => setCollapsed((c) => !c)}
+            title={collapsed ? "Show members" : "Hide members"}
+            icon={collapsed ? "collapse" : "expand"}
+          />
+        </>
       }
     >
       {showInvite && (
@@ -140,124 +166,186 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
           submitting={inviting}
           submitTitle="Send invite"
         >
-          <input
-            type="email"
-            autoFocus
-            placeholder="rider@example.com"
-            value={inviteEmail}
-            onChange={(e) => setInviteEmail(e.target.value)}
-            className={inputClass}
-          />
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_9rem]">
+            <input
+              type="email"
+              autoFocus
+              placeholder="rider@example.com"
+              aria-label="Email address"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              className={inputClass}
+            />
+            <select
+              value={inviteRole}
+              aria-label="Access level"
+              onChange={(e) => setInviteRole(e.target.value as TripRole)}
+              className={inputClass}
+            >
+              <option value="editor">Can edit</option>
+              <option value="viewer">View only</option>
+            </select>
+          </div>
           {inviteError && <p className="text-xs text-rose-400">{inviteError}</p>}
         </AddForm>
       )}
 
-      <ul className="flex flex-col gap-1.5">
-        {members.map((c, idx) => {
-          const isOwnerRow = idx === 0;
-          const isMe = c.user_id === user?.id;
-          return (
-            <li
+      {collapsed ? (
+        // Collapsed: just enough to see the crew at a glance.
+        <div className="flex flex-wrap items-center gap-1.5">
+          {members.map((c, idx) => (
+            <span
               key={c.user_id}
-              className="flex flex-wrap items-center gap-2.5 rounded-md border border-edge bg-surface-raised px-3 py-2"
+              title={c.name}
+              className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${AVATAR_TONES[idx % AVATAR_TONES.length]}`}
             >
-              <span
-                aria-hidden
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${AVATAR_TONES[idx % AVATAR_TONES.length]}`}
+              {initials(c.name)}
+            </span>
+          ))}
+          {pending.length > 0 && (
+            <Badge tone="amber">{pending.length} pending</Badge>
+          )}
+        </div>
+      ) : (
+        /*
+         * A row of small cards rather than stacked full-width rows: a member
+         * carries very little information, so letting each one claim an
+         * entire line wastes the width the section already occupies.
+         */
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {members.map((c, idx) => {
+            const isMe = c.user_id === user?.id;
+            return (
+              <li
+                key={c.user_id}
+                className="flex flex-col gap-2 rounded-card border border-edge bg-surface-raised p-3"
               >
-                {initials(c.name)}
+                <div className="flex items-center gap-2.5">
+                  <span
+                    aria-hidden
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${AVATAR_TONES[idx % AVATAR_TONES.length]}`}
+                  >
+                    {initials(c.name)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-content">{c.name}</p>
+                    <p className="truncate text-xs text-content-subtle">{c.email}</p>
+                  </div>
+                  {isOwner && !c.is_creator && (
+                    <IconButton
+                      onClick={() => handleRemove(c.user_id)}
+                      title="Remove from trip"
+                      variant="danger"
+                      icon="remove"
+                    />
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {isOwner && !c.is_creator ? (
+                    <select
+                      value={c.role}
+                      aria-label={`Access level for ${c.name}`}
+                      onChange={(e) => handleRoleChange(c.user_id, e.target.value as TripRole)}
+                      className={`rounded-full border px-1.5 py-0 text-[11px] outline-none ${
+                        c.role === "viewer"
+                          ? "border-edge bg-surface-overlay text-content-muted"
+                          : "border-emerald-800/60 bg-emerald-950/50 text-emerald-300"
+                      }`}
+                    >
+                      <option value="editor">Collaborator</option>
+                      <option value="viewer">Audience</option>
+                    </select>
+                  ) : (
+                    <Badge tone={c.role === "viewer" ? "cyan" : "emerald"}>
+                      {c.role === "viewer" ? "Audience" : "Collaborator"}
+                    </Badge>
+                  )}
+                </div>
+
+                {isMe && editingBike ? (
+                  <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_auto_auto] items-center gap-1">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Make & model"
+                      value={vehicleDraft}
+                      onChange={(e) => setVehicleDraft(e.target.value)}
+                      className={`${inputClass} py-1 text-xs`}
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="mi"
+                      aria-label="Range in miles"
+                      value={rangeDraft}
+                      onChange={(e) => setRangeDraft(e.target.value)}
+                      className={`${inputClass} py-1 text-xs`}
+                    />
+                    <IconButton
+                      onClick={handleSaveBike}
+                      title="Save"
+                      variant="confirm"
+                      icon="confirm"
+                    />
+                    <IconButton
+                      onClick={() => setEditingBike(false)}
+                      title="Cancel"
+                      icon="close"
+                    />
+                  </div>
+                ) : isMe ? (
+                  <button
+                    onClick={() => setEditingBike(true)}
+                    className="self-start rounded-full border border-edge bg-surface-overlay px-2 py-0.5 text-xs text-content-muted transition-colors hover:border-accent hover:text-accent"
+                  >
+                    {c.vehicle ?? "Add your ride"}
+                    {c.fuel_range_miles ? ` · ${c.fuel_range_miles} mi` : ""}
+                  </button>
+                ) : (c.vehicle || c.fuel_range_miles) ? (
+                  <div className="self-start">
+                    <Badge tone="amber">
+                      {c.vehicle}
+                      {c.vehicle && c.fuel_range_miles ? " · " : ""}
+                      {c.fuel_range_miles ? `${c.fuel_range_miles} mi` : ""}
+                    </Badge>
+                  </div>
+                ) : (
+                  <EmptyHint>No ride listed</EmptyHint>
+                )}
+              </li>
+            );
+          })}
+
+          {pending.map((p) => (
+            <li
+              key={`pending-${p.id}`}
+              className="flex items-center gap-2.5 rounded-card border border-dashed border-edge p-3"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-overlay">
+                <Emoji glyph="✉️" size="md" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-content">
-                  {c.name}
-                  {isOwnerRow && (
-                    <span className="ml-1.5 text-xs font-normal text-content-subtle">Owner</span>
-                  )}
-                </p>
-                <p className="truncate text-xs text-content-subtle">{c.email}</p>
-              </div>
-
-              {isMe && editingBike ? (
-                <div className="flex w-full items-center gap-1.5">
-                  <input
-                    type="text"
-                    autoFocus
-                    placeholder="Make & model"
-                    value={vehicleDraft}
-                    onChange={(e) => setVehicleDraft(e.target.value)}
-                    className={`${inputClass} flex-1 py-1 text-xs`}
-                  />
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="Range mi"
-                    value={rangeDraft}
-                    onChange={(e) => setRangeDraft(e.target.value)}
-                    className={`${inputClass} w-24 py-1 text-xs`}
-                  />
-                  <IconButton onClick={handleSaveBike} title="Save" variant="confirm">
-                    ✓
-                  </IconButton>
-                  <IconButton onClick={() => setEditingBike(false)} title="Cancel">
-                    ×
-                  </IconButton>
-                </div>
-              ) : isMe ? (
-                <button
-                  onClick={() => setEditingBike(true)}
-                  className="rounded-full border border-edge bg-surface-overlay px-2 py-0.5 text-xs text-content-muted transition-colors hover:border-accent hover:text-accent"
-                >
-                  {c.vehicle ?? "Add your ride"}
-                  {c.fuel_range_miles ? ` · ${c.fuel_range_miles} mi` : ""}
-                </button>
-              ) : (
-                (c.vehicle || c.fuel_range_miles) && (
-                  <Badge tone="amber">
-                    {c.vehicle}
-                    {c.vehicle && c.fuel_range_miles ? " · " : ""}
-                    {c.fuel_range_miles ? `${c.fuel_range_miles} mi` : ""}
+                <p className="truncate text-sm text-content-muted">{p.email}</p>
+                <div className="flex flex-wrap gap-1">
+                  <Badge tone="amber">Pending</Badge>
+                  <Badge tone={p.role === "viewer" ? "cyan" : "emerald"}>
+                    {p.role === "viewer" ? "Audience" : "Collaborator"}
                   </Badge>
-                )
-              )}
-
-              {isOwner && !isOwnerRow && (
-                <IconButton
-                  onClick={() => handleRemove(c.user_id)}
-                  title="Remove member"
-                  variant="danger"
-                >
-                  −
-                </IconButton>
-              )}
+                </div>
+              </div>
+              <IconButton
+                onClick={() => handleCancelPending(p.id)}
+                title="Cancel invite"
+                variant="danger"
+                icon="remove"
+              />
             </li>
-          );
-        })}
+          ))}
+        </ul>
+      )}
 
-        {pending.map((p) => (
-          <li
-            key={`pending-${p.id}`}
-            className="flex flex-wrap items-center gap-2.5 rounded-md border border-dashed border-edge px-3 py-2"
-          >
-            <span
-              aria-hidden
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-overlay text-xs text-content-subtle"
-            >
-              ✉️
-            </span>
-            <p className="min-w-0 flex-1 truncate text-sm text-content-muted">{p.email}</p>
-            <Badge tone="amber">Pending</Badge>
-            <IconButton
-              onClick={() => handleCancelPending(p.id)}
-              title="Cancel invite"
-              variant="danger"
-            >
-              −
-            </IconButton>
-          </li>
-        ))}
-      </ul>
-
-      {members.length <= 1 && pending.length === 0 && (
+      {!collapsed && members.length <= 1 && pending.length === 0 && (
         <p className="text-sm text-content-subtle">Just you so far — invite the crew.</p>
       )}
     </Section>

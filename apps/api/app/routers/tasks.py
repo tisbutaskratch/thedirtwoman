@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from app.core.deps import (
     get_accessible_trip,
     get_current_user,
-    trip_access_filter,
+    get_editable_trip,
+    trip_write_filter,
     validate_trip_member,
 )
 from app.db.session import get_db
@@ -24,7 +25,7 @@ def get_owned_task(
     task = (
         db.query(Task)
         .join(Trip, Task.trip_id == Trip.id)
-        .filter(Task.id == task_id, trip_access_filter(current_user.id))
+        .filter(Task.id == task_id, trip_write_filter(current_user.id))
         .first()
     )
     if task is None:
@@ -39,7 +40,7 @@ def list_tasks(trip: Trip = Depends(get_accessible_trip)) -> list[Task]:
 
 @router.post("/trips/{trip_id}/tasks", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
 def create_task(
-    payload: TaskCreate, trip: Trip = Depends(get_accessible_trip), db: Session = Depends(get_db)
+    payload: TaskCreate, trip: Trip = Depends(get_editable_trip), db: Session = Depends(get_db)
 ) -> Task:
     validate_trip_member(trip, payload.assigned_to_user_id, db)
     task = Task(trip_id=trip.id, **payload.model_dump())

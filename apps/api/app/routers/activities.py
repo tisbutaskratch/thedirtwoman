@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
+from app.core.deps import (
+    get_accessible_trip,
+    get_current_user,
+    get_editable_trip,
+    trip_write_filter,
+)
 from app.db.session import get_db
 from app.models.activity import Activity
 from app.models.trip import Trip
@@ -19,7 +24,7 @@ def get_owned_activity(
     activity = (
         db.query(Activity)
         .join(Trip, Activity.trip_id == Trip.id)
-        .filter(Activity.id == activity_id, trip_access_filter(current_user.id))
+        .filter(Activity.id == activity_id, trip_write_filter(current_user.id))
         .first()
     )
     if activity is None:
@@ -37,7 +42,7 @@ def list_activities(trip: Trip = Depends(get_accessible_trip)) -> list[Activity]
 )
 def create_activity(
     payload: ActivityCreate,
-    trip: Trip = Depends(get_accessible_trip),
+    trip: Trip = Depends(get_editable_trip),
     db: Session = Depends(get_db),
 ) -> Activity:
     activity = Activity(trip_id=trip.id, **payload.model_dump())

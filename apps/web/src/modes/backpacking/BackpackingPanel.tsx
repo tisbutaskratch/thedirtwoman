@@ -90,14 +90,12 @@ export default function BackpackingPanel({
 
   return (
     <Section
-      icon="🥾"
+      glyph="🥾"
       title="Trail plan"
       tone="violet"
       actions={
         !editing && (
-          <IconButton onClick={() => setEditing(true)} title="Edit trail plan">
-            ✎
-          </IconButton>
+          <IconButton onClick={() => setEditing(true)} title="Edit trail plan" icon="edit" />
         )
       }
     >
@@ -107,9 +105,7 @@ export default function BackpackingPanel({
           className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
         >
           <div className="flex justify-end">
-            <IconButton onClick={() => setEditing(false)} title="Cancel">
-              ×
-            </IconButton>
+            <IconButton onClick={() => setEditing(false)} title="Cancel" icon="close" />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Total distance (mi)">
@@ -207,9 +203,7 @@ export default function BackpackingPanel({
             </Field>
           </div>
           <div className="flex justify-end">
-            <IconButton type="submit" title="Save" variant="confirm" disabled={saving}>
-              ✓
-            </IconButton>
+            <IconButton type="submit" title="Save" variant="confirm" disabled={saving} icon="confirm" />
           </div>
         </form>
       ) : (
@@ -217,20 +211,20 @@ export default function BackpackingPanel({
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <StatTile
               label="Distance"
-              value={detail.total_distance_mi ?? "—"}
+              value={detail.total_distance_mi ?? null}
               unit={detail.total_distance_mi ? "mi" : undefined}
               hint={detail.avg_miles_per_day ? `${detail.avg_miles_per_day} mi/day avg` : undefined}
               tone="violet"
             />
             <StatTile
               label="Elevation gain"
-              value={detail.elevation_gain_ft?.toLocaleString() ?? "—"}
+              value={detail.elevation_gain_ft?.toLocaleString() ?? null}
               unit={detail.elevation_gain_ft ? "ft" : undefined}
               tone="violet"
             />
             <StatTile
               label="Pack weight"
-              value={oz(detail.est_pack_weight_oz) ?? "—"}
+              value={oz(detail.est_pack_weight_oz) ?? null}
               hint={
                 detail.est_pack_weight_oz !== null
                   ? `base ${oz(detail.base_pack_weight_oz)} + gear ${oz(detail.gear_weight_oz)}`
@@ -240,7 +234,7 @@ export default function BackpackingPanel({
             />
             <StatTile
               label="Water carry"
-              value={detail.water_capacity_liters ?? "—"}
+              value={detail.water_capacity_liters ?? null}
               unit={detail.water_capacity_liters ? "L" : undefined}
               hint={
                 detail.water_needed_dry_stretch_l !== null
