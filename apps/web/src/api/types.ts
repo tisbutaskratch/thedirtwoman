@@ -302,3 +302,26 @@ export interface InvitePreview {
 export interface InviteAcceptResult {
   trip_id: number;
 }
+
+/**
+ * A private diary entry. Only ever your own: the API never returns another
+ * member's entries, which is why there is no author field to display.
+ */
+export interface JournalEntry {
+  id: number;
+  trip_id: number;
+  entry_date: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JournalEntryCreate {
+  entry_date: string;
+  body: string;
+}
+
+export interface JournalEntryUpdate {
+  entry_date?: string;
+  body?: string;
+}

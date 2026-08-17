@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Critter from "@/art/critters";
 import { Icon } from "@/components/ui";
-import { DONATION_URL, FEEDBACK_URL, SHARE_TEXT } from "@/lib/support";
+import { AUTHOR, CREATED, DONATION_URL, FEEDBACK_URL, SHARE_TEXT } from "@/lib/support";
 
 /*
  * The "if you like this, chip in / pass it on" footer.
@@ -58,47 +58,57 @@ export default function SupportFooter() {
 
   return (
     <footer className="mt-auto border-t border-edge print:hidden">
-      <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 py-6 text-center sm:flex-row sm:justify-center sm:gap-6 sm:px-6">
-        <p className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-sm text-content-muted">
-          {/* The bee gets its own amber rather than the muted footer grey —
-              it's the one spot of colour down here, so it may as well be
-              worth looking at. */}
-          <Critter name="bee" size={22} className="text-amber-400 opacity-100" />
-          <span>Enjoying Adventure Planner?</span>
-          <a
-            href={DONATION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-medium text-accent underline-offset-2 transition-colors hover:underline"
-          >
-            <Icon name="support" size={14} />
-            Leave a tip on Venmo
-          </a>
+      {/*
+       * The standard site-footer shape: the ask and its links on one side,
+       * the byline pushed to the far end. Stacking them cost three rows for
+       * what is, in the end, a footnote. On a phone there is no room for two
+       * ends, so it stacks and centres.
+       */}
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-5 text-center sm:flex-row sm:justify-between sm:gap-6 sm:px-6 sm:text-left">
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
+          <p className="flex items-center gap-2 text-sm text-content-muted">
+            {/* The one spot of colour down here, and it hoards things for
+                later, which is roughly the ask. */}
+            <Critter
+              name="squirrel"
+              size={24}
+              className="text-amber-500 opacity-100 dark:text-amber-400"
+            />
+            <span>Enjoying Adventure Planner?</span>
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            <a
+              href={DONATION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent underline-offset-4 transition-colors hover:underline"
+            >
+              <Icon name="support" size={15} />
+              Leave a tip on Venmo
+            </a>
+
+            <a
+              href={FEEDBACK_URL}
+              className="inline-flex items-center gap-1.5 text-sm text-content-muted underline-offset-4 transition-colors hover:text-accent hover:underline"
+            >
+              <Icon name="feedback" size={15} />
+              Send feedback
+            </a>
+
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 text-sm text-content-muted underline-offset-4 transition-colors hover:text-accent hover:underline"
+            >
+              <Icon name={shared ? "confirm" : "tellAFriend"} size={15} />
+              {shared ? "Link copied. Thank you!" : "Tell your friends"}
+            </button>
+          </div>
+        </div>
+
+        <p className="shrink-0 text-xs text-content-subtle">
+          Built by {AUTHOR} · {CREATED}
         </p>
-
-        <span aria-hidden className="hidden text-content-subtle sm:inline">
-          ·
-        </span>
-
-        <a
-          href={FEEDBACK_URL}
-          className="inline-flex items-center gap-1.5 text-sm text-content-muted underline-offset-2 transition-colors hover:text-accent hover:underline"
-        >
-          <Icon name="feedback" size={14} />
-          Send feedback
-        </a>
-
-        <span aria-hidden className="hidden text-content-subtle sm:inline">
-          ·
-        </span>
-
-        <button
-          onClick={handleShare}
-          className="inline-flex items-center gap-1.5 text-sm text-content-muted underline-offset-2 transition-colors hover:text-accent hover:underline"
-        >
-          <Icon name={shared ? "confirm" : "tellAFriend"} size={14} />
-          {shared ? "Link copied — thank you!" : "Tell your friends"}
-        </button>
       </div>
     </footer>
   );

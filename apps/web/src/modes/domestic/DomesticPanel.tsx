@@ -331,7 +331,7 @@ export default function DomesticPanel({
               <Field label="Layover notes" span>
                 <textarea
                   rows={2}
-                  placeholder="90 min in DEN — same terminal, bags checked through"
+                  placeholder="90 min in DEN, same terminal, bags checked through"
                   value={form.layover_notes}
                   onChange={set("layover_notes")}
                   className={inputClass}
@@ -447,8 +447,8 @@ export default function DomesticPanel({
                   value={detail.connection_risk === null ? null : detail.connection_risk}
                   hint={
                     detail.separate_tickets
-                      ? "Separate tickets — a missed leg is on you"
-                      : "One ticket — the airline owns the connection"
+                      ? "Separate tickets, so a missed leg is on you"
+                      : "One ticket, so the airline owns the connection"
                   }
                   tone={detail.connection_risk === "high" ? "rose" : "emerald"}
                   status={

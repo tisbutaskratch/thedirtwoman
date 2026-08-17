@@ -360,7 +360,7 @@ export default function ActivitiesSection({
       )}
 
       {groupedByDay.length === 0 ? (
-        <EmptyState glyph="🗓️" message="No days planned yet — add the first activity." />
+        <EmptyState glyph="🗓️" message="No days planned yet. Add the first activity." />
       ) : (
         <div className="flex flex-col gap-3">
           {groupedByDay.map(([day, dayActivities]) => {

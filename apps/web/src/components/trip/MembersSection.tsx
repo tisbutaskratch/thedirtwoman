@@ -346,7 +346,7 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
       )}
 
       {!collapsed && members.length <= 1 && pending.length === 0 && (
-        <p className="text-sm text-content-subtle">Just you so far — invite the crew.</p>
+        <p className="text-sm text-content-subtle">Just you so far. Invite the crew.</p>
       )}
     </Section>
   );

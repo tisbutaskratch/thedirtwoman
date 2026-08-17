@@ -115,12 +115,11 @@ export default function AssignmentsSection({ tripId }: { tripId: number }) {
       title="Who's doing what"
       tone="sky"
       count={total}
-      meta="Everything assigned, in one place"
     >
       {total === 0 ? (
         <EmptyState
           glyph="🧾"
-          message="Nothing assigned yet — claim items in the packing list, prep checklist or timeline."
+          message="Nothing assigned yet. Claim items in the packing list, prep checklist or timeline."
         />
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

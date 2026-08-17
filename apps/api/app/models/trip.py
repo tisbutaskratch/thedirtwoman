@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from app.models.expense import Expense
     from app.models.gear import Gear
     from app.models.international_detail import InternationalDetail
+    from app.models.journal_entry import JournalEntry
     from app.models.location import Location
     from app.models.motocamping_detail import MotocampingDetail
     from app.models.note import Note
@@ -103,6 +104,9 @@ class Trip(Base):
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
     collaborators: Mapped[list[TripCollaborator]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan"
+    )
+    journal_entries: Mapped[list[JournalEntry]] = relationship(
         back_populates="trip", cascade="all, delete-orphan"
     )
     invites: Mapped[list[TripInvite]] = relationship(

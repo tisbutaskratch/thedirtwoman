@@ -77,11 +77,9 @@ export default function GearSection({
   }, [gear]);
 
   const packedCount = gear.filter((g) => g.packed).length;
-  // Weighed items only — an unweighed item shouldn't silently count as 0 oz,
-  // so the heading says how many are still missing a weight.
-  const weighed = gear.filter((g) => g.weight_oz !== null);
-  const totalOz = weighed.reduce((sum, g) => sum + (g.weight_oz ?? 0), 0);
-  const missingWeight = gear.length - weighed.length;
+  // Weighed items only, so an item with no weight recorded doesn't quietly
+  // drag the total down as if it were weightless.
+  const totalOz = gear.reduce((sum, g) => sum + (g.weight_oz ?? 0), 0);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -137,13 +135,7 @@ export default function GearSection({
       title="Packing list"
       tone={SECTION_META.packing.tone}
       count={gear.length}
-      meta={
-        gear.length > 0
-          ? `${packedCount} packed · ${(totalOz / 16).toFixed(1)} lb${
-              missingWeight > 0 ? ` (${missingWeight} unweighed)` : ""
-            }`
-          : undefined
-      }
+      meta={gear.length > 0 ? `${packedCount} packed · ${(totalOz / 16).toFixed(1)} lb` : undefined}
       actions={
         !showAdd && <IconButton onClick={() => setShowAdd(true)} title="Add gear" icon="add" />
       }

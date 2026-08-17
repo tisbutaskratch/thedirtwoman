@@ -10,12 +10,14 @@
 import {
   Archive,
   ArrowLeft,
+  ArrowUp,
   Check,
   ChevronDown,
   ChevronRight,
   Download,
   Heart,
   Link2,
+  Lock,
   Mail,
   MapPin,
   Minus,
@@ -43,6 +45,7 @@ export const Icons = {
   delete: Trash2,
   archive: Archive,
   back: ArrowLeft,
+  toTop: ArrowUp,
   share: Link2,
   download: Download,
   expand: ChevronDown,
@@ -55,6 +58,7 @@ export const Icons = {
   support: Heart,
   tellAFriend: Share2,
   feedback: Mail,
+  private: Lock,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof Icons;

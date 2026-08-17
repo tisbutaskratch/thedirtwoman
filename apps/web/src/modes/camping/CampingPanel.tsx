@@ -145,8 +145,8 @@ export default function CampingPanel({
                 className={inputClass}
               >
                 <option value="">Not checked yet</option>
-                <option value="true">Checked — fires allowed</option>
-                <option value="false">Checked — restrictions on</option>
+                <option value="true">Checked, fires allowed</option>
+                <option value="false">Checked, restrictions on</option>
               </select>
             </Field>
             <Field label="Firewood">

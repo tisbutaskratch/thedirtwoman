@@ -7,6 +7,7 @@ import AssignmentsSection from "@/components/trip/AssignmentsSection";
 import ExpensesSection from "@/components/trip/ExpensesSection";
 import FilesSection from "@/components/trip/FilesSection";
 import GearSection from "@/components/trip/GearSection";
+import JournalSection from "@/components/trip/JournalSection";
 import LocationsSection from "@/components/trip/LocationsSection";
 import MembersSection from "@/components/trip/MembersSection";
 import NotesSection from "@/components/trip/NotesSection";
@@ -37,6 +38,24 @@ function formatRange(start: string | null, end: string | null) {
   return fmt((start ?? end) as string);
 }
 
+/**
+ * Day and month only, for the condensed header.
+ *
+ * The year is the first thing worth dropping: you already know roughly when
+ * your own trip is, and it costs the width that the title needs.
+ */
+function formatRangeCompact(start: string | null, end: string | null) {
+  if (!start && !end) return null;
+  const fmt = (d: string) =>
+    new Date(`${d}T00:00:00Z`).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  if (start && end) return `${fmt(start)} → ${fmt(end)}`;
+  return fmt((start ?? end) as string);
+}
+
 /** Which destructive action the confirmation modal is currently guarding. */
 type PendingAction = "delete" | "archive" | "unarchive" | null;
 
@@ -50,6 +69,13 @@ export default function TripDetail() {
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<PendingAction>(null);
   const [editingTrip, setEditingTrip] = useState(false);
+  /*
+   * Once you've scrolled into the plan, the sticky header earns its keep by
+   * being small. On a phone it drops to just the way back, which trip you're
+   * in, and a way to the top; the dates and the destructive controls belong
+   * to the top of the page, where you were when you needed them.
+   */
+  const [scrolled, setScrolled] = useState(false);
   const [draft, setDraft] = useState({ title: "", start: "", end: "" });
 
   // The opener needs a trip type before the trip has loaded. The dashboard
@@ -81,6 +107,13 @@ export default function TripDetail() {
   useEffect(() => {
     refreshTrip();
   }, [refreshTrip]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 48);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   async function handleConfirm() {
     const action = pending;
@@ -131,11 +164,15 @@ export default function TripDetail() {
   // Viewers see the whole plan but get no controls that would 403 on submit.
   const canEdit = trip.my_role === "editor";
   const isArchived = trip.archived_at !== null;
+  // Only condense once out of the way of the top, and never mid-edit, where
+  // the controls being yanked away would be alarming.
+  const condensed = scrolled && !editingTrip;
+  const compactRange = formatRangeCompact(trip.start_date, trip.end_date);
 
   const confirmCopy = {
     delete: {
       title: "Delete this trip?",
-      body: `“${trip.title}” and everything in it — timeline, packing list, expenses, screenshots — will be permanently removed. This cannot be undone.`,
+      body: `“${trip.title}” and everything in it (timeline, packing list, expenses, screenshots) will be permanently removed. This cannot be undone.`,
       confirmLabel: "Delete trip",
       tone: "rose" as const,
     },
@@ -162,7 +199,11 @@ export default function TripDetail() {
        * block gets everything below. Stacking those separately cost roughly
        * a quarter of the viewport before you saw any of the plan.
        */}
-      <header className="sticky top-0 z-20 -mx-4 overflow-hidden border-b border-edge bg-surface/85 px-4 py-2.5 backdrop-blur sm:-mx-6 sm:px-6 sm:py-4">
+      <header
+        className={`sticky top-0 z-20 -mx-4 overflow-hidden border-b border-edge bg-surface/85 px-4 backdrop-blur transition-[padding] sm:-mx-6 sm:px-6 sm:py-4 ${
+          condensed ? "py-1.5" : "py-2.5"
+        }`}
+      >
         <TripBackdrop type={trip.trip_type} />
 
         <div className="relative flex items-center justify-between gap-2">
@@ -173,7 +214,13 @@ export default function TripDetail() {
             <Icon name="back" size={14} /> All trips
           </Link>
 
-          <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+          {/* Condensed on a phone, this whole cluster gives way to one
+              scroll-to-top control. */}
+          <div
+            className={`shrink-0 items-center gap-0.5 sm:flex sm:gap-1 ${
+              condensed ? "hidden" : "flex"
+            }`}
+          >
             {/*
              * Export runs through the browser's own print-to-PDF: the print
              * stylesheet flattens the grid and hides the controls, so the PDF
@@ -199,13 +246,35 @@ export default function TripDetail() {
               </>
             )}
           </div>
+
+          {condensed && (
+            // Phone only: on a wider screen the full controls never go away,
+            // so there is nothing for this to stand in for.
+            <span className="sm:hidden">
+              <IconButton
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                title="Back to top"
+                icon="toTop"
+              />
+            </span>
+          )}
         </div>
 
-        <div className="relative mt-1.5 flex min-w-0 items-center gap-2.5 sm:mt-2 sm:gap-3">
+        <div
+          className={`relative flex min-w-0 items-center gap-2.5 sm:mt-2 sm:gap-3 ${
+            condensed ? "mt-0.5" : "mt-1.5"
+          }`}
+        >
           <span
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-card border sm:h-11 sm:w-11 ${TONE_SOFT[meta.tone]}`}
+            className={`flex shrink-0 items-center justify-center rounded-card border sm:h-11 sm:w-11 ${
+              condensed ? "h-7 w-7" : "h-9 w-9"
+            } ${TONE_SOFT[meta.tone]}`}
           >
-            <TripMark type={trip.trip_type} size={22} className="sm:hidden" />
+            <TripMark
+              type={trip.trip_type}
+              size={condensed ? 18 : 22}
+              className="sm:hidden"
+            />
             <TripMark type={trip.trip_type} size={26} className="hidden sm:block" />
           </span>
           <div className="min-w-0 flex-1">
@@ -246,12 +315,31 @@ export default function TripDetail() {
               </div>
             ) : (
               <>
-                <h1 className="flex flex-wrap items-center gap-x-2 text-lg font-bold leading-tight tracking-tight text-content sm:text-2xl lg:text-3xl">
-                  <span className="min-w-0 break-words">{trip.title}</span>
+                <h1
+                  className={`flex items-center gap-x-2 font-bold leading-tight tracking-tight text-content sm:flex-wrap sm:text-2xl lg:text-3xl ${
+                    condensed ? "flex-nowrap text-sm" : "flex-wrap text-lg"
+                  }`}
+                >
+                  <span className={`min-w-0 ${condensed ? "truncate" : "break-words"}`}>
+                    {trip.title}
+                  </span>
                   {isArchived && <Badge tone="amber">Archived</Badge>}
+                  {/* Condensed only: the slack beside a short title is free
+                      real estate, so the dates ride along in a lighter weight
+                      rather than costing their own row. */}
+                  {condensed && compactRange && (
+                    <span className="shrink-0 text-xs font-normal text-content-subtle sm:hidden">
+                      {compactRange}
+                    </span>
+                  )}
                 </h1>
-                {/* Type and dates on one line — they're both just context. */}
-                <p className="mt-0.5 truncate text-xs text-content-muted sm:text-sm">
+                {/* Type and dates on one line: both are just context, and the
+                    first thing worth dropping when the header has to shrink. */}
+                <p
+                  className={`mt-0.5 truncate text-xs text-content-muted sm:block sm:text-sm ${
+                    condensed ? "hidden" : "block"
+                  }`}
+                >
                   {meta.label} · {formatRange(trip.start_date, trip.end_date)}
                 </p>
               </>
@@ -280,7 +368,7 @@ export default function TripDetail() {
 
       {!canEdit && (
         <p className="rounded-card border border-dashed border-edge px-3 py-2 text-xs text-content-subtle">
-          You have view-only access to this trip — you can see everything, but
+          You have view-only access to this trip. You can see everything, but
           changes are up to the collaborators.
         </p>
       )}
@@ -302,6 +390,11 @@ export default function TripDetail() {
         <LocationsSection tripId={id} onChange={refreshTrip} />
         <NotesSection tripId={id} onChange={refreshTrip} />
       </div>
+
+      {/* The private counterpart to Notes: same act of writing, different
+          audience, so it gets its own row rather than sitting beside the
+          shared one where the distinction would blur. */}
+      <JournalSection tripId={id} />
 
       <PhotosSection tripId={id} />
 

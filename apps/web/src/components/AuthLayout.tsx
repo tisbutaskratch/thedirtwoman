@@ -30,14 +30,15 @@ export default function AuthLayout({ title, children }: { title: string; childre
         </Link>
         <div className="relative rounded-card border border-edge bg-surface-raised p-6 shadow-xl">
           {/*
-           * A raccoon leaning on the top edge of the card, waving. It lives
-           * only on the sign-in screens, so arriving at the app has one face
-           * that belongs to it and turns up nowhere else.
+           * A raccoon peering over the card. It lives only on the sign-in
+           * screens, so arriving at the app has one face that belongs to it
+           * and turns up nowhere else. Offset so its paws land on the card's
+           * top border rather than floating above it.
            */}
           <Critter
             name="raccoon"
-            size={46}
-            className="absolute -top-[34px] right-5 text-amber-400 opacity-100"
+            size={52}
+            className="absolute -top-[33px] right-6 text-amber-500 opacity-100 dark:text-amber-400"
           />
           <h1 className="mb-5 text-xl font-semibold">{title}</h1>
           {children}

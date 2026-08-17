@@ -5,7 +5,7 @@ export default function Contact() {
     <section className="flex flex-col gap-8">
       <h1 className="text-3xl font-bold tracking-tight">Contact</h1>
       <p className="text-content-muted">
-        Send word by post, raven, or whatever's quickest — I'll get back to you between garden rounds.
+        Send word by post, raven, or whatever's quickest. I'll get back to you between garden rounds.
       </p>
       <ul className="flex flex-col gap-3">
         {contactLinks.map((link) => (

@@ -9,9 +9,9 @@ export const profile = {
 
 export const about = {
   paragraphs: [
-    "I'm a gardener by trade — first for old Mr. Bilbo Baggins, then for Mr. Frodo — and I like to think I know a thing or two about coaxing something good out of stubborn ground.",
+    "I'm a gardener by trade, first for old Mr. Bilbo Baggins and then for Mr. Frodo, and I like to think I know a thing or two about coaxing something good out of stubborn ground.",
     "A while back I got talked into a rather longer walk than I'd planned: out of the Shire, through Moria, over the mountains, and eventually up a very unpleasant hill in Mordor. I carried what needed carrying, cooked what needed cooking, and made sure Mr. Frodo got where he was going, even the last bit when I had to carry him too.",
-    "These days I'm back to gardening, mostly — replanted the Party Tree, brought the Shire back after the Troubles, that sort of thing. I also serve as Mayor, which mostly means I'm good at listening to complaints and handing out potatoes.",
+    "These days I'm back to gardening, mostly. Replanted the Party Tree, brought the Shire back after the Troubles, that sort of thing. I also serve as Mayor, which mostly means I'm good at listening to complaints and handing out potatoes.",
     "I keep good notes. I finish what I start. And I've found that most problems get smaller once you've had a proper breakfast.",
   ],
 };

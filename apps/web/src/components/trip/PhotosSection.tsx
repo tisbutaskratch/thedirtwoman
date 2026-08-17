@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { attachmentUrl, deleteAttachment, listPhotos, uploadPhoto } from "@/api/attachments";
+import {
+  attachmentUrl,
+  deleteAttachment,
+  downloadAttachment,
+  listPhotos,
+  uploadPhoto,
+} from "@/api/attachments";
 import type { Attachment } from "@/api/types";
 import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
 import { SECTION_META } from "@/lib/tripTypes";
@@ -101,21 +107,38 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
       ) : (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           {photos.map((photo) => (
-            <button
+            <div
               key={photo.id}
-              onClick={() => setViewing(photo)}
-              className="group overflow-hidden rounded-card border border-edge bg-surface-raised text-left transition-all hover:border-accent hover:shadow-lg"
+              className="group relative overflow-hidden rounded-card border border-edge bg-surface-raised transition-all hover:border-accent hover:shadow-lg"
             >
-              <img
-                src={attachmentUrl(photo)}
-                alt={photo.title}
-                loading="lazy"
-                className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <span className="block truncate px-2 py-1.5 text-xs text-content-muted group-hover:text-accent">
-                {photo.title}
+              <button
+                onClick={() => setViewing(photo)}
+                className="block w-full text-left"
+                title={`Open ${photo.title}`}
+              >
+                <img
+                  src={attachmentUrl(photo)}
+                  alt={photo.title}
+                  loading="lazy"
+                  className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <span className="block truncate px-2 py-1.5 text-xs text-content-muted group-hover:text-accent">
+                  {photo.title}
+                </span>
+              </button>
+
+              {/*
+               * Saving a screenshot shouldn't mean opening it first. Always
+               * visible on touch, where there is no hover to reveal it.
+               */}
+              <span className="absolute right-1 top-1 rounded-md bg-surface/85 backdrop-blur transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+                <IconButton
+                  onClick={() => downloadAttachment(photo)}
+                  title={`Download ${photo.original_filename}`}
+                  icon="download"
+                />
               </span>
-            </button>
+            </div>
           ))}
         </div>
       )}
@@ -145,6 +168,11 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
                 )}
               </div>
               <div className="flex shrink-0 gap-1">
+                <IconButton
+                  onClick={() => downloadAttachment(viewing)}
+                  title={`Download ${viewing.original_filename}`}
+                  icon="download"
+                />
                 <IconButton
                   onClick={() => handleDelete(viewing.id)}
                   title="Delete"

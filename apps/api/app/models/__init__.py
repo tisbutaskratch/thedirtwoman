@@ -6,6 +6,7 @@ from app.models.domestic_detail import DomesticDetail, DomesticTravelMode
 from app.models.expense import Expense, ExpenseParticipant
 from app.models.gear import Gear, GearRequiredLevel
 from app.models.international_detail import InternationalDetail
+from app.models.journal_entry import JournalEntry
 from app.models.location import Location, LocationKind
 from app.models.motocamping_detail import MotocampingDetail
 from app.models.note import Note
@@ -25,6 +26,7 @@ __all__ = [
     "CampingDetail",
     "DomesticDetail",
     "DomesticTravelMode",
+    "JournalEntry",
     "Expense",
     "ExpenseParticipant",
     "Gear",

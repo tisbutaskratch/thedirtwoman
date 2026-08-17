@@ -96,7 +96,7 @@ export default function NewTrip() {
           <input
             type="text"
             required
-            placeholder="KAT 2026 — Kentucky Adventure Tour"
+            placeholder="KAT 2026, Kentucky Adventure Tour"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={inputClass}

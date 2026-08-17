@@ -72,4 +72,5 @@ export const SECTION_META = {
   expenses: { glyph: "💰", tone: "emerald" as Tone },
   essentials: { glyph: "🧭", tone: "cyan" as Tone },
   assignments: { glyph: "🧾", tone: "sky" as Tone },
+  journal: { glyph: "📔", tone: "violet" as Tone },
 };

@@ -16,6 +16,7 @@ from app.routers import (
     expenses,
     gear,
     health,
+    journal,
     locations,
     notes,
     sharing,
@@ -87,6 +88,7 @@ app.include_router(activities.router)
 app.include_router(attachments.router)
 app.include_router(expenses.router)
 app.include_router(gear.router)
+app.include_router(journal.router)
 app.include_router(notes.router)
 app.include_router(tasks.router)
 app.include_router(sharing.router)

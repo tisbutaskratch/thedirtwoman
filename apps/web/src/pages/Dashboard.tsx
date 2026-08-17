@@ -72,7 +72,7 @@ export default function Dashboard() {
           <p className="mt-1 text-sm text-content-muted">
             {nextUp
               ? `${countdown(nextUp.start_date)} days until ${nextUp.title}`
-              : "Nothing on the calendar — time to plan something."}
+              : "Nothing on the calendar. Time to plan something."}
           </p>
         </div>
         <Link

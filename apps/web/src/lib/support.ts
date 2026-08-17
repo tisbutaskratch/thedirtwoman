@@ -30,6 +30,17 @@ export const FEEDBACK_URL =
   "?subject=" +
   encodeURIComponent("Adventure Planner feedback");
 
+/**
+ * Credit line.
+ *
+ * A byline and a year in the footer is the ordinary convention for a
+ * personal project. It answers "who made this and is it still maintained?",
+ * which is exactly what someone wonders before they trust an app with a
+ * trip, or send money to it.
+ */
+export const AUTHOR = "Saba Wilhelm";
+export const CREATED = "August 2026";
+
 /** What gets shared when someone taps "tell a friend". */
 export const SHARE_TEXT =
-  "Adventure Planner — trip planning for motocamping, camping, overlanding, backpacking and travel.";
+  "Adventure Planner: trip planning for motocamping, camping, overlanding, backpacking and travel.";

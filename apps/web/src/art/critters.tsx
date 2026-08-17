@@ -47,7 +47,8 @@ export type CritterName =
   | "turtle"
   | "frog"
   | "raccoon"
-  | "squirrel";
+  | "squirrel"
+  | "hamster";
 
 interface CritterProps {
   size?: number;
@@ -494,6 +495,32 @@ export function Frog({ size, className }: CritterProps) {
   );
 }
 
+/** Hamster: cheeks full, telling nobody what's in them. */
+export function Hamster({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* ears */}
+      <circle cx="9" cy="10" r="3.4" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={0.3} />
+      <circle cx="23" cy="10" r="3.4" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={0.3} />
+      {/* body, wider than it is tall */}
+      <ellipse cx="16" cy="19" rx="11" ry="9" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* the full cheeks, which are the whole character */}
+      <path d="M6 19 Q4 23 8 24.5" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M26 19 Q28 23 24 24.5" stroke="currentColor" strokeWidth="1.3" />
+      <circle cx="12" cy="17.5" r="1.4" fill="currentColor" />
+      <circle cx="20" cy="17.5" r="1.4" fill="currentColor" />
+      {/* nose and a closed, secretive mouth */}
+      <path d="M16 20 L14.4 21.6 L17.6 21.6 Z" fill="currentColor" />
+      <path d="M13.5 23.5 Q16 24.8 18.5 23.5" stroke="currentColor" strokeWidth="1.2" />
+      {/* little paws tucked together */}
+      <path d="M14 27 L14 29 M18 27 L18 29" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M12.5 29 L15.5 29 M16.5 29 L19.5 29" stroke="currentColor" strokeWidth="1.4" />
+      {/* whiskers */}
+      <path d="M8 20.5 L4 20 M8 22 L4.5 23 M24 20.5 L28 20 M24 22 L27.5 23" stroke="currentColor" strokeWidth="0.9" opacity="0.55" />
+    </Body>
+  );
+}
+
 /** Squirrel: enormous tail, small acorn, strong opinions about saving. */
 export function Squirrel({ size, className }: CritterProps) {
   return (
@@ -526,35 +553,51 @@ export function Squirrel({ size, className }: CritterProps) {
   );
 }
 
-/** Raccoon: the mask does all the work. Waves at people arriving. */
+/**
+ * Raccoon, peering over the top of the sign-in card.
+ *
+ * A peeking pose rather than a whole animal: it sits on an edge, so a full
+ * body with a tail just looked like a creature cut in half. Ears are drawn
+ * clear of the skull rather than tucked behind it (they vanished otherwise),
+ * the mask is a light band with the eyes ringed on top of it so the face
+ * still has features, and the lower viewBox is left empty so the card's
+ * border passes cleanly under the paws.
+ */
 export function Raccoon({ size, className }: CritterProps) {
   return (
     <Body size={size} className={className}>
-      {/* ringed tail, curling up behind */}
-      <path d="M5 26 Q-3 22 -1 13 Q1 8 6 10" stroke="currentColor" strokeWidth="2.6" fill="none" />
-      <path d="M-1.5 20 L2 21.5 M-1 15.5 L2.5 16 M1.5 11.5 L4 13.5" stroke="currentColor" strokeWidth="1.2" opacity="0.6" />
-      {/* body */}
-      <path d="M8 27 Q8 19 17 19 Q26 19 26 27 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
-      {/* ears */}
-      <circle cx="11" cy="9" r="3.4" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity={0.3} />
-      <circle cx="22" cy="9" r="3.4" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity={0.3} />
+      {/* ears, clear of the head so they actually read */}
+      <circle cx="8" cy="7.5" r="4.2" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={0.3} />
+      <circle cx="24" cy="7.5" r="4.2" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={0.3} />
       {/* head */}
-      <circle cx="16.5" cy="14" r="8" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
-      {/* the bandit mask — the whole point of a raccoon */}
       <path
-        d="M9.5 13 Q13 10.5 16.5 13 Q20 10.5 23.5 13 Q22 17.5 18.5 16.5 Q16.5 15 14.5 16.5 Q11 17.5 9.5 13 Z"
+        d="M5 21 Q5 7 16 7 Q27 7 27 21 Z"
         stroke="currentColor"
-        strokeWidth="1.2"
+        strokeWidth={OUTLINE}
         fill="currentColor"
-        fillOpacity={0.5}
+        fillOpacity={FILL}
       />
-      <circle cx="13" cy="13.5" r="1.3" fill="currentColor" />
-      <circle cx="20" cy="13.5" r="1.3" fill="currentColor" />
+      {/* mask: a light band, so the eyes can sit on top of it */}
+      <path
+        d="M6 13.5 Q11 11.5 16 13 Q21 11.5 26 13.5 Q24.5 18 20 16.8 Q16 15.6 12 16.8 Q7.5 18 6 13.5 Z"
+        fill="currentColor"
+        fillOpacity={0.3}
+      />
+      {/* eyes, ringed then pupilled */}
+      <circle cx="11.5" cy="14.2" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="20.5" cy="14.2" r="2.5" stroke="currentColor" strokeWidth="1.4" />
+      <circle cx="11.5" cy="14.2" r="1.1" fill="currentColor" />
+      <circle cx="20.5" cy="14.2" r="1.1" fill="currentColor" />
       {/* snout */}
-      <path d="M16.5 18 L14.8 19.6 L18.2 19.6 Z" fill="currentColor" />
-      {/* the wave */}
-      <path d="M26 22 L29.5 17" stroke="currentColor" strokeWidth={OUTLINE} />
-      <path d="M28.5 15.5 L29 17.5 L31 17 " stroke="currentColor" strokeWidth="1.3" />
+      <path d="M16 18 L14 20 L18 20 Z" fill="currentColor" />
+      <path d="M16 20 L16 21" stroke="currentColor" strokeWidth="1.2" />
+      {/* the lip it's gripping, with paws hooked over */}
+      <path d="M1 21 L31 21" stroke="currentColor" strokeWidth={OUTLINE} />
+      <path
+        d="M5.5 21 L5.5 23.8 M8.5 21 L8.5 23.8 M23.5 21 L23.5 23.8 M26.5 21 L26.5 23.8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
     </Body>
   );
 }
@@ -584,6 +627,7 @@ export const CRITTERS: Record<CritterName, (p: CritterProps) => JSX.Element> = {
   frog: Frog,
   raccoon: Raccoon,
   squirrel: Squirrel,
+  hamster: Hamster,
 };
 
 /**
@@ -605,6 +649,7 @@ const CRITTER_BY_SECTION: Record<string, CritterName> = {
   Notes: "wiggler",
   Screenshots: "ghost",
   "Who's doing what": "owl",
+  Journal: "hamster",
   // Mode panels — only one shows per trip, but they still get their own.
   "Trail plan": "frog",
   Campground: "bear",
