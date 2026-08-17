@@ -14,13 +14,16 @@ import {
   ChevronDown,
   ChevronRight,
   Download,
+  Heart,
   Link2,
+  Mail,
   MapPin,
   Minus,
   Moon,
   Pencil,
   Phone,
   Plus,
+  Share2,
   Sun,
   Ticket,
   Trash2,
@@ -49,6 +52,9 @@ export const Icons = {
   phone: Phone,
   address: MapPin,
   confirmation: Ticket,
+  support: Heart,
+  tellAFriend: Share2,
+  feedback: Mail,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof Icons;

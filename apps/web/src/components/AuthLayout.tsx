@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { ReactNode } from "react";
+import Critter from "@/art/critters";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Emoji } from "@/components/ui";
 
@@ -27,7 +28,17 @@ export default function AuthLayout({ title, children }: { title: string; childre
           <Emoji glyph="🧭" size="lg" />
           Adventure Planner
         </Link>
-        <div className="rounded-card border border-edge bg-surface-raised p-6 shadow-xl">
+        <div className="relative rounded-card border border-edge bg-surface-raised p-6 shadow-xl">
+          {/*
+           * A raccoon leaning on the top edge of the card, waving. It lives
+           * only on the sign-in screens, so arriving at the app has one face
+           * that belongs to it and turns up nowhere else.
+           */}
+          <Critter
+            name="raccoon"
+            size={46}
+            className="absolute -top-[34px] right-5 text-amber-400 opacity-100"
+          />
           <h1 className="mb-5 text-xl font-semibold">{title}</h1>
           {children}
         </div>

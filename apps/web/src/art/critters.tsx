@@ -45,7 +45,9 @@ export type CritterName =
   | "cat"
   | "bear"
   | "turtle"
-  | "frog";
+  | "frog"
+  | "raccoon"
+  | "squirrel";
 
 interface CritterProps {
   size?: number;
@@ -492,6 +494,71 @@ export function Frog({ size, className }: CritterProps) {
   );
 }
 
+/** Squirrel: enormous tail, small acorn, strong opinions about saving. */
+export function Squirrel({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* the tail, which is most of the animal */}
+      <path
+        d="M9 27 Q1 26 1 17 Q1 8 9 7 Q15 7 14 13"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        fill="currentColor"
+        fillOpacity={0.12}
+      />
+      {/* haunches */}
+      <path d="M10 27 Q10 18 18 18 Q26 18 26 27 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* head */}
+      <circle cx="21" cy="12" r="6.5" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* tufted ears */}
+      <path d="M16 8 L14.5 2.5 L20 6 Z" stroke="currentColor" strokeWidth="1.4" fill="currentColor" fillOpacity={0.3} />
+      <path d="M26 8 L27.5 2.5 L22 6 Z" stroke="currentColor" strokeWidth="1.4" fill="currentColor" fillOpacity={0.3} />
+      <circle cx="19" cy="11.5" r="1.3" fill="currentColor" />
+      <circle cx="23.5" cy="11.5" r="1.3" fill="currentColor" />
+      <path d="M21.3 14.5 L21.3 15.5" stroke="currentColor" strokeWidth="1.4" />
+      {/* the acorn, held close */}
+      <path d="M22 21 L28 21 L26.5 26 L23.5 26 Z" stroke="currentColor" strokeWidth="1.3" fill="currentColor" fillOpacity={0.35} />
+      <path d="M21.5 21 L28.5 21" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M25 18.5 L25 20.5" stroke="currentColor" strokeWidth="1.1" />
+      {/* little paws round it */}
+      <path d="M20 22 L22 22 M20 25 L23 25" stroke="currentColor" strokeWidth="1.3" />
+    </Body>
+  );
+}
+
+/** Raccoon: the mask does all the work. Waves at people arriving. */
+export function Raccoon({ size, className }: CritterProps) {
+  return (
+    <Body size={size} className={className}>
+      {/* ringed tail, curling up behind */}
+      <path d="M5 26 Q-3 22 -1 13 Q1 8 6 10" stroke="currentColor" strokeWidth="2.6" fill="none" />
+      <path d="M-1.5 20 L2 21.5 M-1 15.5 L2.5 16 M1.5 11.5 L4 13.5" stroke="currentColor" strokeWidth="1.2" opacity="0.6" />
+      {/* body */}
+      <path d="M8 27 Q8 19 17 19 Q26 19 26 27 Z" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* ears */}
+      <circle cx="11" cy="9" r="3.4" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity={0.3} />
+      <circle cx="22" cy="9" r="3.4" stroke="currentColor" strokeWidth="1.5" fill="currentColor" fillOpacity={0.3} />
+      {/* head */}
+      <circle cx="16.5" cy="14" r="8" stroke="currentColor" strokeWidth={OUTLINE} fill="currentColor" fillOpacity={FILL} />
+      {/* the bandit mask — the whole point of a raccoon */}
+      <path
+        d="M9.5 13 Q13 10.5 16.5 13 Q20 10.5 23.5 13 Q22 17.5 18.5 16.5 Q16.5 15 14.5 16.5 Q11 17.5 9.5 13 Z"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        fill="currentColor"
+        fillOpacity={0.5}
+      />
+      <circle cx="13" cy="13.5" r="1.3" fill="currentColor" />
+      <circle cx="20" cy="13.5" r="1.3" fill="currentColor" />
+      {/* snout */}
+      <path d="M16.5 18 L14.8 19.6 L18.2 19.6 Z" fill="currentColor" />
+      {/* the wave */}
+      <path d="M26 22 L29.5 17" stroke="currentColor" strokeWidth={OUTLINE} />
+      <path d="M28.5 15.5 L29 17.5 L31 17 " stroke="currentColor" strokeWidth="1.3" />
+    </Body>
+  );
+}
+
 export const CRITTERS: Record<CritterName, (p: CritterProps) => JSX.Element> = {
   sprout: Sprout,
   shelly: Shelly,
@@ -515,6 +582,8 @@ export const CRITTERS: Record<CritterName, (p: CritterProps) => JSX.Element> = {
   bear: Bear,
   turtle: Turtle,
   frog: Frog,
+  raccoon: Raccoon,
+  squirrel: Squirrel,
 };
 
 /**
@@ -544,7 +613,13 @@ const CRITTER_BY_SECTION: Record<string, CritterName> = {
   "Documents & logistics": "penguin",
 };
 
-/** The spare cast, for places that aren't a trip section. */
+/**
+ * The spare cast, for places that aren't a trip section.
+ *
+ * Raccoon and squirrel are deliberately absent. The raccoon greets people on
+ * the sign-in screens and the squirrel sits in the support footer, so each of
+ * those has one face that turns up nowhere else.
+ */
 export const LOOSE_CRITTERS: CritterName[] = [
   "butterfly",
   "ladybug",

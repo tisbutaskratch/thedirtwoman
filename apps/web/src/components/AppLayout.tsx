@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import SupportFooter from "@/components/SupportFooter";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { Emoji } from "@/components/ui";
@@ -38,6 +39,7 @@ export default function AppLayout() {
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <Outlet />
       </main>
+      <SupportFooter />
     </div>
   );
 }
