@@ -28,6 +28,7 @@ export const positioning =
 
 export const about = {
   paragraphs: [
+    "I am truly energized by working on projects that have a meaningful impact on people's lives. I love working collaboratively with people of varying skillsets to brainstorm delightful solutions together, and I am passionate about helping people grow while continuously striving to grow myself.",
     "I build backend systems for returns and logistics at Loop Returns. My team owns carrier integrations, label generation, and the shipping half of a return: the unglamorous machinery that decides how a package gets from a shopper's door back to a warehouse.",
     "I started at Cerner in 2016 on healthcare software, where the stakes made me careful in a way I've never lost. Nursing workflows, infusion pump interfaces, medication charting. Code that a bad day makes somebody else's bad day.",
     "I joined Loop as an engineer, became a tech lead, and then spent two and a half years as an engineering manager running teams across three product areas. I was good at it. I ran hackathons, built a mentorship program that got four junior engineers promoted early, and kept a product area at 99.99% uptime.",
@@ -94,40 +95,70 @@ export const roles: Role[] = [
     tags: ["Team leadership", "Roadmap planning", "Mentorship", "Stakeholder management"],
   },
   {
-    title: "Software Engineer, Tech Lead",
+    title: "Tech Lead, Grow and Scale",
+    company: "Loop Returns",
+    location: "Remote · Kansas City, MO",
+    start: "May 2022",
+    end: "Oct 2022",
+    summary:
+      "Technical lead for Loop's point of sale iOS solution, from architecture through the App Store release cycle.",
+    highlights: [
+      "Led development of the POS iOS solution, making the key architectural decisions and setting the coding standards.",
+      "Implemented metrics and observability to track performance: Datadog log dashboards, Hex dashboards for business metrics, and real-user monitoring.",
+      "Mentored engineers, and worked directly with merchants and store associates to find the real pain points rather than the reported ones.",
+      "Managed release cycles and CI/CD pipelines for the Apple App Store.",
+      "Focused on scalability and long-term impact, adapting the solution as traffic grew with each release phase.",
+    ],
+    tags: ["iOS", "Architecture", "CI/CD", "Observability", "Mentorship"],
+  },
+  {
+    title: "Software Engineer",
     company: "Loop Returns",
     location: "Remote · Kansas City, MO",
     start: "Nov 2021",
-    end: "Oct 2022",
+    end: "May 2022",
     summary:
-      "Technical lead for Loop's point of sale iOS application, from architecture through release process.",
+      "First stretch at Loop: merchant-facing configuration, onboarding, and the internal tooling around both.",
     highlights: [
-      "Led development of the POS iOS app, owning the architectural decisions and setting the coding standards.",
-      "Introduced design patterns, CI/CD pipelines, versioning, and testing principles to a codebase that had none.",
-      "Built observability for scale: Datadog log dashboards, Hex dashboards for business metrics, and real-user-monitoring for platform performance.",
-      "Replaced manual client-success setup with automated merchant onboarding.",
-      "Built internal tooling: an automated release bot, an in-house feature flag interface, and a configurable account type UI for plan changes.",
-      "Automated the finance team's billing with a Lambda that reads return volumes, calculates what's owed, and files it to the billing platform for monthly invoicing.",
+      "Improved the merchant onboarding process, replacing manual client-success steps with automated setup.",
+      "Enhanced the merchant shop configuration platform.",
+      "Upgraded internal developer and merchant-success tooling: an automated release bot, an in-house feature flag interface, and a configurable account type UI for plan changes.",
+      "Automated the finance team's billing with a Lambda that reads return volumes, calculates what is owed, and files it to the billing platform for monthly invoicing.",
     ],
-    tags: ["iOS", "CI/CD", "Observability", "Internal tooling"],
+    tags: ["Internal tooling", "AWS Lambda", "Automation", "Merchant platform"],
+  },
+  {
+    title: "Associate Senior Software Engineer",
+    company: "Cerner Corporation (Oracle Health)",
+    location: "Kansas City, MO",
+    start: "Sep 2018",
+    end: "Nov 2021",
+    summary:
+      "Promoted into the senior associate track on the Connect Nursing application, working across Android and Java microservices.",
+    highlights: [
+      "Resolved defects and built enhancements on Java microservices behind the Connect Nursing Android application.",
+      "Migrated a native Android application to a React-based model so it could work across multiple platforms.",
+      "Owned high-visibility work on the infusion pump interface.",
+      "Subject matter expert for badge scanning, workflow auditing, and code caching to cut database reads.",
+      "Drove unit test coverage to 100% across roughly 150 files, each over 2,000 lines.",
+    ],
+    tags: ["Java", "Android", "React", "Microservices", "REST"],
   },
   {
     title: "Software Engineer",
     company: "Cerner Corporation (Oracle Health)",
     location: "Kansas City, MO",
     start: "Jan 2016",
-    end: "Nov 2021",
+    end: "Sep 2018",
     summary:
-      "Six years on clinical software: nursing applications, medication workflows, and device interfaces where correctness is not negotiable.",
+      "Revenue cycle and medication administration: claims, encounters, and insurance transactions on clinical software where correctness is not negotiable.",
     highlights: [
-      "Drove unit test coverage to 100% across roughly 150 files, each over 2,000 lines.",
-      "Owned high-visibility work on the infusion pump interface.",
-      "Subject matter expert for badge scanning, workflow auditing, code caching to cut database reads, and medication charting.",
-      "Migrated a native Android application to React for cross-platform reach.",
-      "Built insurance claims, encounter modification, and medication transaction functionality on Java microservices with an Android front end.",
-      "Mentored new associates through code review, development practices, and the release process.",
+      "Designed and built functionality for patient claims, encounter modifications, and insurance transactions.",
+      "Built Millennium Visualizer, a web app mapping every table and relationship in the Cerner Millennium database, on plain JavaScript, Node.js, and MongoDB with Sinon.js unit tests.",
+      "Mentored new associates on team standards, gave direct code-review feedback, and ran knowledge-transfer sessions on nursing content and platform topics.",
+      "Worked across Cerner's proprietary database language and Java services, plus a JavaScript front end for payment plan workflows.",
     ],
-    tags: ["Java", "Android", "React", "Microservices", "Healthcare"],
+    tags: ["Java", "JavaScript", "Node.js", "MongoDB", "SQL", "Healthcare"],
   },
 ];
 
@@ -498,9 +529,63 @@ export const contactLinks: ContactLink[] = [
   },
 ];
 
-export const education = {
-  degree: "Master of Science, Computer Science",
-  school: "Illinois Institute of Technology",
-  location: "Chicago, Illinois",
-  year: "2015",
-};
+export interface SpokenLanguage {
+  name: string;
+  level: string;
+}
+
+export const spokenLanguages: SpokenLanguage[] = [
+  { name: "English", level: "Professional working" },
+  { name: "Hindi", level: "Native or bilingual" },
+  { name: "Gujarati", level: "Native or bilingual" },
+];
+
+/**
+ * Roles before the professional track, kept compact.
+ *
+ * Not headline material, but they close the gap between the degree and the
+ * first engineering job, which is otherwise an unexplained hole.
+ */
+export interface EarlyRole {
+  title: string;
+  org: string;
+  period: string;
+  note: string;
+}
+
+export const earlyRoles: EarlyRole[] = [
+  {
+    title: "Jr. Android Application Developer",
+    org: "Centre for Innovation Incubation and Entrepreneurship, IIM Ahmedabad",
+    period: "2014",
+    note: "Built a location-aware chat client sharing travel times between friends, aimed at community safety, with non-intrusive background processing.",
+  },
+  {
+    title: "Student IT Technician, then Prospect Research Assistant",
+    org: "Illinois Institute of Technology",
+    period: "2013 to 2015",
+    note: "Tier 1 and Tier 2 hardware and software support for university offices, and maintained departmental websites.",
+  },
+];
+
+export interface Degree {
+  degree: string;
+  school: string;
+  location: string;
+  years: string;
+}
+
+export const education: Degree[] = [
+  {
+    degree: "Master of Science, Computer Science",
+    school: "Illinois Institute of Technology",
+    location: "Chicago, Illinois",
+    years: "2013 to 2015",
+  },
+  {
+    degree: "Bachelor of Engineering, Information Technology",
+    school: "L.J. Institute of Engineering and Technology",
+    location: "Ahmedabad, India",
+    years: "2009 to 2013",
+  },
+];

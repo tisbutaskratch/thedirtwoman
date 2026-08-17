@@ -3,7 +3,7 @@ import { Badge, Card, Emoji } from "@/components/ui";
 import { competencies, positioning, roles } from "@/lib/profile";
 
 /** One resident per role, oldest to newest, so the column has faces down it. */
-const ROLE_CRITTERS: CritterName[] = ["otter", "owl", "fox", "hedgehog"];
+const ROLE_CRITTERS: CritterName[] = ["otter", "owl", "fox", "hedgehog", "bee", "shelly"];
 
 export default function Experience() {
   return (
