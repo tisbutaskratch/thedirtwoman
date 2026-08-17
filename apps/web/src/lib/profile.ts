@@ -529,63 +529,26 @@ export const contactLinks: ContactLink[] = [
   },
 ];
 
-export interface SpokenLanguage {
-  name: string;
-  level: string;
-}
-
-export const spokenLanguages: SpokenLanguage[] = [
-  { name: "English", level: "Professional working" },
-  { name: "Hindi", level: "Native or bilingual" },
-  { name: "Gujarati", level: "Native or bilingual" },
-];
-
-/**
- * Roles before the professional track, kept compact.
- *
- * Not headline material, but they close the gap between the degree and the
- * first engineering job, which is otherwise an unexplained hole.
- */
-export interface EarlyRole {
-  title: string;
-  org: string;
-  period: string;
-  note: string;
-}
-
-export const earlyRoles: EarlyRole[] = [
-  {
-    title: "Jr. Android Application Developer",
-    org: "Centre for Innovation Incubation and Entrepreneurship, IIM Ahmedabad",
-    period: "2014",
-    note: "Built a location-aware chat client sharing travel times between friends, aimed at community safety, with non-intrusive background processing.",
-  },
-  {
-    title: "Student IT Technician, then Prospect Research Assistant",
-    org: "Illinois Institute of Technology",
-    period: "2013 to 2015",
-    note: "Tier 1 and Tier 2 hardware and software support for university offices, and maintained departmental websites.",
-  },
-];
-
 export interface Degree {
   degree: string;
   school: string;
-  location: string;
-  years: string;
 }
 
+/*
+ * Deliberately no graduation years and no campus locations.
+ *
+ * A graduation year is an age proxy and a campus location is a
+ * national-origin proxy. Both are well-documented screening biases, and
+ * neither says anything about whether someone can do the job. The degree
+ * and the institution carry all the signal that matters.
+ */
 export const education: Degree[] = [
   {
     degree: "Master of Science, Computer Science",
     school: "Illinois Institute of Technology",
-    location: "Chicago, Illinois",
-    years: "2013 to 2015",
   },
   {
     degree: "Bachelor of Engineering, Information Technology",
     school: "L.J. Institute of Engineering and Technology",
-    location: "Ahmedabad, India",
-    years: "2009 to 2013",
   },
 ];
