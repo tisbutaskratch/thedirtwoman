@@ -5,9 +5,9 @@ import { TRIP_TYPE_META } from "@/lib/tripTypes";
  * The one-second opener.
  *
  * Each trip type gets its own thing crossing the screen while the trip
- * loads: a parade of cats, a bear ambling through, a rig with a roof tent,
- * a hiker plodding under a pack. It runs once and gets out of the way —
- * anything longer stops being a delight and becomes a wait.
+ * loads: a cat chasing a dirt bike, a bear ambling through, a rig with a
+ * roof tent, a hiker plodding under a pack. It runs once and gets out of
+ * the way — anything longer stops being a delight and becomes a wait.
  *
  * Everything is CSS keyframes on transforms, so it costs nothing and it
  * honours prefers-reduced-motion (see index.css) by simply not moving.
@@ -35,81 +35,90 @@ function Scene({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * A parade of cats, trotting.
+ * One cat, in hot pursuit of a dirt bike.
  *
- * Not a motorcycle — the joke is better. Three of them at slightly different
- * sizes with staggered bobs, so they read as a little procession rather than
- * one shape copied three times.
+ * The bike leads, the cat gives chase a little way behind with its tail
+ * streaming out and its legs at full stretch. Both ride the same crossing
+ * transform so the gap between them stays constant — the cat is never
+ * catching up, which is the joke.
  */
-function Cat({ scale = 1, delay = 0 }: { scale?: number; delay?: number }) {
+function ChasedBike() {
   return (
-    <g transform={`scale(${scale})`} className="trip-cat" style={{ animationDelay: `${delay}ms` }}>
-      {/* tail, up and hooked — the cue that reads first */}
+    <g transform="translate(44 14.2) scale(0.72)">
+      {/* fat tyres */}
+      <circle cx="18" cy="46" r="12" stroke="currentColor" strokeWidth="3.4" />
+      <circle cx="58" cy="46" r="12" stroke="currentColor" strokeWidth="3.4" />
+      <circle cx="18" cy="46" r="2.6" fill="currentColor" />
+      <circle cx="58" cy="46" r="2.6" fill="currentColor" />
+      {/* bodywork as one closed profile */}
       <path
-        d="M4 36 Q-3 32 0 24 Q1.5 20 5 21"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        fill="none"
-      />
-      {/* body */}
-      <path
-        d="M5 38 Q4 26 16 26 Q28 26 27 38 Z"
+        d="M2 22 L10 20 L23 22 L33 23 L38 15 L46 17 L45 29 L41 43 L37 46 L25 46 L19 37 L7 33 Z"
         stroke="currentColor"
         strokeWidth="2.2"
+        strokeLinejoin="round"
         fill="currentColor"
-        fillOpacity="0.2"
+        fillOpacity="0.16"
       />
-      {/* head */}
-      <circle
-        cx="26"
-        cy="20"
-        r="7.5"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        fill="currentColor"
-        fillOpacity="0.2"
-      />
-      {/* ears */}
-      <path d="M20 15 L20 8 L26 13 Z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.35" />
-      <path d="M32 15 L33 8 L27 12.5 Z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.35" />
-      {/* face: two dots, a nose, and whiskers */}
-      <circle cx="23.5" cy="19" r="1.3" fill="currentColor" />
-      <circle cx="29" cy="19" r="1.3" fill="currentColor" />
-      <path d="M26.2 22.5 L26.2 23.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M31 21 L35 20 M31 23 L35 23.5" stroke="currentColor" strokeWidth="1" opacity="0.65" />
-      {/* legs */}
-      <path
-        d="M9 38 L9 43 M15 38 L15 43 M20 38 L20 43 M25 38 L25 43"
-        stroke="currentColor"
-        strokeWidth="2.2"
-      />
-      {/* paws */}
-      <path d="M7.5 43 L10.5 43 M13.5 43 L16.5 43 M18.5 43 L21.5 43 M23.5 43 L26.5 43"
-        stroke="currentColor" strokeWidth="2.2" />
+      {/* forks, bars, high fender */}
+      <path d="M44 21 L57 12" stroke="currentColor" strokeWidth="2.6" />
+      <path d="M56 14 L58 46" stroke="currentColor" strokeWidth="2.4" />
+      <path d="M53 7 L65 7" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M43 26 Q55 18 66 25" stroke="currentColor" strokeWidth="2.2" />
+      {/* rider, tucked in */}
+      <circle cx="30" cy="9" r="6" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M30 15 L27 24 L42 21" stroke="currentColor" strokeWidth="2.4" />
+      {/* roost off the back tyre */}
+      <path d="M4 48 L-4 44 M5 54 L-5 54 M6 59 L-3 63" stroke="currentColor" strokeWidth="1.8" opacity="0.55" />
     </g>
   );
 }
 
-function CatsTraveller({ className }: TravellerProps) {
+/** The cat, at full stretch, gaining on nothing. */
+function ChasingCat() {
+  return (
+    <g transform="translate(8 37.6) scale(0.45)" className="trip-cat">
+      {/* tail streaming out behind */}
+      <path d="M2 26 Q-8 22 -10 12" stroke="currentColor" strokeWidth="2.6" fill="none" />
+      {/* stretched body */}
+      <path
+        d="M2 30 Q1 18 16 18 Q30 18 29 30 Z"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        fill="currentColor"
+        fillOpacity="0.18"
+      />
+      {/* head, eyes forward on the chase */}
+      <circle cx="29" cy="14" r="8" stroke="currentColor" strokeWidth="2.2" fill="currentColor" fillOpacity="0.18" />
+      <path d="M22 9 L21 1 L28 6 Z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.32" />
+      <path d="M36 9 L38 1 L30 5.5 Z" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.32" />
+      <circle cx="26.5" cy="13" r="1.4" fill="currentColor" />
+      <circle cx="32" cy="13" r="1.4" fill="currentColor" />
+      <path d="M29.3 16.5 L29.3 17.8" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M37 15 L43 13.5 M37 17.5 L43 18.5" stroke="currentColor" strokeWidth="1.1" opacity="0.6" />
+      {/* legs at full stretch, front and back */}
+      <path d="M6 30 L-2 40 M12 31 L7 41" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M22 31 L27 41 M27 30 L35 39" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M-4 40 L1 40 M5 41 L10 41 M25 41 L30 41 M33 39 L38 39" stroke="currentColor" strokeWidth="2.2" />
+      {/* motion lines behind the cat */}
+      <path d="M-6 24 L-14 24 M-6 30 L-16 30" stroke="currentColor" strokeWidth="1.4" opacity="0.45" />
+    </g>
+  );
+}
+
+function CatChaseTraveller({ className }: TravellerProps) {
   return (
     <g className={className}>
-      <g transform="translate(0 8)">
-        <Cat scale={0.72} delay={0} />
-      </g>
-      <g transform="translate(30 4)">
-        <Cat scale={0.9} delay={160} />
-      </g>
-      <g transform="translate(72 10)">
-        <Cat scale={0.62} delay={320} />
-      </g>
+      <ChasingCat />
+      <ChasedBike />
     </g>
   );
 }
 
-/** Bear, ambling. */
+/** Bear, ambling. Drawn facing left, so mirrored to match the direction of travel. */
 function BearTraveller({ className }: TravellerProps) {
   return (
     <g className={className}>
+      <g transform="translate(88 0) scale(-1 1)">
       <circle cx="22" cy="20" r="4" stroke="currentColor" strokeWidth={S} />
       <circle cx="36" cy="20" r="4" stroke="currentColor" strokeWidth={S} />
       <circle cx="29" cy="26" r="9" stroke="currentColor" strokeWidth={S} fill="currentColor" fillOpacity="0.15" />
@@ -124,6 +133,7 @@ function BearTraveller({ className }: TravellerProps) {
         fillOpacity="0.12"
       />
       <path d="M44 48 L44 54 M58 48 L58 54" stroke="currentColor" strokeWidth={S} />
+      </g>
     </g>
   );
 }
@@ -147,10 +157,11 @@ function RigTraveller({ className }: TravellerProps) {
   );
 }
 
-/** Hiker under a pack, plodding. */
+/** Hiker under a pack, plodding. Mirrored so the pack rides on their back. */
 function HikerTraveller({ className }: TravellerProps) {
   return (
     <g className={className}>
+      <g transform="translate(72 0) scale(-1 1)">
       <rect x="40" y="14" width="16" height="22" rx="4" stroke="currentColor" strokeWidth={S} fill="currentColor" fillOpacity="0.18" />
       <circle cx="30" cy="16" r="6" stroke="currentColor" strokeWidth={S} />
       <path d="M28 22 L36 38" stroke="currentColor" strokeWidth={S} />
@@ -158,48 +169,76 @@ function HikerTraveller({ className }: TravellerProps) {
       <path d="M36 38 L26 52 M36 38 L44 52" stroke="currentColor" strokeWidth={S} />
       <path d="M22 52 L28 52 M41 52 L48 52" stroke="currentColor" strokeWidth={S} />
       <path d="M18 22 L16 54" stroke="currentColor" strokeWidth="1.5" />
+      </g>
     </g>
   );
 }
 
-/** Wheeled suitcase, trundling. */
+/** Wheeled suitcase, trundling. Mirrored so it's pulled, not pushed. */
 function SuitcaseTraveller({ className }: TravellerProps) {
   return (
     <g className={className}>
+      <g transform="translate(84 0) scale(-1 1)">
       <rect x="20" y="22" width="34" height="26" rx="4" stroke="currentColor" strokeWidth={S} fill="currentColor" fillOpacity="0.15" />
       <path d="M20 32 L54 32" stroke="currentColor" strokeWidth="1.4" />
       <path d="M54 26 L64 26 L64 12 L58 12" stroke="currentColor" strokeWidth={S} />
       <circle cx="27" cy="52" r="4" stroke="currentColor" strokeWidth={S} />
       <circle cx="47" cy="52" r="4" stroke="currentColor" strokeWidth={S} />
       <path d="M30 16 L36 16 M33 12 L33 20" stroke="currentColor" strokeWidth="1.4" opacity="0.7" />
+      </g>
     </g>
   );
 }
 
-/** Little train, chuffing. */
+/**
+ * Little steam loco, chuffing.
+ *
+ * Redrawn rather than mirrored: the old one put the chimney on the tall
+ * block, which reads as a cab, so it was ambiguous whichever way you turned
+ * it. Now it's unmistakable — cab at the back, boiler running forward, and
+ * the chimney at the front with its smoke trailing off behind.
+ */
 function TrainTraveller({ className }: TravellerProps) {
   return (
     <g className={className}>
+      {/* cab, at the back */}
       <path
-        d="M14 44 L14 24 L34 24 L34 16 L54 16 L54 44 Z"
+        d="M10 46 L10 16 L32 16 L32 46 Z"
         stroke="currentColor"
         strokeWidth={S}
         fill="currentColor"
         fillOpacity="0.14"
       />
-      <rect x="38" y="21" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <rect x="18" y="30" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
-      <circle cx="22" cy="48" r="4" stroke="currentColor" strokeWidth={S} />
-      <circle cx="46" cy="48" r="4" stroke="currentColor" strokeWidth={S} />
-      <path d="M44 16 L44 10" stroke="currentColor" strokeWidth={S} />
-      <circle cx="44" cy="7" r="3" stroke="currentColor" strokeWidth="1.3" opacity="0.7" />
-      <circle cx="50" cy="3" r="2" stroke="currentColor" strokeWidth="1.1" opacity="0.5" />
+      <rect x="15" y="21" width="12" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+      {/* boiler, running forward from the cab */}
+      <path
+        d="M32 46 L32 27 L60 27 L60 46 Z"
+        stroke="currentColor"
+        strokeWidth={S}
+        fill="currentColor"
+        fillOpacity="0.14"
+      />
+      {/* boiler bands */}
+      <path d="M41 27 L41 42 M50 27 L50 42" stroke="currentColor" strokeWidth="1.2" opacity="0.55" />
+      {/* chimney at the front, with the smoke trailing back over the cab */}
+      <path d="M52 27 L52 17 L58 17 L58 27" stroke="currentColor" strokeWidth={S} />
+      <circle cx="55" cy="12" r="3" stroke="currentColor" strokeWidth="1.3" opacity="0.75" />
+      <circle cx="47" cy="7" r="2.4" stroke="currentColor" strokeWidth="1.1" opacity="0.55" />
+      <circle cx="39" cy="4" r="1.8" stroke="currentColor" strokeWidth="1" opacity="0.4" />
+      {/* lamp and cowcatcher up front */}
+      <circle cx="63" cy="31" r="2.2" stroke="currentColor" strokeWidth="1.3" />
+      <path d="M60 38 L66 46 L60 46 Z" stroke="currentColor" strokeWidth="1.4" fill="currentColor" fillOpacity="0.2" />
+      {/* wheels: small under the boiler, big driver under the cab */}
+      <circle cx="19" cy="49" r="5" stroke="currentColor" strokeWidth={S} />
+      <circle cx="38" cy="50" r="3.6" stroke="currentColor" strokeWidth={S} />
+      <circle cx="52" cy="50" r="3.6" stroke="currentColor" strokeWidth={S} />
+      <circle cx="19" cy="49" r="1.3" fill="currentColor" />
     </g>
   );
 }
 
 const TRAVELLERS: Record<TripType, (p: TravellerProps) => JSX.Element> = {
-  motocamping: CatsTraveller,
+  motocamping: CatChaseTraveller,
   camping: BearTraveller,
   overlanding: RigTraveller,
   backpacking: HikerTraveller,

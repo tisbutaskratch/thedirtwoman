@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import Critter, { critterFor } from "@/art/critters";
+import Critter, { critterFor, looseCritterFor } from "@/art/critters";
 import { Emoji, Icon, type IconName } from "@/components/ui/icons";
 
 export { Emoji, Icon } from "@/components/ui/icons";
@@ -238,8 +238,12 @@ export function Field({
 
 export function EmptyState({ glyph, message }: { glyph: string; message: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-1 rounded-card border border-dashed border-edge px-4 py-8 text-center">
-      <Emoji glyph={glyph} size="xl" className="opacity-60" />
+    <div className="flex flex-col items-center justify-center gap-1.5 rounded-card border border-dashed border-edge px-4 py-8 text-center">
+      <div className="flex items-end gap-2 text-content-subtle">
+        <Emoji glyph={glyph} size="xl" className="opacity-60" />
+        {/* Someone keeping the empty section company. */}
+        <Critter name={looseCritterFor(message)} size={30} />
+      </div>
       <p className="text-sm text-content-subtle">{message}</p>
     </div>
   );
@@ -313,7 +317,9 @@ export function AddForm({
       className="flex flex-col gap-2 rounded-card border border-edge bg-surface-overlay p-3"
     >
       {children}
-      <div className="flex items-center justify-end gap-1">
+      <div className="flex items-center gap-1">
+        {/* A critter leaning in to see what you're typing. */}
+        <Critter name={looseCritterFor(submitTitle)} size={22} className="mr-auto" />
         <IconButton onClick={onClose} title="Cancel" icon="close" />
         {/* The confirm reads a touch larger — it's the action you actually want. */}
         <IconButton

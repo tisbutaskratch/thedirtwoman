@@ -4,6 +4,7 @@ import { ApiError } from "@/api/client";
 import { createTrip } from "@/api/trips";
 import type { TripType } from "@/api/types";
 import { Field, Icon, TONE_SOFT, inputClass } from "@/components/ui";
+import Critter from "@/art/critters";
 import TripMark from "@/art/tripMarks";
 import { TRIP_TYPE_META, TRIP_TYPES } from "@/lib/tripTypes";
 
@@ -48,7 +49,14 @@ export default function NewTrip() {
         >
           <Icon name="back" size={14} /> All trips
         </Link>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">Plan a new trip</h1>
+        <h1 className="mt-2 flex items-center gap-2.5 text-3xl font-bold tracking-tight">
+          Plan a new trip
+          {/* A small welcoming party for a brand-new trip. */}
+          <span className="flex items-end gap-1 text-accent">
+            <Critter name="butterfly" size={26} />
+            <Critter name="ladybug" size={20} className="mb-0.5" />
+          </span>
+        </h1>
         <p className="mt-1 text-sm text-content-muted">
           Pick the kind of trip and we'll tailor the planning tools to it.
         </p>
@@ -124,6 +132,14 @@ export default function NewTrip() {
           {submitting ? "Creating…" : "Create trip"}
         </button>
       </form>
+
+      {/* Sign-off: whoever's around while you fill the form in. */}
+      <div className="flex items-end gap-3 pt-2 text-content-subtle opacity-60">
+        <Critter name="duckling" size={26} />
+        <Critter name="chick" size={22} />
+        <Critter name="bunny" size={28} />
+        <Critter name="snail" size={24} />
+      </div>
     </section>
   );
 }

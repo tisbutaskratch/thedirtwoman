@@ -42,47 +42,50 @@ function Frame({
 /**
  * Dirt motorcycle (enduro/motocross).
  *
- * Drawn as a solid silhouette rather than line art. That is the whole
- * difference: a bicycle is see-through — an open triangle of thin tubes
- * between two big hoops — whereas a motorcycle is one continuous lump of
- * bodywork with an engine filling the gap. At 22px in a chip only the
- * silhouette survives, so the mass has to carry the read, with the dirt
- * cues (high front fender, upswept rear fender, knobby tyres) on top.
+ * Outlined like the rest of the set, but the bodywork is still drawn as one
+ * closed shape — fender, seat, tank and engine as a single continuous
+ * profile — rather than an open triangle of tubes. That silhouette is what
+ * separates a motorcycle from a bicycle; the fill was never doing the work,
+ * so it can drop to the same light wash the other marks use. Fat tyres with
+ * knobby tread and a high front fender carry the "dirt" half.
  */
 export function DirtBikeMark(props: MarkProps) {
   return (
     <Frame {...props}>
-      {/* One continuous body: upswept rear fender → seat → tank → shrouds,
-          with the engine block filling the space between the wheels. */}
+      {/* Bodywork: one continuous profile, lightly washed. */}
       <path
         d="M1.5 10.5 L5 9.5 L11 10.5 L15.5 11 L18 7.5 L21.5 8.5 L21 14
            L19.5 20.5 L17.5 21.5 L12 21.5 L9 17.5 L3.5 15.5 Z"
+        stroke="currentColor"
+        strokeWidth={STROKE}
+        strokeLinejoin="round"
         fill="currentColor"
+        fillOpacity="0.15"
+      />
+      {/* Engine block and tank seam, so the mass reads as machinery. */}
+      <path d="M10.5 16.5 L19 16.5" stroke="currentColor" strokeWidth="1.2" opacity="0.65" />
+      <path d="M13.5 17 L13.5 21" stroke="currentColor" strokeWidth="1.2" opacity="0.65" />
+      <path d="M16.5 17 L16.5 21" stroke="currentColor" strokeWidth="1.2" opacity="0.65" />
+
+      {/* Forks raked forward to the front axle, and narrow bars. */}
+      <path d="M20.5 10 L26.5 5.5" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M26 6.5 L24.5 22.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M24.5 3.5 L30 3.5" stroke="currentColor" strokeWidth="1.7" />
+      {/* High front fender, clear of both the tyre and the bars. */}
+      <path d="M20 12.5 Q25.5 9 31 12" stroke="currentColor" strokeWidth="1.7" />
+
+      {/* Fat knobby tyres — kept heavier than the bodywork on purpose. */}
+      <circle cx="7.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.2" />
+      <circle cx="24.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.2" />
+      <path
+        d="M7.5 15.5 L7.5 14.1 M14.5 22.5 L15.9 22.5 M7.5 29.5 L7.5 30.9 M0.5 22.5 L-0.9 22.5
+           M24.5 15.5 L24.5 14.1 M31.5 22.5 L32.9 22.5 M24.5 29.5 L24.5 30.9"
         stroke="currentColor"
         strokeWidth="1.3"
-        strokeLinejoin="round"
+        opacity="0.55"
       />
-      {/* Forks raked forward to the front axle, and narrow bars. */}
-      <path d="M20.5 10 L26.5 5.5" stroke="currentColor" strokeWidth="2.4" />
-      <path d="M26 6.5 L24.5 22.5" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M24.5 3.5 L30 3.5" stroke="currentColor" strokeWidth="1.9" />
-      {/* High front fender, floating well clear of the tyre — and clear of
-          the bars, or the two read as one flat plate. */}
-      <path d="M20 12.5 Q25.5 9 31 12" stroke="currentColor" strokeWidth="2" />
-
-      {/* Fat knobby tyres last, so they sit over the bodywork. */}
-      <circle cx="7.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.6" />
-      <circle cx="24.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.6" />
-      <path
-        d="M7.5 15.4 L7.5 13.9 M14.6 22.5 L16.1 22.5 M7.5 29.6 L7.5 31.1 M0.4 22.5 L-1.1 22.5
-           M24.5 15.4 L24.5 13.9 M31.6 22.5 L33.1 22.5 M24.5 29.6 L24.5 31.1"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        opacity="0.6"
-      />
-      {/* Hubs, punched out of the tyre so it reads as a wheel not a disc. */}
-      <circle cx="7.5" cy="22.5" r="1.5" fill="currentColor" />
-      <circle cx="24.5" cy="22.5" r="1.5" fill="currentColor" />
+      <circle cx="7.5" cy="22.5" r="1.4" fill="currentColor" />
+      <circle cx="24.5" cy="22.5" r="1.4" fill="currentColor" />
     </Frame>
   );
 }
@@ -166,25 +169,27 @@ export function PlaneMark(props: MarkProps) {
   return (
     <Frame {...props}>
       {/*
-       * One filled top-down silhouette. Drawn as a single shape rather than
-       * outlined parts so the swept wings still read at chip size, where
-       * separate strokes would collapse into a smudge.
+       * Outlined with a light wash rather than a solid fill, so it sits in
+       * the same weight class as the tent, pack and rig. The dirt bike is
+       * the deliberate exception — solid is the only way it stops reading
+       * as a bicycle — but a plane has no such twin to be confused with.
        */}
       <path
         d="M16 1.5 Q18.8 1.5 19.3 7.5 L19.3 12.5 L30 20 L30 23 L19.3 20.2 L19.3 25
            L22.6 28.4 L22.6 30.2 L16 28.2 L9.4 30.2 L9.4 28.4 L12.7 25 L12.7 20.2
            L2 23 L2 20 L12.7 12.5 L12.7 7.5 Q13.2 1.5 16 1.5 Z"
-        fill="currentColor"
         stroke="currentColor"
-        strokeWidth="1.3"
+        strokeWidth={STROKE}
         strokeLinejoin="round"
+        fill="currentColor"
+        fillOpacity="0.15"
       />
       {/* Cabin windows down the spine, so it isn't a featureless dart. */}
       <path
         d="M16 8 L16 10 M16 12 L16 14 M16 16 L16 18"
         stroke="currentColor"
-        strokeWidth="1.2"
-        opacity="0.35"
+        strokeWidth="1.1"
+        opacity="0.5"
       />
     </Frame>
   );
