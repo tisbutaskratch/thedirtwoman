@@ -85,6 +85,12 @@ export const roles: Role[] = [
       "Led cross-functional teams across three product areas: shopper portal, point of sale, and the merchant administration platform.",
     highlights: [
       "Took Loop into physical retail with an in-store iPad returns app, adding 82,000 returns and reaching 197 merchants.",
+      "Authored the team's product delivery lifecycle end to end: planning, implementation, launch, and post-launch, each phase with its own exit criteria, plus a Definition of Ready and separate Definitions of Done for features and for tickets.",
+      "Made testing coverage a tracked program rather than an aspiration. Instrumented three codebases and drove admin coverage from 36% to 49% and the customer portal from 40% to 55% over a year, with core held above 78%.",
+      "Built the engineering and support metrics the team ran on: velocity against a deliberate 30% technical-debt and 70% product split, ticket cycle time broken out by work type, security vulnerabilities by severity, and incident counts by severity and responder.",
+      "Defined support SLAs by severity, from four hours to first update on a critical through to resolution targets per tier, and built the Jira dashboards that made them visible instead of aspirational.",
+      "Created the release process and automated release naming, tracked commit-to-deploy time, and ran it at a zero percent failure rate.",
+      "Introduced break-it weeks, scheduled manual and automated testing baked into the timeline, so critical bugs surfaced before a release rather than after it.",
       "Cut bug tickets on the Exchanges feature by 80% by paying down technical debt and fixing the onboarding path rather than triaging symptoms.",
       "Held the product area at 99.99% uptime.",
       "Scored highest in engineering on employee experience surveys, with a 100% team engagement rating.",
@@ -92,7 +98,14 @@ export const roles: Role[] = [
       "Built a mentorship program pairing engineers for onboarding and career growth; four junior engineers earned accelerated promotions.",
       "Championed the Women in Engineering and Women at Loop employee resource groups, taking the case for career growth directly to executive leadership.",
     ],
-    tags: ["Team leadership", "Roadmap planning", "Mentorship", "Stakeholder management"],
+    tags: [
+      "Team leadership",
+      "Delivery process",
+      "Engineering KPIs",
+      "SLAs and SLOs",
+      "Roadmap planning",
+      "Mentorship",
+    ],
   },
   {
     title: "Tech Lead, Grow and Scale",
@@ -253,6 +266,7 @@ export const skills: SkillGroup[] = [
       "Retry semantics",
       "Graceful degradation",
       "Feature-flag rollout",
+      "LaunchDarkly",
       "Phased data migration",
       "Incident response and RCA",
       "SLOs",
@@ -295,8 +309,10 @@ export const skills: SkillGroup[] = [
       "CloudWatch",
       "Hex",
       "Real-user monitoring",
+      "Mixpanel",
       "Structured logging",
       "Metrics and alerting",
+      "Coverage tracking",
     ],
   },
   {
@@ -323,6 +339,9 @@ export const skills: SkillGroup[] = [
       "Code review at depth",
       "Mentorship",
       "Technical writing",
+      "Delivery lifecycle design",
+      "Definition of ready and done",
+      "Engineering KPIs",
       "Roadmap planning",
       "WCAG contrast",
       "Accessible components",
@@ -413,9 +432,10 @@ export const projects: Project[] = [
     period: "2022 - 2024",
     status: "Shipped",
     description:
-      "Took Loop from online-only into physical retail with a point-of-sale returns application for in-store staff.",
-    outcome: "82,000 additional returns processed, across 197 merchants.",
-    tags: ["iOS", "Point of sale", "Retail"],
+      "Took Loop from online-only into physical retail with a point-of-sale returns application for in-store staff. We went and did the research in person: bought things, returned them, and watched what store associates actually did. Our assumptions were wrong. We had planned a toolkit for deciding whether to restock, ship to a warehouse, or courier between stores, and the associates did not care about any of it. They wanted the return done fast. The persona changed on the strength of that research and the product became a QR code and a short, seamless flow.",
+    outcome:
+      "82,000 additional returns processed across 197 merchants. Later sunset deliberately, once it had done its job, rather than kept alive out of sunk cost.",
+    tags: ["iOS", "Point of sale", "Field research", "Retail"],
   },
 ];
 
@@ -468,6 +488,7 @@ export const competencies: Competency[] = [
       "Weighed a decorator seam against caller orchestration and recorded why both were wrong for the situation, rather than silently picking one.",
       "Required a security review before adopting a third-party label library, and insisted on self-hosting because those labels can carry customer data.",
       "Kept the design docs from a cancelled attempt on record so the successor explicitly supersedes them.",
+      "Talked a team out of a full data importer between two structurally different systems, shipped the smallest thing that would test the assumption instead, and turned three months of planned work into two days. Nobody ever used the feature, which was the answer we needed.",
     ],
   },
   {
@@ -488,6 +509,7 @@ export const competencies: Competency[] = [
       "Roughly a quarter of hands-on ticket load is support for my own domain, and it spikes right after my own launches because I pick it up.",
       "Ran the release train end to end: monitoring, coordinating merges, working pipeline failures with infra, clean handoff.",
       "Led a carrier incident through investigation, stakeholder comms, and a completed root-cause analysis before closing it out.",
+      "As a manager, defined support SLAs by severity and built the dashboards that made them visible, so response and resolution targets were measured rather than assumed.",
     ],
   },
   {
@@ -511,6 +533,19 @@ export const competencies: Competency[] = [
       "A feature shipped as seven independently mergeable, flag-gated slices, with one throwaway draft used purely to preview the whole stack first.",
       "Observability split into three changes that each ship on their own.",
       "Feature flags added, verified in production, then deleted in a dedicated follow-up so they never rot into permanent complexity.",
+    ],
+  },
+  {
+    name: "Quality as a system",
+    glyph: "🧪",
+    meaning:
+      "Making quality something the process produces, rather than something individuals remember to do.",
+    evidence: [
+      "Turned testing coverage into a tracked program across three codebases, moving two of them 13 and 15 points in a year rather than leaving coverage as a number nobody owned.",
+      "Wrote a Definition of Ready and separate Definitions of Done for features and tickets, so 'done' meant observability added, regression tests passing, and compliance documented rather than 'it works on my branch'.",
+      "Scheduled break-it weeks into the delivery timeline, pairing manual and automated testing so critical bugs surfaced before release.",
+      "Ran a release process at a zero percent failure rate, with commit-to-deploy time tracked and release naming automated.",
+      "Treats functional requirements and quality requirements as different things: what a system should do versus what it should be, and measures the second as deliberately as the first.",
     ],
   },
   {
