@@ -4,7 +4,7 @@
  * Kept in one file so swapping the placeholder for a real account is a
  * single edit and never a hunt through components.
  *
- * ⚠️ PLACEHOLDER — this is not a real Venmo account. Replace
+ * ⚠️ PLACEHOLDER: this is not a real Venmo account. Replace
  * DONATION_URL with the real profile link before this ships anywhere
  * public, or the ask sends people nowhere.
  */
@@ -16,7 +16,7 @@ export const DONATION_URL_IS_PLACEHOLDER = DONATION_URL.includes("example-not-a-
 /**
  * Where feedback lands.
  *
- * ⚠️ PLACEHOLDER — swap for a real inbox before this goes anywhere public.
+ * ⚠️ PLACEHOLDER: swap for a real inbox before this goes anywhere public.
  *
  * A mailto is the right tool while the app is small: no form to build, no
  * backend to maintain, no third-party service holding people's messages,

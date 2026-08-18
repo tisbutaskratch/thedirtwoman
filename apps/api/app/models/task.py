@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class Task(Base):
-    """A trip prep checklist item — e.g. "Book Lil Abner's for night 2"."""
+    """A trip prep checklist item: e.g. "Book Lil Abner's for night 2"."""
 
     __tablename__ = "tasks"
 
@@ -23,7 +23,7 @@ class Task(Base):
     trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     done: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    # Same required/optional split as the packing list — "book the campsite"
+    # Same required/optional split as the packing list: "book the campsite"
     # is not the same kind of task as "practise the off-road section".
     required_level: Mapped[RequiredLevel] = mapped_column(
         Enum(RequiredLevel, native_enum=False, name="taskrequiredlevel"),
@@ -33,7 +33,7 @@ class Task(Base):
     assigned_to_user_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
-    # "Everyone does this one" — distinct from unassigned.
+    # "Everyone does this one": distinct from unassigned.
     assigned_to_all: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     due_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

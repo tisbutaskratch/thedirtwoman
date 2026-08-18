@@ -35,7 +35,7 @@ export const attachmentUrl = (attachment: Attachment) => `${API_BASE}${attachmen
  * Save an attachment to disk under its original filename.
  *
  * An `<a download>` won't do: the media host is a different origin from the
- * app, and browsers ignore the download attribute cross-origin — the file
+ * app, and browsers ignore the download attribute cross-origin. The file
  * just opens in a tab instead. Fetching it as a blob keeps it same-origin at
  * the moment of download, so the filename sticks.
  */

@@ -25,7 +25,7 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
 
   useEffect(refresh, [tripId]);
 
-  // Escape closes the lightbox — expected behaviour for any modal overlay.
+  // Escape closes the lightbox. Expected behaviour for any modal overlay.
   useEffect(() => {
     if (!viewing) return;
     const onKey = (e: KeyboardEvent) => {

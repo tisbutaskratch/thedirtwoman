@@ -34,12 +34,12 @@ class Gear(Base):
         nullable=False,
         default=RequiredLevel.required,
     )
-    # Who's bringing/responsible for this item — used for the group's
+    # Who's bringing/responsible for this item. Used for the group's
     # "shareables" list (e.g. one stove shared across the whole trip).
     assigned_to_user_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id"), nullable=True
     )
-    # "Everyone brings one" — distinct from unassigned, which means nobody
+    # "Everyone brings one". Distinct from unassigned, which means nobody
     # has claimed it yet.
     assigned_to_all: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

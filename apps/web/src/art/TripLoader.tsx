@@ -7,7 +7,7 @@ import { TRIP_TYPE_META } from "@/lib/tripTypes";
  * Each trip type gets its own thing crossing the screen while the trip
  * loads: a cat chasing a dirt bike, a bear ambling through, a rig with a
  * roof tent, a hiker plodding under a pack. It runs once and gets out of
- * the way — anything longer stops being a delight and becomes a wait.
+ * the way, anything longer stops being a delight and becomes a wait.
  *
  * Everything is CSS keyframes on transforms, so it costs nothing and it
  * honours prefers-reduced-motion (see index.css) by simply not moving.
@@ -39,7 +39,7 @@ function Scene({ children }: { children: React.ReactNode }) {
  *
  * The bike leads, the cat gives chase a little way behind with its tail
  * streaming out and its legs at full stretch. Both ride the same crossing
- * transform so the gap between them stays constant — the cat is never
+ * transform so the gap between them stays constant. The cat is never
  * catching up, which is the joke.
  */
 function ChasedBike() {
@@ -195,7 +195,7 @@ function SuitcaseTraveller({ className }: TravellerProps) {
  *
  * Redrawn rather than mirrored: the old one put the chimney on the tall
  * block, which reads as a cab, so it was ambiguous whichever way you turned
- * it. Now it's unmistakable — cab at the back, boiler running forward, and
+ * it. Now it's unmistakable. Cab at the back, boiler running forward, and
  * the chimney at the front with its smoke trailing off behind.
  */
 function TrainTraveller({ className }: TravellerProps) {

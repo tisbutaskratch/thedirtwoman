@@ -25,7 +25,7 @@ import { AUTHOR, CREATED, DONATION_URL, FEEDBACK_URL, SHARE_TEXT } from "@/lib/s
  * Note on "leave a review": there is deliberately no review button. A web
  * app has nowhere to review yet, and once there is a store listing the
  * prompt must go through Apple's SKStoreReviewController or Google's
- * In-App Review API — both platforms rate-limit those and reject custom
+ * In-App Review API. Both platforms rate-limit those and reject custom
  * buttons that link straight to a review form. So the ask here is feedback
  * by email, which is the honest version of the same request today.
  */
@@ -35,7 +35,7 @@ export default function SupportFooter() {
   async function handleShare() {
     const url = window.location.origin;
 
-    // The native sheet is the right affordance on a phone — it offers the
+    // The native sheet is the right affordance on a phone. It offers the
     // apps people actually message their friends in. Desktop browsers mostly
     // lack it, so those fall back to copying the link.
     if (navigator.share) {

@@ -23,7 +23,7 @@ class OverlandingDetailRead(BaseModel):
     water_capacity_gal: Optional[float]
     aux_fuel_gal: Optional[float]
     est_range_miles: Optional[float]
-    # Range including jerry cans — the number that actually matters when
+    # Range including jerry cans. The number that actually matters when
     # committing to a remote stretch.
     est_total_range_miles: Optional[float]
     water_days_supported: Optional[float]

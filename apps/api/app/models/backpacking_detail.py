@@ -20,7 +20,7 @@ class BackpackingDetail(Base):
     permit_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     resupply_plan: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     # Bear canisters are legally required in parts of the Sierra, Yosemite,
-    # Sequoia/Kings Canyon and the Adirondacks — worth tracking explicitly.
+    # Sequoia/Kings Canyon and the Adirondacks. Worth tracking explicitly.
     bear_canister_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     # Water planning drives the whole day: carry capacity vs. the longest
     # stretch between reliable sources.

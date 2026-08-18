@@ -57,9 +57,9 @@ class Trip(Base):
         DateTime(timezone=True), nullable=True
     )
     # The owner's own vehicle for this trip (collaborators get theirs on
-    # TripCollaborator.vehicle) — real usage always lists a full rider roster.
+    # TripCollaborator.vehicle), real usage always lists a full rider roster.
     owner_vehicle: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    # Owner's tank range in miles (full to empty) — collaborators get theirs
+    # Owner's tank range in miles (full to empty). Collaborators get theirs
     # on TripCollaborator.fuel_range_miles.
     owner_fuel_range_miles: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

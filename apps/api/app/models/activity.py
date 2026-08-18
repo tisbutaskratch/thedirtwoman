@@ -23,7 +23,7 @@ class Activity(Base):
     start_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     end_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    # Per-entry prep items (e.g. "Book Lil Abner's for night 2") — the
+    # Per-entry prep items (e.g. "Book Lil Abner's for night 2"). The
     # itinerary PDFs' "To-Do" column, scoped to this specific timeline
     # entry rather than the trip-wide checklist.
     todos: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

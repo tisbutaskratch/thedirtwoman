@@ -17,7 +17,7 @@ from app.services.email import send_invite_email
 
 def to_owner_collaborator_read(trip: Trip) -> CollaboratorRead:
     """The trip's creator isn't a TripCollaborator row, but the roster should
-    still show them alongside everyone else — as a collaborator, not an
+    still show them alongside everyone else, as a collaborator, not an
     "owner"."""
     return CollaboratorRead(
         user_id=trip.user_id,

@@ -56,7 +56,7 @@ function bulletLines(text: string | null): string[] {
 
 /*
  * Details and todos sit side by side, so both use the same ROW_HEIGHT
- * rhythm — otherwise the two columns drift apart line by line and stop
+ * rhythm, otherwise the two columns drift apart line by line and stop
  * reading as one row of the day.
  */
 const ROW = "flex min-h-7 items-center px-1.5 leading-5";
@@ -149,7 +149,7 @@ function TodoList({
   /*
    * Each todo is one striped, full-width row with the assignee pinned to a
    * fixed right-hand column. The stripe is what carries the eye across the
-   * gap — with twenty todos, whitespace alone stops telling you which name
+   * gap, with twenty todos, whitespace alone stops telling you which name
    * belongs to which line.
    */
   return (
@@ -461,7 +461,7 @@ export default function ActivitiesSection({
                         key={activity.id}
                         className="group grid gap-2 p-2 text-sm transition-colors hover:bg-surface-overlay/50 sm:grid-cols-[2.5rem_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.5fr)]"
                       >
-                        {/* Controls are always visible on touch — there is no
+                        {/* Controls are always visible on touch. There is no
                             hover to reveal them with. */}
                         <div className="order-2 flex gap-1 opacity-100 transition-opacity sm:order-none sm:flex-col sm:items-center sm:opacity-0 sm:focus-within:opacity-100 sm:group-hover:opacity-100">
                           <IconButton

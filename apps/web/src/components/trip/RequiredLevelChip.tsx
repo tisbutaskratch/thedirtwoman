@@ -16,7 +16,7 @@ export const REQUIRED_LEVEL_STYLE: Record<RequiredLevel, string> = {
  * The required/optional pill, as an inline dropdown.
  *
  * Shared between the packing list and the prep checklist so the same word
- * carries the same colour in both — a red "Required" means the trip doesn't
+ * carries the same colour in both. A red "Required" means the trip doesn't
  * happen without it, wherever you see it.
  */
 export default function RequiredLevelChip({

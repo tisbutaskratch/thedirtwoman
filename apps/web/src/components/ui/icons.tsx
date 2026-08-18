@@ -3,8 +3,8 @@
  *
  * Actions are line icons from a single package (lucide-react) so stroke
  * weight, corner radius and optical size match everywhere. Decorative
- * glyphs stay as emoji — rendered through <Emoji> so they share one size
- * and one font — which keeps the playful bits playful without mixing two
+ * glyphs stay as emoji, rendered through <Emoji> so they share one size
+ * and one font. That keeps the playful bits playful without mixing two
  * competing line-icon styles.
  */
 import {
@@ -81,7 +81,7 @@ export function Icon({
  * Decorative emoji at a fixed optical size.
  *
  * Emoji render differently per platform, so the stylesheet prefers Noto
- * Color Emoji (the Android set) with a system fallback — that keeps the
+ * Color Emoji (the Android set) with a system fallback. That keeps the
  * playful glyphs looking the same everywhere instead of Apple on a Mac
  * and something else on Windows.
  */

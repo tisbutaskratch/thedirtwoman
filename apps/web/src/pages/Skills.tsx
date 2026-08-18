@@ -14,7 +14,7 @@ export default function Skills() {
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Skills</h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-content-muted">
           Things I have shipped production code with, not things I have read about. Grouped by what
-          they are for rather than by how impressive the list looks.
+          they are for.
         </p>
       </header>
 

@@ -36,7 +36,7 @@ class DomesticDetail(Base):
     travel_mode: Mapped[Optional[DomesticTravelMode]] = mapped_column(
         Enum(DomesticTravelMode, native_enum=False), nullable=True
     )
-    # Confirmation code, PNR, or rental reference — the string you'll be asked
+    # Confirmation code, PNR, or rental reference. The string you'll be asked
     # for at a counter.
     booking_ref: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     origin: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)

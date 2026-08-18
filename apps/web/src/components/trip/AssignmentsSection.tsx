@@ -184,7 +184,7 @@ export default function AssignmentsSection({ tripId }: { tripId: number }) {
         </div>
       )}
 
-      {/* Legend for the coloured dots — cheaper than repeating a label per row. */}
+      {/* Legend for the coloured dots. Cheaper than repeating a label per row. */}
       {total > 0 && (
         <div className="flex flex-wrap gap-2">
           {(Object.keys(SOURCE_META) as Item["source"][]).map((source) => (

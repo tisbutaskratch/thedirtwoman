@@ -96,7 +96,7 @@ export default function Experience() {
           </div>
           <p className="mt-2 max-w-2xl text-base leading-relaxed text-content-muted">
             If you are trying to work out what level this is, these are the axes that usually
-            decide it. Each one lists what actually happened, not how I would describe myself.
+            decide it. Each one lists what happened, not how I would describe myself.
           </p>
         </div>
 

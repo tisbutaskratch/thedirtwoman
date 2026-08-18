@@ -19,22 +19,22 @@ export const profile = {
   tagline: "I went back to building on purpose.",
   location: "Kansas City, MO · Remote",
   summary:
-    "I thrive on turning ideas into live products, driving the whole software development lifecycle from conception through planning, coding, releasing, and maintaining. Today that means owning carrier integrations and label generation on Loop Returns' shipping and logistics team. I spent two and a half years as an engineering manager and chose to come back to building, and I brought the manager's view of scope, risk, and stakeholders with me.",
+    "I'm a software engineer at Loop Returns, on the shipping and logistics team. Carrier integrations, label generation, the part of a return that gets a package back to a warehouse. Before this I managed engineers for two and a half years, then went back to building, because that's the work I actually like doing.",
 };
 
 /** The one-liner a recruiter should leave with. */
 export const positioning =
-  "Ten years building production software, two and a half of them managing engineers, now deliberately hands-on again. Architecture-first, ships in small reversible slices, and owns what breaks.";
+  "Ten years of production software, two and a half of them managing. I design before I build, ship in pieces small enough to undo, and stay on the hook when something breaks.";
 
 export const about = {
   paragraphs: [
-    "I am truly energized by working on projects that have a meaningful impact on people's lives. I love working collaboratively with people of varying skillsets to brainstorm delightful solutions together, and I am passionate about helping people grow while continuously striving to grow myself.",
-    "I build backend systems for returns and logistics at Loop Returns. My team owns carrier integrations, label generation, and the shipping half of a return: the unglamorous machinery that decides how a package gets from a shopper's door back to a warehouse.",
-    "I started at Cerner in 2016 on healthcare software, where the stakes made me careful in a way I've never lost. Nursing workflows, infusion pump interfaces, medication charting. Code that a bad day makes somebody else's bad day.",
-    "I joined Loop as an engineer, became a tech lead, and then spent two and a half years as an engineering manager running teams across three product areas. I was good at it. I ran hackathons, built a mentorship program that got four junior engineers promoted early, and kept a product area at 99.99% uptime.",
-    "Then I went back to being an engineer, on purpose. What I want to be doing day to day is the work itself: the depth of a hard problem, and the satisfaction of a design that still holds up a year later. Management is a genuinely different job that happens to sit near code, and I wanted to be closer to the building.",
-    "It turned out to be the right call. Since coming back I have owned the architecture on a customer-facing feature end to end and led a platform migration across three legacy integrations, which is exactly the work I wanted. The management years did not go to waste either: I scope, sequence, and communicate like someone who has had to answer for a roadmap.",
-    "I write design docs before code, ship behind flags and then delete the flags, and write down the alternatives I rejected so the next person knows why. I carry the support load for what I build. When a bug turns out not to be mine, I prove it and hand it over cleanly rather than guessing.",
+    "I like working on things that actually affect people, with people who know things I don't. And I care about helping people grow, which is most of why I enjoyed managing.",
+    "At Loop I work on the shipping side of returns. My team owns carrier integrations and label generation, so when you send something back, we're the part that works out how it physically gets there.",
+    "I started at Cerner in 2016 writing healthcare software. Nursing workflows, infusion pump interfaces, medication charting. You learn to be careful fast when a bug shows up in someone's chart.",
+    "I joined Loop as an engineer, moved into a tech lead role, then managed for two and a half years across three product areas. I liked it and I was good at it. I ran the hackathons, set up a mentorship program that got four junior engineers promoted ahead of schedule, and held our area at 99.99% uptime.",
+    "Then I went back to engineering. The parts of managing I looked forward to were always the technical ones, and I missed being close to the thing being built. It's a different job that happens to sit near code.",
+    "Since coming back I've designed a carrier-choice system end to end and led a migration off three legacy integrations. I still plan and communicate like someone who has had to defend a roadmap, which turns out to be useful.",
+    "I write the design down before I write the code. I ship behind flags and then go back and delete them. When I pick one approach over another I say why, so nobody has to guess a year later. I stay on my own bugs. And when something turns out not to be my bug, I prove it before handing it over.",
   ],
 };
 
@@ -63,13 +63,13 @@ export const roles: Role[] = [
     end: "Present",
     current: true,
     summary:
-      "Shipping and logistics: carrier integrations, label generation, and the shipping side of returns. Architecture ownership on a customer-facing feature and a platform migration, carried alongside the support rotation for everything I ship.",
+      "Carrier integrations, label generation, and the shipping side of returns. I own the architecture on a customer-facing feature and on a platform migration, and I take support rotation for everything I ship.",
     highlights: [
-      "Designed and built Carrier Choice, letting EU and UK shoppers pick their own return carrier. Wrote the provider-agnostic interface a year before the build started; it survived a PRD, a formal spec, and implementation without changing shape.",
+      "Designed and built Carrier Choice, letting EU and UK shoppers pick their own return carrier. I wrote the provider-agnostic interface a year before the build started, and it went through a PRD, a formal spec, and implementation without needing to change.",
       "Built it as a four-layer domain module shipped one layer per merge request, with observability split into three separately releasable changes so a metrics bug could never be mistaken for a behaviour regression.",
-      "Led the Nucleus to Synks migration, consolidating three legacy 3PL and warehouse integrations off an aging Node layer. Authored the execution plan, sequenced by risk rather than size, and went on site to pair with the platform's original author.",
-      "Designed a Strategy-pattern destination rules engine, then argued that shipping shouldn't own destinations at all. Took the pushback, made the case, and handed the domain to the team it belonged to.",
-      "Root-caused a partner bug clawing back real customer money, tracing it to a redundant API call that had been latent since 2021. Separately proved a similar-looking bug was not ours and handed the other team an unambiguous, actionable investigation.",
+      "Led the Nucleus to Synks migration, consolidating three legacy 3PL and warehouse integrations off an aging Node layer. Authored the execution plan, sequenced by risk, not by size, and went on site to pair with the engineer who originally wrote the platform.",
+      "Designed a Strategy-pattern destination rules engine, then argued that shipping shouldn't own destinations at all. That got pushback. I made the case anyway and handed the domain to the team it belonged to.",
+      "Root-caused a partner bug that was clawing back real customer money. It came down to a redundant API call that had been sitting there since 2021. A second, similar-looking bug turned out not to be ours, so I proved that and handed the other team something they could act on.",
       "Remediated roughly 37,800 shipping labels in one campaign, reworked into batched, rate-limit-aware jobs with a status doc so stakeholders could follow along without asking.",
       "Ran the release train end to end and led a carrier incident through investigation, comms, and a completed root-cause analysis.",
     ],
@@ -82,16 +82,16 @@ export const roles: Role[] = [
     start: "Oct 2022",
     end: "Feb 2025",
     summary:
-      "Led cross-functional teams across three product areas: shopper portal, point of sale, and the merchant administration platform.",
+      "Led cross-functional teams across three product areas. Shopper portal, point of sale, and the merchant administration platform.",
     highlights: [
       "Took Loop into physical retail with an in-store iPad returns app, adding 82,000 returns and reaching 197 merchants.",
       "Authored the team's product delivery lifecycle end to end: planning, implementation, launch, and post-launch, each phase with its own exit criteria, plus a Definition of Ready and separate Definitions of Done for features and for tickets.",
-      "Made testing coverage a tracked program rather than an aspiration. Instrumented three codebases and drove admin coverage from 36% to 49% and the customer portal from 40% to 55% over a year, with core held above 78%.",
+      "Turned testing coverage into something we actually tracked. Instrumented three codebases and drove admin coverage from 36% to 49% and the customer portal from 40% to 55% over a year, with core held above 78%.",
       "Built the engineering and support metrics the team ran on: velocity against a deliberate 30% technical-debt and 70% product split, ticket cycle time broken out by work type, security vulnerabilities by severity, and incident counts by severity and responder.",
-      "Defined support SLAs by severity, from four hours to first update on a critical through to resolution targets per tier, and built the Jira dashboards that made them visible instead of aspirational.",
-      "Created the release process and automated release naming, and instrumented it so release success, recovery time, and commit-to-deploy were tracked rather than assumed.",
-      "Introduced break-it weeks, scheduled manual and automated testing baked into the timeline, so critical bugs surfaced before a release rather than after it.",
-      "Cut bug tickets on the Exchanges feature by 80% by paying down technical debt and fixing the onboarding path rather than triaging symptoms.",
+      "Defined support SLAs by severity, from four hours to first update on a critical through to resolution targets per tier, and built the Jira dashboards that made them visible.",
+      "Created the release process and automated release naming, and instrumented it so we could see release success, recovery time, and commit-to-deploy instead of guessing at them.",
+      "Introduced break-it weeks: manual and automated testing scheduled into the timeline, so critical bugs turned up before a release instead of after.",
+      "Cut bug tickets on the Exchanges feature by 80%, by paying down the technical debt and fixing the onboarding path instead of triaging symptoms one at a time.",
       "Held the product area at 99.99% uptime.",
       "Scored highest in engineering on employee experience surveys, with a 100% team engagement rating.",
       "Ran bi-annual hackathons at 95% engineering participation: 22 prototypes in 2024, 16 of which shipped as real features.",
@@ -118,7 +118,7 @@ export const roles: Role[] = [
     highlights: [
       "Led development of the POS iOS solution, making the key architectural decisions and setting the coding standards.",
       "Implemented metrics and observability to track performance: Datadog log dashboards, Hex dashboards for business metrics, and real-user monitoring.",
-      "Mentored engineers, and worked directly with merchants and store associates to find the real pain points rather than the reported ones.",
+      "Mentored engineers, and spent time with merchants and store associates, which is usually how you find out what is actually wrong.",
       "Managed release cycles and CI/CD pipelines for the Apple App Store.",
       "Focused on scalability and long-term impact, adapting the solution as traffic grew with each release phase.",
     ],
@@ -131,7 +131,7 @@ export const roles: Role[] = [
     start: "Nov 2021",
     end: "May 2022",
     summary:
-      "First stretch at Loop: merchant-facing configuration, onboarding, and the internal tooling around both.",
+      "My first stretch at Loop. Merchant-facing configuration, onboarding, and the internal tooling around both.",
     highlights: [
       "Improved the merchant onboarding process, replacing manual client-success steps with automated setup.",
       "Enhanced the merchant shop configuration platform.",
@@ -164,7 +164,7 @@ export const roles: Role[] = [
     start: "Jan 2016",
     end: "Sep 2018",
     summary:
-      "Revenue cycle and medication administration: claims, encounters, and insurance transactions on clinical software where correctness is not negotiable.",
+      "Revenue cycle and medication administration. Claims, encounters, and insurance transactions, on software that clinicians use to do their jobs.",
     highlights: [
       "Designed and built functionality for patient claims, encounter modifications, and insurance transactions.",
       "Built Millennium Visualizer, a web app mapping every table and relationship in the Cerner Millennium database, on plain JavaScript, Node.js, and MongoDB with Sinon.js unit tests.",
@@ -371,9 +371,9 @@ export const projects: Project[] = [
     period: "2026",
     status: "Side project",
     description:
-      "A trip planner for motocamping, camping, overlanding, backpacking, and travel. Each trip type asks the questions that discipline actually needs: tank range and fuel stops for a motorcycle, water carry against the longest dry stretch for a thru-hike, seat reservations versus rail passes for a train. Editor and viewer roles enforced server side, a private per-trip journal, print-to-PDF export, and a cast of hand-drawn critters hiding in the margins. This portfolio site is the same codebase and the same design system.",
+      "A trip planner for motocamping, camping, overlanding, backpacking, and travel. Each trip type asks the questions that discipline needs. Tank range and fuel stops for a motorcycle, water carry against the longest dry stretch for a thru-hike, seat reservations versus rail passes for a train. Editor and viewer roles enforced server side, a private per-trip journal, print-to-PDF export, and a cast of hand-drawn critters hiding in the margins. This portfolio site is the same codebase and the same design system.",
     outcome:
-      "Live and usable. The same instincts as the day job: domain modules, hand-reviewed migrations smoke-tested up and down, features behind flags, and accessibility checked by measurement rather than by eye.",
+      "Live and usable, and built the way I build at work: domain modules, migrations reviewed by hand and smoke-tested up and down, features behind flags, and accessibility contrast measured, not eyeballed.",
     href: "/app/dashboard",
     linkLabel: "Open the app",
     tags: [
@@ -410,9 +410,9 @@ export const projects: Project[] = [
     period: "2025 - present",
     status: "In flight",
     description:
-      "Consolidating three legacy 3PL and warehouse integrations off an aging Node integration layer onto a newer platform. Sequenced by risk rather than size, piloting on the lowest-variance integration first, and fixing known debt during the move instead of relocating it.",
+      "Consolidating three legacy 3PL and warehouse integrations off an aging Node integration layer onto a newer platform. Sequenced by risk, not size. We piloted on the least volatile integration first, and fixed known debt on the way across so we weren't just moving it.",
     outcome:
-      "Became the person who documents and standardises a system I did not previously own.",
+      "I did not own this system before and now I am the one documenting and standardising it.",
     tags: ["Migration", "SOAP / REST / GraphQL", "Integration platforms"],
   },
   {
@@ -423,7 +423,7 @@ export const projects: Project[] = [
     description:
       "Replacing per-carrier hardcoded label fields with a provider-agnostic customization model. Ran a discovery and audit phase before writing any schema, and published a written library assessment with a reproducible test harness before committing to a build.",
     outcome:
-      "Required a formal security review before adopting any third-party label library, and self-hosting rather than a hosted renderer, because these labels carry customer data.",
+      "Required a formal security review before adopting any third-party label library, and self-hosting over a hosted renderer, because these labels carry customer data.",
     tags: ["Schema design", "Security review", "ZPL", "Capability framework"],
   },
   {
@@ -432,9 +432,9 @@ export const projects: Project[] = [
     period: "2022 - 2024",
     status: "Shipped",
     description:
-      "Took Loop from online-only into physical retail with a point-of-sale returns application for in-store staff. We went and did the research in person: bought things, returned them, and watched what store associates actually did. Our assumptions were wrong. We had planned a toolkit for deciding whether to restock, ship to a warehouse, or courier between stores, and the associates did not care about any of it. They wanted the return done fast. The persona changed on the strength of that research and the product became a QR code and a short, seamless flow.",
+      "Took Loop from online-only into physical retail with a point-of-sale returns application for in-store staff. We went and did the research in person: bought things, returned them, and watched what store associates did. Our assumptions were wrong. We had planned a toolkit for deciding whether to restock, ship to a warehouse, or courier between stores, and the associates did not care about any of it. They wanted the return done fast. The persona changed on the strength of that research and the product became a QR code and a short, seamless flow.",
     outcome:
-      "82,000 additional returns processed across 197 merchants. Later sunset deliberately, once it had done its job, rather than kept alive out of sunk cost.",
+      "82,000 additional returns processed across 197 merchants. We sunset it on purpose once it had done its job, instead of keeping it alive out of sunk cost.",
     tags: ["iOS", "Point of sale", "Field research", "Retail"],
   },
 ];
@@ -466,14 +466,14 @@ export const competencies: Competency[] = [
     meaning: "Owning the architecture of a real slice of the system, not just the tickets inside it.",
     evidence: [
       "Designed the Carrier Choice interface a full year before the build, and it never needed to change through a PRD, a formal spec, and implementation.",
-      "Owns two domain modules end to end, each built layer by layer with boundaries the tooling enforces rather than boundaries people are asked to respect.",
-      "Caught an architectural violation mid-build and fixed the foundation before building on top of it, instead of working around it.",
+      "Owns two domain modules end to end, each built layer by layer, with boundaries the tooling enforces so nobody has to remember them.",
+      "Caught an architectural violation mid-build and went back and fixed the foundation before building on top of it.",
     ],
   },
   {
     name: "Turning ambiguity into a plan",
     glyph: "🧭",
-    meaning: "Taking a vague problem and producing a sequenced, de-risked plan instead of waiting to be told the shape.",
+    meaning: "Taking a vague problem and coming back with a sequenced, de-risked plan, without being told what shape it should be.",
     evidence: [
       "Ran a discovery and audit phase before writing any schema for label customizations, and published a written library assessment with a reproducible test harness first.",
       "Authored a full migration execution plan for a platform I did not own: abstract, risks, named tech debt, three phases, and a timeline.",
@@ -485,7 +485,7 @@ export const competencies: Competency[] = [
     glyph: "⚖️",
     meaning: "Making real tradeoffs and writing down the options you rejected, so the next person inherits the reasoning.",
     evidence: [
-      "Weighed a decorator seam against caller orchestration and recorded why both were wrong for the situation, rather than silently picking one.",
+      "Weighed a decorator seam against caller orchestration and wrote down why neither fit, so the decision is not a mystery later.",
       "Required a security review before adopting a third-party label library, and insisted on self-hosting because those labels can carry customer data.",
       "Kept the design docs from a cancelled attempt on record so the successor explicitly supersedes them.",
       "Talked a team out of a full data importer between two structurally different systems, shipped the smallest thing that would test the assumption instead, and turned three months of planned work into two days. Nobody ever used the feature, which was the answer we needed.",
@@ -494,7 +494,7 @@ export const competencies: Competency[] = [
   {
     name: "Influence across team boundaries",
     glyph: "🤝",
-    meaning: "Changing what another team believes it owns, with an argument rather than authority.",
+    meaning: "Changing what another team believes it owns, by arguing it, not by outranking anyone.",
     evidence: [
       "Argued that shipping should not own destination routing at all, absorbed live pushback, made the counter-case, and got the room to commit to a decision.",
       "Followed it through to an actual handoff with a technical design and a recorded walkthrough, not just a meeting that went well.",
@@ -504,12 +504,12 @@ export const competencies: Competency[] = [
   {
     name: "Operational ownership",
     glyph: "🚨",
-    meaning: "Owning what happens when the thing you built breaks at 2am, not just whether it shipped.",
+    meaning: "Owning what happens when the thing you built breaks at 2am, not only whether it shipped.",
     evidence: [
       "Roughly a quarter of hands-on ticket load is support for my own domain, and it spikes right after my own launches because I pick it up.",
       "Ran the release train end to end: monitoring, coordinating merges, working pipeline failures with infra, clean handoff.",
       "Led a carrier incident through investigation, stakeholder comms, and a completed root-cause analysis before closing it out.",
-      "As a manager, defined support SLAs by severity and built the dashboards that made them visible, so response and resolution targets were measured rather than assumed.",
+      "As a manager, defined support SLAs by severity and built the dashboards that made them visible, so response and resolution targets were measured.",
     ],
   },
   {
@@ -518,7 +518,7 @@ export const competencies: Competency[] = [
     meaning:
       "Building things that stay correct under load, across services you do not control, and while data is moving underneath you.",
     evidence: [
-      "Remediated roughly 37,800 shipping labels by reworking a job that processed a whole merchant at once into batches of 100, sized against observed timeout behaviour rather than a round number.",
+      "Remediated roughly 37,800 shipping labels by reworking a job that processed a whole merchant at once into batches of 100, sized against the timeouts we actually saw and not a number that looked tidy.",
       "Added deliberate backoff against a third-party rate limit, and leaned on existing idempotency guards so a partial re-run could not double-process anything.",
       "Moved a synchronous side effect onto an async listener with a no-op guard, restoring the event-driven boundary a new feature was about to be built on top of.",
       "Planned a three-integration platform migration across SOAP, REST, and GraphQL back ends, with a parallel-run period, a rollback plan, and success criteria defined before starting.",
@@ -539,13 +539,13 @@ export const competencies: Competency[] = [
     name: "Quality as a system",
     glyph: "🧪",
     meaning:
-      "Making quality something the process produces, rather than something individuals remember to do.",
+      "Making quality something the process produces, so it does not depend on individuals remembering.",
     evidence: [
-      "Turned testing coverage into a tracked program across three codebases, moving two of them 13 and 15 points in a year rather than leaving coverage as a number nobody owned.",
-      "Wrote a Definition of Ready and separate Definitions of Done for features and tickets, so 'done' meant observability added, regression tests passing, and compliance documented rather than 'it works on my branch'.",
+      "Turned testing coverage into a tracked program across three codebases, moving two of them 13 and 15 points in a year. Before that it was a number nobody owned.",
+      "Wrote a Definition of Ready and separate Definitions of Done for features and tickets, so 'done' meant observability added, regression tests passing, and compliance documented, not 'it works on my branch'.",
       "Scheduled break-it weeks into the delivery timeline, pairing manual and automated testing so critical bugs surfaced before release.",
-      "Built and instrumented the release process, automating release naming and tracking commit-to-deploy time, so delivery health was a measured thing rather than a feeling.",
-      "Treats functional requirements and quality requirements as different things: what a system should do versus what it should be, and measures the second as deliberately as the first.",
+      "Built and instrumented the release process, automating release naming and tracking commit-to-deploy time, so delivery health was a number we could look at.",
+      "I treat what a system should do and what it should be as two separate questions, and I measure the second one as carefully as the first.",
     ],
   },
   {
@@ -553,9 +553,9 @@ export const competencies: Competency[] = [
     glyph: "🌱",
     meaning: "Raising the bar for people who are not you: review depth, tooling, standards others adopt.",
     evidence: [
-      "Consistently the team's highest-volume code reviewer, and the one leaving substantive comments rather than approvals.",
+      "Consistently the team's highest-volume code reviewer, and the one leaving real comments, not just approvals.",
       "Proposed a dry-run-first standard for any script touching production data, built the templates, and engineers on other teams used them.",
-      "Built self-serve internal tooling that took engineering out of a recurring support loop entirely, then followed up to confirm it was actually used.",
+      "Built self-serve internal tooling that took engineering out of a recurring support loop entirely, then followed up to check people were using it.",
       "As a manager, built the mentorship program that got four junior engineers promoted early.",
     ],
   },

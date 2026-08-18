@@ -126,7 +126,7 @@ def update_collaborator_role(
     trip: Trip = Depends(get_owned_trip),
     db: Session = Depends(get_db),
 ) -> CollaboratorRead:
-    # The creator always keeps edit rights — otherwise a trip could be left
+    # The creator always keeps edit rights. Otherwise a trip could be left
     # with nobody able to change it.
     if user_id == trip.user_id:
         raise HTTPException(
@@ -217,7 +217,7 @@ def accept_invite(
         already_member.role = TripRole.editor
 
     if invite.invitee_email is not None:
-        # Targeted invite consumed on acceptance — it stops showing as pending.
+        # Targeted invite consumed on acceptance. It stops showing as pending.
         db.delete(invite)
 
     db.commit()

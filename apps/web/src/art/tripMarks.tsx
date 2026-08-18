@@ -5,8 +5,8 @@ import type { TripType } from "@/api/types";
  *
  * These are hand-drawn rather than emoji for two reasons: Unicode has no
  * dirt-bike glyph (🏍️ is unmistakably a sport bike, which is the wrong
- * discipline entirely), and drawing all six in one neobrutalist style —
- * flat fills, heavy outlines, one offset shadow — keeps them a set rather
+ * discipline entirely), and drawing all six in one neobrutalist style
+ * (flat fills, heavy outlines, one offset shadow) keeps them a set rather
  * than six borrowed pictures. Section glyphs stay emoji; only trip types
  * get bespoke art.
  */
@@ -43,8 +43,8 @@ function Frame({
  * Dirt motorcycle (enduro/motocross).
  *
  * Outlined like the rest of the set, but the bodywork is still drawn as one
- * closed shape — fender, seat, tank and engine as a single continuous
- * profile — rather than an open triangle of tubes. That silhouette is what
+ * closed shape (fender, seat, tank and engine as a single continuous
+ * profile) instead of an open triangle of tubes. That silhouette is what
  * separates a motorcycle from a bicycle; the fill was never doing the work,
  * so it can drop to the same light wash the other marks use. Fat tyres with
  * knobby tread and a high front fender carry the "dirt" half.
@@ -74,7 +74,7 @@ export function DirtBikeMark(props: MarkProps) {
       {/* High front fender, clear of both the tyre and the bars. */}
       <path d="M20 12.5 Q25.5 9 31 12" stroke="currentColor" strokeWidth="1.7" />
 
-      {/* Fat knobby tyres — kept heavier than the bodywork on purpose. */}
+      {/* Fat knobby tyres. Kept heavier than the bodywork on purpose. */}
       <circle cx="7.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.2" />
       <circle cx="24.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.2" />
       <path
@@ -171,8 +171,8 @@ export function PlaneMark(props: MarkProps) {
       {/*
        * Outlined with a light wash rather than a solid fill, so it sits in
        * the same weight class as the tent, pack and rig. The dirt bike is
-       * the deliberate exception — solid is the only way it stops reading
-       * as a bicycle — but a plane has no such twin to be confused with.
+       * the deliberate exception (solid is the only way it stops reading
+       * as a bicycle), but a plane has no such twin to be confused with.
        */}
       <path
         d="M16 1.5 Q18.8 1.5 19.3 7.5 L19.3 12.5 L30 20 L30 23 L19.3 20.2 L19.3 25

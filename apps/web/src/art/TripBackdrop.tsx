@@ -5,8 +5,8 @@ import { TRIP_TYPE_META } from "@/lib/tripTypes";
 /*
  * Neobrutalist backdrop for a trip header.
  *
- * Flat bands of the trip's own hue, hard edges, no gradients or photography —
- * it has to sit behind text and stay quiet, so it's built from three or four
+ * Flat bands of the trip's own hue, hard edges, no gradients or photography.
+ * It has to sit behind text and stay quiet, so it's built from three or four
  * shapes at low opacity rather than a busy illustration. The type's mascot
  * stands at the right-hand end.
  */

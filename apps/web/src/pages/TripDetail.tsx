@@ -87,7 +87,7 @@ export default function TripDetail() {
    * The opener runs for its full second when you arrive from the trip list.
    * Locally the fetch resolves in a few milliseconds, so without a floor the
    * animation would flash and vanish. Deep links and refreshes skip it
-   * entirely — there is no hinted type then, and nobody wants an artificial
+   * entirely, there is no hinted type then, and nobody wants an artificial
    * wait on a page they loaded directly.
    */
   const [openerDone, setOpenerDone] = useState(hintedType === undefined);
@@ -192,9 +192,9 @@ export default function TripDetail() {
 
   return (
     <div className="flex flex-col gap-8">
-      {/* Trip header — sticky so the way back is always one click away. */}
+      {/* Trip header, sticky so the way back is always one click away. */}
       {/*
-       * Trip header — sticky, so it has to stay short. On a phone it is two
+       * Trip header: sticky, so it has to stay short. On a phone it is two
        * rows: the back link shares its line with the actions, and the title
        * block gets everything below. Stacking those separately cost roughly
        * a quarter of the viewport before you saw any of the plan.
@@ -361,8 +361,8 @@ export default function TripDetail() {
        * Sections are grouped by how much content they actually hold, not
        * packed into one uniform grid: a long list next to a short one leaves
        * a column of dead space. Anything unbounded (timeline, packing list,
-       * photos) gets a full row; only pairs that grow at a similar rate —
-       * and that you read together — share a two-column split.
+       * photos) gets a full row; only pairs that grow at a similar rate,
+       * and that you read together, share a two-column split.
        */}
       <MembersSection tripId={id} isOwner={isOwner} />
 

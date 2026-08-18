@@ -19,7 +19,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Existing tasks predate the distinction, so they default to "required" —
+    # Existing tasks predate the distinction, so they default to "required"
     # the safer reading of a checklist item somebody already wrote down.
     with op.batch_alter_table('tasks', schema=None) as batch_op:
         batch_op.add_column(

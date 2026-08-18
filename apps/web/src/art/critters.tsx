@@ -2,7 +2,7 @@
  * The Critters.
  *
  * An original cast of small creatures who live around the app. They are
- * deliberately not anybody else's characters — every one is drawn from
+ * deliberately not anybody else's characters. Every one is drawn from
  * scratch for this project.
  *
  * The cast is animals: birds, bugs and small mammals, plus the handful of
@@ -16,7 +16,7 @@
  *  - they never sit in a content area; only in the slack space around one
  *
  * There are more of them than there are places to put them, so no two ever
- * appear twice on a page — repeats read as wallpaper instead of residents.
+ * appear twice on a page. Repeats read as wallpaper instead of residents.
  */
 
 export type CritterName =
@@ -775,7 +775,7 @@ export const CRITTERS: Record<CritterName, (p: CritterProps) => JSX.Element> = {
  *
  * Assigned by hand rather than hashed: a hash collides, and two identical
  * critters on one page immediately read as wallpaper. Where the pairing can
- * be a small joke, it is — the snail on Timeline, the hoarding hedgehog on
+ * be a small joke, it is. The snail on Timeline, the hoarding hedgehog on
  * the packing list, the owl watching over who's doing what.
  */
 const CRITTER_BY_SECTION: Record<string, CritterName> = {
@@ -790,7 +790,7 @@ const CRITTER_BY_SECTION: Record<string, CritterName> = {
   Screenshots: "ghost",
   "Who's doing what": "owl",
   Journal: "hamster",
-  // Mode panels — only one shows per trip, but they still get their own.
+  // Mode panels: only one shows per trip, but they still get their own.
   "Trail plan": "frog",
   Campground: "bear",
   "Getting there": "turtle",

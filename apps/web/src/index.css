@@ -125,13 +125,13 @@
   --color-amber-900: oklch(0.28 0.07 88);
   --color-amber-950: oklch(0.22 0.05 88);
 
-  /* Semantic surfaces — roughly the 60% of the 60-30-10 split. */
+  /* Semantic surfaces: roughly the 60% of the 60-30-10 split. */
   --color-surface: oklch(0.14 0.008 80);
   --color-surface-raised: oklch(0.19 0.009 80);
   --color-surface-overlay: oklch(0.23 0.010 80);
   --color-surface-sunken: oklch(0.11 0.007 80);
 
-  /* Edges — the 30%. */
+  /* Edges: the 30%. */
   --color-edge: oklch(0.27 0.010 80);
   --color-edge-strong: oklch(0.36 0.012 80);
 
@@ -142,7 +142,7 @@
      labels use this token, so it needs to clear 4.5:1 too. */
   --color-content-subtle: oklch(0.62 0.012 80);
 
-  /* Accent — the 10%. */
+  /* Accent: the 10%. */
   --color-accent: oklch(0.68 0.15 155);
   --color-accent-hover: oklch(0.76 0.14 155);
   --color-accent-muted: oklch(0.28 0.07 155);
@@ -307,7 +307,7 @@ body {
  * Print / "Download PDF".
  *
  * Exporting through the browser's own print-to-PDF keeps the text
- * selectable and lets the engine handle pagination — far better output
+ * selectable and lets the engine handle pagination. Far better output
  * than rasterising the DOM to canvas, and no extra dependency.
  */
 /*
@@ -328,7 +328,7 @@ body {
   animation: trip-traveller-cross 1s cubic-bezier(0.4, 0, 0.5, 1) forwards;
 }
 
-/* The chasing cat bounds rather than bobs — a flat run reads as sliding. */
+/* The chasing cat bounds rather than bobs. A flat run reads as sliding. */
 @keyframes trip-cat-bound {
   0%,
   100% {
@@ -361,7 +361,7 @@ body {
 }
 
 /*
- * Motion is decoration here, never information — anyone who has asked the
+ * Motion is decoration here, never information. Anyone who has asked the
  * system to calm down gets the same content, held still.
  */
 @media (prefers-reduced-motion: reduce) {
@@ -408,7 +408,7 @@ body {
   }
 
   /*
-   * Selects stay, because their value is real content — who a todo is
+   * Selects stay, because their value is real content. Who a todo is
    * assigned to, how required an item is. Only the widget chrome goes.
    */
   select {
@@ -448,7 +448,7 @@ body {
     grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
   }
 
-  /* Summary tiles are the exception — they read better as a strip. */
+  /* Summary tiles are the exception. They read better as a strip. */
   .grid-cols-2 {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   }

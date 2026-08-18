@@ -46,6 +46,6 @@ class DomesticDetailRead(BaseModel):
     recommended_airport_lead_hours: Optional[int]
     # True when a pass needs seat reservations that nobody has booked yet.
     reservations_outstanding: Optional[bool]
-    # "high" when the legs are on separate tickets — then a missed connection
+    # "high" when the legs are on separate tickets. Then a missed connection
     # is on you, not the airline.
     connection_risk: Optional[str]

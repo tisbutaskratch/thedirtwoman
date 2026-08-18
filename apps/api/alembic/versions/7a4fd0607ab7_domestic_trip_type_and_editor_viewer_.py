@@ -50,7 +50,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('trip_id'),
     )
 
-    # Everyone who already had access was an editor — the viewer tier is new,
+    # Everyone who already had access was an editor. The viewer tier is new,
     # so nothing existing should be silently downgraded to read-only.
     role_enum = sa.Enum('editor', 'viewer', name='triprole', native_enum=False)
     with op.batch_alter_table('trip_collaborators', schema=None) as batch_op:

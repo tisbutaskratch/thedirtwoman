@@ -24,7 +24,7 @@ from app.services.trip_progress import to_trip_read
 
 router = APIRouter(prefix="/trips", tags=["trips"])
 
-# Every trip type now has a detail model — each gets a blank row created
+# Every trip type now has a detail model. Each gets a blank row created
 # alongside its trip.
 _DETAIL_MODEL_BY_TYPE = {
     TripType.motocamping: MotocampingDetail,

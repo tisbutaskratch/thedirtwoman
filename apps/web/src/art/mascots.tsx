@@ -7,12 +7,12 @@ import type { TripType } from "@/api/types";
  * as the critters, each caught in a pose rather than standing to attention.
  * They live in the mode panel's corner so opening a trip has a face on it.
  *
- *  Motocamping — Dusty, a goggled rider slumped against the section edge
- *  Camping     — Bramble, a bear who has clearly been through the cooler
- *  Overlanding — Ridge, arms folded on the roof rack, surveying
- *  Backpacking — Fern, mid-stride under a pack twice her size
- *  International — Wanda, sunglasses on, entirely unbothered
- *  Domestic    — Milo, asleep upright with a ticket in hand
+ *  Motocamping: Dusty, a goggled rider slumped against the section edge
+ *  Camping: Bramble, a bear who has clearly been through the cooler
+ *  Overlanding: Ridge, arms folded on the roof rack, surveying
+ *  Backpacking: Fern, mid-stride under a pack twice her size
+ *  International: Wanda, sunglasses on, entirely unbothered
+ *  Domestic: Milo, asleep upright with a ticket in hand
  */
 
 interface MascotProps {

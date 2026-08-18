@@ -23,7 +23,7 @@ class Expense(Base):
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="USD")
     date: Mapped[date] = mapped_column(Date, nullable=False)
-    # Who fronted the money — the group's "Who (paid)" column.
+    # Who fronted the money: the group's "Who (paid)" column.
     paid_by_user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)
 
     trip: Mapped[Trip] = relationship(back_populates="expenses")
@@ -34,7 +34,7 @@ class Expense(Base):
 
 
 class ExpenseParticipant(Base):
-    """One person's equal share of an expense — the "Split" / "Owed" columns."""
+    """One person's equal share of an expense. The "Split" / "Owed" columns."""
 
     __tablename__ = "expense_participants"
     __table_args__ = (UniqueConstraint("expense_id", "user_id", name="uq_expense_participant"),)

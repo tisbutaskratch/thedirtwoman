@@ -4,13 +4,13 @@ import type { Tone } from "@/components/ui";
 /*
  * Trip-type identity, in one place.
  *
- * Hues are chosen so no two types read as the same colour at a glance —
- * that was the problem with orange motocamping next to amber overlanding,
+ * Hues are chosen so no two types read as the same colour at a glance.
+ * That was the problem with orange motocamping next to amber overlanding,
  * and violet backpacking next to fuchsia international. Each type now sits
  * in a clearly separate part of the wheel: red, green, yellow, purple,
  * blue, pink.
  *
- * The mark for each type lives in art/tripMarks.tsx — hand-drawn, because
+ * The mark for each type lives in art/tripMarks.tsx, hand-drawn, because
  * Unicode has no dirt bike and a borrowed sportbike glyph is simply the
  * wrong vehicle.
  */

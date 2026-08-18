@@ -24,10 +24,10 @@ class TripCollaborator(Base):
     role: Mapped[TripRole] = mapped_column(
         Enum(TripRole, native_enum=False), nullable=False, default=TripRole.editor
     )
-    # What this rider is bringing for this specific trip (e.g. "DRZ400") —
-    # real usage always lists a per-trip vehicle roster, not a fixed one.
+    # What this rider is bringing for this specific trip (e.g. "DRZ400").
+    # Real usage always lists a per-trip vehicle roster, not a fixed one.
     vehicle: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    # Tank range in miles (full to empty) — motocamping-specific but kept
+    # Tank range in miles (full to empty), motocamping-specific but kept
     # generic since every trip type shares this roster.
     fuel_range_miles: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

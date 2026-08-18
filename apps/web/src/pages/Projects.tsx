@@ -22,8 +22,8 @@ export default function Projects() {
         />
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Projects</h1>
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-content-muted">
-          The work I would actually want to talk through in an interview. One of these you can open
-          and click around in right now.
+          The work I would want to talk through in an interview. One of them you can open and click
+          around in right now.
         </p>
       </header>
 

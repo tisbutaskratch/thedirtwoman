@@ -81,7 +81,7 @@ export function SectionHeader({
   title: string;
   count?: number;
   /**
-   * A small derived fact that belongs to the heading rather than the body —
+   * A small derived fact that belongs to the heading rather than the body:
    * total pack weight, tasks left. Deliberately quiet: it is context, not a
    * metric worth its own card.
    */
@@ -105,7 +105,7 @@ export function SectionHeader({
       {meta && <span className="text-xs text-content-subtle">{meta}</span>}
       {/*
        * A resident critter loiters in the gap between the heading and its
-       * controls. Same one every time for a given section — they live here.
+       * controls. Same one every time for a given section. They live here.
        * Hidden on small screens, where there is no gap to loiter in.
        */}
       <Critter
@@ -250,8 +250,8 @@ export function EmptyState({ glyph, message }: { glyph: string; message: string 
 }
 
 /**
- * Placeholder for an empty cell. Deliberately a word rather than a dash —
- * a "–" sitting in a table reads as the remove control.
+ * Placeholder for an empty cell. Deliberately a word rather than a dash,
+ * because a "–" sitting in a table reads as the remove control.
  */
 export function EmptyHint({ children = "Nothing yet" }: { children?: ReactNode }) {
   return <span className="text-xs italic text-content-subtle">{children}</span>;
@@ -321,7 +321,7 @@ export function AddForm({
         {/* A critter leaning in to see what you're typing. */}
         <Critter name={looseCritterFor(submitTitle)} size={22} className="mr-auto" />
         <IconButton onClick={onClose} title="Cancel" icon="close" />
-        {/* The confirm reads a touch larger — it's the action you actually want. */}
+        {/* The confirm reads a touch larger. It's the action you want. */}
         <IconButton
           type="submit"
           title={submitTitle}

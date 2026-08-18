@@ -55,7 +55,7 @@ def get_owned_trip(
 
 
 def trip_access_filter(user_id: int) -> ColumnElement[bool]:
-    """True when user_id can *see* the trip — any role, plus the creator."""
+    """True when user_id can *see* the trip: any role, plus the creator."""
     return or_(
         Trip.user_id == user_id,
         Trip.id.in_(select(TripCollaborator.trip_id).where(TripCollaborator.user_id == user_id)),
@@ -96,7 +96,7 @@ def get_editable_trip(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Trip:
-    """Write access: creator or editor. Viewers get a 403, not a 404 —
+    """Write access: creator or editor. Viewers get a 403, not a 404:
     they can legitimately see this trip, they just can't change it."""
     trip = db.query(Trip).filter(Trip.id == trip_id, trip_access_filter(current_user.id)).first()
     if trip is None:
