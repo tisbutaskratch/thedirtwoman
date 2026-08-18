@@ -590,7 +590,7 @@ export const stats: Stat[] = [
   { label: "Years shipping software", value: "10+", hint: "Healthcare, then commerce" },
   { label: "Uptime held", value: "99.99%", hint: "Across a full product area" },
   { label: "Fewer bug tickets", value: "80%", hint: "After paying down the debt behind them" },
-  { label: "Coverage lifted", value: "+15 pts", hint: "Customer portal, in a year" },
+  { label: "Coverage lifted", value: "+15 pts", hint: "Portal in a year, with core held above 78%" },
 ];
 
 /* -------------------------------------------------- contact ------------ */
