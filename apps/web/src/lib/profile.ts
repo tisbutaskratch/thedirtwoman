@@ -16,7 +16,7 @@ export const profile = {
   // Jira and GitLab still carry the maiden name; worth being findable under both.
   alsoKnownAs: "Saba Dasadawala",
   title: "Software Engineer",
-  tagline: "I went back to building on purpose.",
+  tagline: "I like hard problems and code you can build on.",
   location: "Kansas City, MO · Remote",
   summary:
     "I'm a software engineer at Loop Returns, on the shipping and logistics team. Carrier integrations, label generation, the part of a return that gets a package back to a warehouse. Before this I managed engineers for two and a half years, then went back to building, because that's the work I actually like doing.",
