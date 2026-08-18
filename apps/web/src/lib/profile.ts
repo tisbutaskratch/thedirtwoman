@@ -589,8 +589,8 @@ export interface Stat {
 export const stats: Stat[] = [
   { label: "Years shipping software", value: "10+", hint: "Healthcare, then commerce" },
   { label: "Uptime held", value: "99.99%", hint: "Across a full product area" },
-  { label: "Merchants reached", value: "197", hint: "In-store returns launch" },
-  { label: "Engineers promoted", value: "4", hint: "Through a mentorship program I built" },
+  { label: "Release failure rate", value: "0%", hint: "On a process I built" },
+  { label: "Coverage lifted", value: "+15 pts", hint: "Customer portal, in a year" },
 ];
 
 /* -------------------------------------------------- contact ------------ */
