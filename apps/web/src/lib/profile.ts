@@ -204,14 +204,58 @@ export const skills: SkillGroup[] = [
     ],
   },
   {
-    category: "Architecture",
+    category: "Architecture & patterns",
     glyph: "📐",
     items: [
       "Domain-driven design",
-      "Event-driven systems",
-      "Strategy & factory patterns",
+      "Bounded contexts",
+      "CQRS",
+      "SOLID principles",
+      "Event-driven architecture",
+      "Ports and adapters",
+      "Strategy pattern",
+      "Factory pattern",
+      "Adapter pattern",
       "Capability interfaces",
-      "Feature-flag lifecycle",
+      "Enforced module boundaries",
+      "Design docs and ADRs",
+    ],
+  },
+  {
+    category: "APIs & integration",
+    glyph: "🔌",
+    items: [
+      "REST",
+      "GraphQL",
+      "SOAP",
+      "Webhooks",
+      "API versioning",
+      "Contract design",
+      "Backward compatibility",
+      "EasyPost",
+      "Sendcloud",
+      "UPS",
+      "InPost",
+      "Salesforce",
+      "3PL and WMS platforms",
+    ],
+  },
+  {
+    category: "Scale & reliability",
+    glyph: "⚙️",
+    items: [
+      "Distributed systems",
+      "Message queues",
+      "Async workers",
+      "Idempotency",
+      "Batched processing",
+      "Rate limiting and backoff",
+      "Retry semantics",
+      "Graceful degradation",
+      "Feature-flag rollout",
+      "Phased data migration",
+      "Incident response and RCA",
+      "SLOs",
     ],
   },
   {
@@ -222,29 +266,38 @@ export const skills: SkillGroup[] = [
       "PostgreSQL",
       "MongoDB",
       "DynamoDB",
-      "Alembic migrations",
       "Schema design",
-      "Snowflake-adjacent analytics contracts",
+      "Reversible migrations",
+      "Analytics contracts",
     ],
   },
   {
-    category: "Platform",
+    category: "Platform & delivery",
     glyph: "☁️",
     items: [
       "AWS Lambda",
+      "Serverless",
       "Docker",
       "GitHub Actions",
       "GitLab CI",
+      "Jenkins",
       "Gradle",
       "Maven",
-      "Feature flags",
       "Release management",
     ],
   },
   {
     category: "Observability",
     glyph: "📊",
-    items: ["Datadog", "Segment", "CloudWatch", "Hex", "Real-user monitoring"],
+    items: [
+      "Datadog",
+      "Segment",
+      "CloudWatch",
+      "Hex",
+      "Real-user monitoring",
+      "Structured logging",
+      "Metrics and alerting",
+    ],
   },
   {
     category: "Testing & quality",
@@ -267,18 +320,13 @@ export const skills: SkillGroup[] = [
     category: "Craft",
     glyph: "🛠️",
     items: [
-      "Design docs and ADRs",
-      "Incident response and RCA",
       "Code review at depth",
       "Mentorship",
+      "Technical writing",
+      "Roadmap planning",
       "WCAG contrast",
       "Accessible components",
     ],
-  },
-  {
-    category: "Integrations",
-    glyph: "🔌",
-    items: ["EasyPost", "Sendcloud", "UPS", "InPost", "Salesforce", "3PL / WMS platforms"],
   },
 ];
 
@@ -443,6 +491,19 @@ export const competencies: Competency[] = [
     ],
   },
   {
+    name: "Systems at scale",
+    glyph: "⚙️",
+    meaning:
+      "Building things that stay correct under load, across services you do not control, and while data is moving underneath you.",
+    evidence: [
+      "Remediated roughly 37,800 shipping labels by reworking a job that processed a whole merchant at once into batches of 100, sized against observed timeout behaviour rather than a round number.",
+      "Added deliberate backoff against a third-party rate limit, and leaned on existing idempotency guards so a partial re-run could not double-process anything.",
+      "Moved a synchronous side effect onto an async listener with a no-op guard, restoring the event-driven boundary a new feature was about to be built on top of.",
+      "Planned a three-integration platform migration across SOAP, REST, and GraphQL back ends, with a parallel-run period, a rollback plan, and success criteria defined before starting.",
+      "Held a product area at 99.99% uptime as its engineering manager, and shipped an in-store returns app across 197 merchants.",
+    ],
+  },
+  {
     name: "Decomposition at scale",
     glyph: "🧩",
     meaning: "Breaking a multi-month initiative into shippable, individually reversible pieces.",
@@ -457,7 +518,7 @@ export const competencies: Competency[] = [
     glyph: "🌱",
     meaning: "Raising the bar for people who are not you: review depth, tooling, standards others adopt.",
     evidence: [
-      "Four times the team's review volume in a quarter, with more than double the comments.",
+      "Consistently the team's highest-volume code reviewer, and the one leaving substantive comments rather than approvals.",
       "Proposed a dry-run-first standard for any script touching production data, built the templates, and engineers on other teams used them.",
       "Built self-serve internal tooling that took engineering out of a recurring support loop entirely, then followed up to confirm it was actually used.",
       "As a manager, built the mentorship program that got four junior engineers promoted early.",
@@ -483,12 +544,18 @@ export interface Stat {
   hint?: string;
 }
 
-/** Only numbers with a real source behind them. */
+/*
+ * Only numbers with a real source behind them, and only ones that mean
+ * something to someone outside the company. Domain-specific volume metrics
+ * ("labels remediated") and internal productivity dashboards read as jargon
+ * to a recruiter, so they live in the evidence section where there is room
+ * to explain them, not in a hero tile that has to land in two seconds.
+ */
 export const stats: Stat[] = [
-  { label: "Years building", value: "10+", hint: "Healthcare, then commerce" },
-  { label: "Code reviews", value: "4x", hint: "Team average, most recent quarter" },
-  { label: "Labels remediated", value: "37.8k", hint: "Single campaign" },
-  { label: "Uptime held", value: "99.99%", hint: "As engineering manager" },
+  { label: "Years shipping software", value: "10+", hint: "Healthcare, then commerce" },
+  { label: "Uptime held", value: "99.99%", hint: "Across a full product area" },
+  { label: "Merchants reached", value: "197", hint: "In-store returns launch" },
+  { label: "Engineers promoted", value: "4", hint: "Through a mentorship program I built" },
 ];
 
 /* -------------------------------------------------- contact ------------ */
@@ -544,11 +611,7 @@ export interface Degree {
  */
 export const education: Degree[] = [
   {
-    degree: "Master of Science, Computer Science",
+    degree: "Masters in Computer Science",
     school: "Illinois Institute of Technology",
-  },
-  {
-    degree: "Bachelor of Engineering, Information Technology",
-    school: "L.J. Institute of Engineering and Technology",
   },
 ];
