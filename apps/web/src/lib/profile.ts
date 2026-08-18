@@ -89,7 +89,7 @@ export const roles: Role[] = [
       "Made testing coverage a tracked program rather than an aspiration. Instrumented three codebases and drove admin coverage from 36% to 49% and the customer portal from 40% to 55% over a year, with core held above 78%.",
       "Built the engineering and support metrics the team ran on: velocity against a deliberate 30% technical-debt and 70% product split, ticket cycle time broken out by work type, security vulnerabilities by severity, and incident counts by severity and responder.",
       "Defined support SLAs by severity, from four hours to first update on a critical through to resolution targets per tier, and built the Jira dashboards that made them visible instead of aspirational.",
-      "Created the release process and automated release naming, tracked commit-to-deploy time, and ran it at a zero percent failure rate.",
+      "Created the release process and automated release naming, and instrumented it so release success, recovery time, and commit-to-deploy were tracked rather than assumed.",
       "Introduced break-it weeks, scheduled manual and automated testing baked into the timeline, so critical bugs surfaced before a release rather than after it.",
       "Cut bug tickets on the Exchanges feature by 80% by paying down technical debt and fixing the onboarding path rather than triaging symptoms.",
       "Held the product area at 99.99% uptime.",
@@ -544,7 +544,7 @@ export const competencies: Competency[] = [
       "Turned testing coverage into a tracked program across three codebases, moving two of them 13 and 15 points in a year rather than leaving coverage as a number nobody owned.",
       "Wrote a Definition of Ready and separate Definitions of Done for features and tickets, so 'done' meant observability added, regression tests passing, and compliance documented rather than 'it works on my branch'.",
       "Scheduled break-it weeks into the delivery timeline, pairing manual and automated testing so critical bugs surfaced before release.",
-      "Ran a release process at a zero percent failure rate, with commit-to-deploy time tracked and release naming automated.",
+      "Built and instrumented the release process, automating release naming and tracking commit-to-deploy time, so delivery health was a measured thing rather than a feeling.",
       "Treats functional requirements and quality requirements as different things: what a system should do versus what it should be, and measures the second as deliberately as the first.",
     ],
   },
@@ -589,7 +589,7 @@ export interface Stat {
 export const stats: Stat[] = [
   { label: "Years shipping software", value: "10+", hint: "Healthcare, then commerce" },
   { label: "Uptime held", value: "99.99%", hint: "Across a full product area" },
-  { label: "Release failure rate", value: "0%", hint: "On a process I built" },
+  { label: "Fewer bug tickets", value: "80%", hint: "After paying down the debt behind them" },
   { label: "Coverage lifted", value: "+15 pts", hint: "Customer portal, in a year" },
 ];
 
