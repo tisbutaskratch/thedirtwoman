@@ -1,7 +1,10 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user
+from app.core.policy import PRIVACY_POLICY_VERSION
 from app.core.ratelimit import check_identity_limit, rate_limit
 from app.core.security import (
     InvalidTokenError,
@@ -33,12 +36,25 @@ def _issue_token_pair(user: User) -> TokenPair:
     dependencies=[Depends(rate_limit("register", limit=5, window_seconds=3600))],
 )
 def register(payload: UserCreate, db: Session = Depends(get_db)) -> TokenPair:
+    # A client sending an older version was shown an older policy, so the
+    # agreement it is reporting is not agreement to this one. Rejecting is
+    # the honest response; the page reloads and shows the current text.
+    if payload.accepted_privacy_version != PRIVACY_POLICY_VERSION:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The privacy policy has changed. Reload the page and read the current one.",
+        )
+
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
     user = User(
-        email=payload.email, name=payload.name, hashed_password=hash_password(payload.password)
+        email=payload.email,
+        name=payload.name,
+        hashed_password=hash_password(payload.password),
+        privacy_policy_version=PRIVACY_POLICY_VERSION,
+        privacy_accepted_at=datetime.now(timezone.utc),
     )
     db.add(user)
     db.commit()

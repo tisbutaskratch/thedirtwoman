@@ -9,6 +9,7 @@ from __future__ import annotations
 import pytest
 
 from app.core.config import settings
+from app.core.policy import PRIVACY_POLICY_VERSION
 from app.core.ratelimit import SlidingWindowLimiter, client_ip, limiter
 
 
@@ -105,11 +106,21 @@ def test_bulk_signup_is_capped(client, limiting_on):
     for i in range(5):
         created = client.post(
             "/auth/register",
-            json={"email": f"signup{i}@example.com", "password": "a-long-password", "name": "T"},
+            json={
+                "email": f"signup{i}@example.com",
+                "password": "a-long-password",
+                "name": "T",
+                "accepted_privacy_version": PRIVACY_POLICY_VERSION,
+            },
         )
         assert created.status_code == 201
 
     assert client.post(
         "/auth/register",
-        json={"email": "signup5@example.com", "password": "a-long-password", "name": "T"},
+        json={
+            "email": "signup5@example.com",
+            "password": "a-long-password",
+            "name": "T",
+            "accepted_privacy_version": PRIVACY_POLICY_VERSION,
+        },
     ).status_code == 429
