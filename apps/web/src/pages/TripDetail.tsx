@@ -24,6 +24,7 @@ import CampingPanel from "@/modes/camping/CampingPanel";
 import DomesticPanel from "@/modes/domestic/DomesticPanel";
 import InternationalPanel from "@/modes/international/InternationalPanel";
 import OverlandingPanel from "@/modes/overlanding/OverlandingPanel";
+import { routes } from "@/lib/site";
 
 function formatRange(start: string | null, end: string | null) {
   if (!start && !end) return "No dates set";
@@ -120,7 +121,7 @@ export default function TripDetail() {
     setPending(null);
     if (action === "delete") {
       await deleteTrip(id);
-      navigate("/app/dashboard");
+      navigate(routes.dashboard);
       return;
     }
     if (action === "archive" || action === "unarchive") {
@@ -208,7 +209,7 @@ export default function TripDetail() {
 
         <div className="relative flex items-center justify-between gap-2">
           <Link
-            to="/app/dashboard"
+            to={routes.dashboard}
             className="inline-flex shrink-0 items-center gap-1.5 text-sm text-content-muted transition-colors hover:text-accent"
           >
             <Icon name="back" size={14} /> All trips

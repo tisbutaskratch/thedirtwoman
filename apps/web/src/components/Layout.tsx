@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import Critter from "@/art/critters";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Icon, IconButton } from "@/components/ui";
 import { contactLinks, profile } from "@/lib/profile";
+import { plannerUrl } from "@/lib/site";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 const navItems = [
@@ -105,13 +106,13 @@ export default function Layout() {
              * should be one click from the thing it talks about, and the
              * planner's own footer links back the other way.
              */}
-            <Link
-              to="/app/dashboard"
+            <a
+              href={plannerUrl()}
               className="inline-flex items-center gap-1.5 font-medium text-accent underline-offset-4 transition-colors hover:underline"
             >
               <Icon name="share" size={15} />
               Adventure Planner
-            </Link>
+            </a>
           </div>
         </div>
       </footer>

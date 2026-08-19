@@ -11,6 +11,8 @@
  *     rounded up for effect.
  */
 
+import { plannerUrl } from "@/lib/site";
+
 export const profile = {
   name: "Saba Wilhelm",
   // Jira and GitLab still carry the maiden name; worth being findable under both.
@@ -374,7 +376,7 @@ export const projects: Project[] = [
       "A trip planner for motocamping, camping, overlanding, backpacking, and travel. Each trip type asks the questions that discipline needs. Tank range and fuel stops for a motorcycle, water carry against the longest dry stretch for a thru-hike, seat reservations versus rail passes for a train. Editor and viewer roles enforced server side, a private per-trip journal, print-to-PDF export, and a cast of hand-drawn critters hiding in the margins. This portfolio site is the same codebase and the same design system.",
     outcome:
       "Live and usable, and built the way I build at work: domain modules, migrations reviewed by hand and smoke-tested up and down, features behind flags, and accessibility contrast measured, not eyeballed.",
-    href: "/app/dashboard",
+    href: plannerUrl(),
     linkLabel: "Open the app",
     tags: [
       "React 19",

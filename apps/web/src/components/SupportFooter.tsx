@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import Critter from "@/art/critters";
 import { Icon } from "@/components/ui";
+import { resumeUrl } from "@/lib/site";
 import { AUTHOR, CREATED, DONATION_URL, FEEDBACK_URL, SHARE_TEXT } from "@/lib/support";
 
 /*
@@ -111,9 +111,12 @@ export default function SupportFooter() {
             the app first should be able to find out who wrote it. */}
         <p className="shrink-0 text-xs text-content-subtle">
           Built by{" "}
-          <Link to="/" className="font-medium text-content-muted underline-offset-4 hover:text-accent hover:underline">
+          <a
+            href={resumeUrl()}
+            className="font-medium text-content-muted underline-offset-4 hover:text-accent hover:underline"
+          >
             {AUTHOR}
-          </Link>{" "}
+          </a>{" "}
           · {CREATED}
         </p>
       </div>

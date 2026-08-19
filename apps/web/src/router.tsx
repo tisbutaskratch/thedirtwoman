@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -14,8 +14,17 @@ import Projects from "@/pages/Projects";
 import Register from "@/pages/Register";
 import Skills from "@/pages/Skills";
 import TripDetail from "@/pages/TripDetail";
+import { isPlanner } from "@/lib/site";
 
-export const router = createBrowserRouter([
+/*
+ * The two products deploy as separate sites from this one codebase, so the
+ * route table is assembled per build (see lib/site.ts). The resume build
+ * ships no planner routes and no auth screens; the planner build ships no
+ * resume pages and sits at the root of its own domain rather than under
+ * /app. In development VITE_SITE is unset, which builds the resume plus the
+ * planner under /app so both are reachable from one dev server.
+ */
+const resumeRoutes = [
   {
     element: <Layout />,
     children: [
@@ -27,14 +36,26 @@ export const router = createBrowserRouter([
       { path: "/contact", element: <Contact /> },
     ],
   },
+];
+
+/** Auth and invite screens belong to the planner; the resume has no accounts. */
+const authRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/invite/:token", element: <AcceptInvite /> },
+];
+
+/**
+ * Planner screens, mounted at `base`: the root on the planner's own domain,
+ * or /app in the combined development build.
+ */
+const plannerRoutes = (base: string) => [
+  ...authRoutes,
   {
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/app",
+        path: base || "/",
         element: <AppLayout />,
         children: [
           { path: "dashboard", element: <Dashboard /> },
@@ -44,4 +65,15 @@ export const router = createBrowserRouter([
       },
     ],
   },
-]);
+];
+
+export const router = createBrowserRouter(
+  isPlanner
+    ? [
+        // The planner's front door is the dashboard; ProtectedRoute bounces
+        // signed-out visitors to /login from there.
+        { path: "/", element: <Navigate to="/dashboard" replace /> },
+        ...plannerRoutes(""),
+      ]
+    : [...resumeRoutes, ...plannerRoutes("/app")],
+);

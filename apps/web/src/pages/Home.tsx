@@ -119,13 +119,13 @@ export default function Home() {
           </div>
 
           {featured.href && (
-            <Link
-              to={featured.href}
+            <a
+              href={featured.href}
               className="inline-flex w-fit items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
             >
               <Icon name="share" size={15} />
               {featured.linkLabel}
-            </Link>
+            </a>
           )}
         </Card>
       </section>

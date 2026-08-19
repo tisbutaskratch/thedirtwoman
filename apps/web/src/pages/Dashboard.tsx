@@ -6,6 +6,7 @@ import { Badge, EmptyState, Icon, TONE_EDGE, TONE_SOFT } from "@/components/ui";
 import { useAuth } from "@/lib/AuthContext";
 import TripMark from "@/art/tripMarks";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
+import { routes } from "@/lib/site";
 
 function formatRange(start: string | null, end: string | null) {
   if (!start && !end) return "No dates yet";
@@ -76,7 +77,7 @@ export default function Dashboard() {
           </p>
         </div>
         <Link
-          to="/app/trips/new"
+          to={routes.newTrip}
           className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
         >
           + New trip
@@ -85,10 +86,17 @@ export default function Dashboard() {
 
       {error && <p className="text-rose-400">{error}</p>}
       {trips === null && !error && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        // Skeleton cards say nothing to a screen reader, so the placeholder
+        // announces itself instead of leaving the page silently empty.
+        <div
+          role="status"
+          aria-label="Loading trips"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {[0, 1, 2].map((i) => (
             <div
               key={i}
+              aria-hidden
               className="h-40 animate-pulse rounded-card border border-edge bg-surface-raised"
             />
           ))}

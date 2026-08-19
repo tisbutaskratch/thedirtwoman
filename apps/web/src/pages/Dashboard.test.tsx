@@ -51,7 +51,7 @@ describe("Dashboard", () => {
 
     renderDashboard();
 
-    expect(screen.getByText("Loading…")).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Loading trips" })).toBeInTheDocument();
     expect(await screen.findByText("Ride to Rivendell")).toBeInTheDocument();
   });
 

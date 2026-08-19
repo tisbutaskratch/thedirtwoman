@@ -7,6 +7,7 @@ import { Field, Icon, TONE_SOFT, inputClass } from "@/components/ui";
 import Critter from "@/art/critters";
 import TripMark from "@/art/tripMarks";
 import { TRIP_TYPE_META, TRIP_TYPES } from "@/lib/tripTypes";
+import { routes } from "@/lib/site";
 
 export default function NewTrip() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function NewTrip() {
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
         <Link
-          to="/app/dashboard"
+          to={routes.dashboard}
           className="inline-flex items-center gap-1.5 text-sm text-content-muted transition-colors hover:text-accent"
         >
           <Icon name="back" size={14} /> All trips

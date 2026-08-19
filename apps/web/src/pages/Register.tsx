@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import AuthLayout from "@/components/AuthLayout";
 import { useAuth } from "@/lib/AuthContext";
+import { routes } from "@/lib/site";
 
 const inputClass =
   "w-full rounded-md border border-edge bg-surface-sunken px-3 py-2 text-sm text-content outline-none focus:border-emerald-500";
@@ -17,7 +18,7 @@ export default function Register() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const from = (location.state as { from?: string } | null)?.from ?? "/app/dashboard";
+  const from = (location.state as { from?: string } | null)?.from ?? routes.dashboard;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();

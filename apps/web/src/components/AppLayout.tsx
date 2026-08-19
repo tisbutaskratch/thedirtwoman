@@ -4,6 +4,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Emoji } from "@/components/ui";
+import { routes } from "@/lib/site";
 
 export default function AppLayout() {
   const { user, logout } = useAuth();
@@ -20,7 +21,7 @@ export default function AppLayout() {
       <header className="border-b border-edge bg-surface/90 backdrop-blur">
         <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <NavLink
-            to="/app/dashboard"
+            to={routes.dashboard}
             className="flex items-center gap-2 text-base font-bold tracking-tight"
           >
             <Emoji glyph="🧭" size="lg" />
