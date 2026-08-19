@@ -31,6 +31,32 @@ you have them:
 Both are required. Without the first, every planner request is blocked by the
 browser. Without the second, invite emails link people to `localhost`.
 
+### Uploads: a Cloudflare R2 bucket
+
+Render's filesystem is ephemeral, so uploads must not live on it. Set these
+four and the API stores attachments in object storage instead of on disk;
+leave any of them unset and it falls back to local disk, which on Render
+means files vanish on the next restart.
+
+1. Cloudflare dashboard → R2 → create a bucket, e.g. `thedirthags-uploads`.
+   Leave public access **off**. Nothing in it should be world-readable.
+2. R2 → Manage API Tokens → create a token with Object Read & Write, scoped
+   to that bucket.
+3. Set on the Render service:
+
+```
+S3_BUCKET             thedirthags-uploads
+S3_ENDPOINT_URL       https://<account-id>.r2.cloudflarestorage.com
+S3_ACCESS_KEY_ID      <token access key id>
+S3_SECRET_ACCESS_KEY  <token secret>
+```
+
+No CORS configuration is needed on the bucket. Files are reached by plain
+navigation to a signed URL, not by a cross-origin fetch.
+
+The API mints a signed URL, valid for 15 minutes, only after checking that
+the caller may see that trip. Nothing in the bucket is reachable without one.
+
 ## 2. Netlify: two sites from this one repo
 
 Add both sites from the same repo and the same `main` branch. They share
@@ -89,10 +115,6 @@ automatically once DNS resolves; this can take up to an hour to propagate.
 
 ## Known gaps before real users
 
-- **Uploads do not survive a deploy.** `media_root` writes to the container's
-  local disk, which Render replaces on every deploy. Attach a persistent disk
-  or move attachments to object storage before anyone stores anything they
-  care about.
 - **The support footer links are placeholders.** See `apps/web/src/lib/support.ts`.
 - **The free Postgres database expires 30 days after creation**, with a 14-day
   grace period before deletion. This is a hard deadline, not a nag: upgrade it
@@ -102,5 +124,5 @@ automatically once DNS resolves; this can take up to an hour to propagate.
   wake, so a recruiter clicking through from the resume may sit on a blank
   screen. Move to `starter` in `render.yaml` before the link goes anywhere
   public.
-- **Free instances have no persistent disk at all**, so uploads are lost on
-  restart as well as on deploy. Object storage is the only fix on this tier.
+- **Free instances have no persistent disk at all**, which is why the R2 step
+  above is not optional. Skip it and every upload is lost on the next restart.

@@ -279,6 +279,7 @@ export interface Attachment {
   title: string;
   description: string | null;
   url: string;
+  download_url: string;
   original_filename: string;
   content_type: string;
   created_at: string;
