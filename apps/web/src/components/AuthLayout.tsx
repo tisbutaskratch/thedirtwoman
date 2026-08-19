@@ -40,7 +40,19 @@ export default function AuthLayout({ title, children }: { title: string; childre
             size={52}
             className="absolute -top-[33px] right-6 text-amber-500 opacity-100 dark:text-amber-400"
           />
-          <h1 className="mb-5 text-xl font-semibold">{title}</h1>
+          <h1 className="mb-1 text-xl font-semibold">{title}</h1>
+          {/*
+           * One line saying what this is. Most people reach the front door
+           * and get the explanation there, but an invite link drops someone
+           * straight onto this card, and a bare form asks them to have an
+           * account before telling them what it is for.
+           */}
+          <p className="mb-1 text-sm leading-relaxed text-content-muted">
+            Trip planning for motocamping, camping, overlanding, backpacking and travel.
+          </p>
+          <p className="mb-5 text-sm text-content-subtle">
+            Free, with no ads and no upsells.
+          </p>
           {children}
         </div>
       </div>
