@@ -42,8 +42,12 @@ class Settings(BaseSettings):
     attachment_url_ttl_seconds: int = 900
     frontend_base_url: str = "http://localhost:5173"
 
-    # Email invites: if smtp_host is unset, invite emails are logged instead
-    # of sent (safe default for local dev with no provider configured).
+    # Email invites. Preferred path is Resend's HTTP API: it runs on 443, and
+    # Render's free instances block outbound connections on every SMTP port,
+    # which shows up as a hang rather than a refusal. SMTP is kept for anyone
+    # self-hosting somewhere without that restriction. With neither set,
+    # invites are logged instead of sent, which is the right default locally.
+    resend_api_key: Optional[str] = None
     smtp_host: Optional[str] = None
     smtp_port: int = 587
     smtp_user: Optional[str] = None

@@ -57,6 +57,22 @@ navigation to a signed URL, not by a cross-origin fetch.
 The API mints a signed URL, valid for 15 minutes, only after checking that
 the caller may see that trip. Nothing in the bucket is reachable without one.
 
+### Email: a Resend API key
+
+Render's free instances block outbound connections on every SMTP port (25,
+465 and 587), and the symptom is a hang rather than a refusal, so set the HTTP
+API key rather than SMTP settings:
+
+```
+RESEND_API_KEY   re_...
+SMTP_FROM_EMAIL  noreply@thedirthags.com
+```
+
+The sending domain must be verified in Resend and the From address must be on
+it, or sends are rejected with a 403 that names the reason in the log. SMTP is
+still supported for hosts without that restriction; set SMTP_HOST and friends
+instead. With neither configured, invites are logged rather than sent.
+
 ## 2. Netlify: two sites from this one repo
 
 Add both sites from the same repo and the same `main` branch. They share
