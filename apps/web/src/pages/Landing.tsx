@@ -8,14 +8,14 @@ import { resumeUrl } from "@/lib/site";
 /*
  * The planner's front door.
  *
- * Kept to about a screen and a half. Someone signed out is deciding whether
- * to bother, not reading a brochure, so this says what it is, shows the one
- * thing that makes it different, lists what every trip gets in a line each,
- * and asks once.
+ * Someone signed out is deciding whether to bother, not reading a brochure,
+ * so this is short: a heading, why it exists in the builder's own words, one
+ * ask, and then the six trip cards.
  *
- * The trip cards are the real components with example data rather than
- * screenshots, so they serve as both the picture of the product and the
- * pitch. That is how five sections became three.
+ * Those cards are the real components with example data rather than
+ * screenshots, so they show the product and make the argument at once. A
+ * paragraph describing them would only repeat what they already say, which
+ * is why there isn't one.
  */
 
 /** The question each kind of trip turns on. This is the pitch. */
@@ -56,11 +56,28 @@ export default function Landing() {
           Plan the whole trip in one place
         </h1>
 
-        <p className="max-w-xl text-lg leading-relaxed text-content-muted">
-          Dates, packing, who is coming and what it costs. Pick the kind of trip you are taking and
-          it asks about the right things, which is not the same list for a motorcycle as for a
-          thru-hike.
-        </p>
+        {/*
+         * Her words, up front rather than buried at the bottom. They say what
+         * this is and that it is free without a separate line claiming either,
+         * and the six cards below show the product better than a paragraph
+         * describing them would.
+         */}
+        <blockquote className="max-w-xl border-l-2 border-accent/50 pl-4">
+          <p className="text-lg leading-relaxed text-content-muted">
+            No ads, nothing to buy. I made this for my own trips and then my friends and family
+            ended up on it too, which has honestly been the nicest part. It is so much easier when
+            everyone can see the same plan. Come and use it, and take someone with you.
+          </p>
+          <footer className="mt-2 text-sm text-content-subtle">
+            <a
+              href={resumeUrl()}
+              className="font-medium text-content-muted underline-offset-4 hover:text-accent hover:underline"
+            >
+              Saba Wilhelm
+            </a>{" "}
+            <Emoji glyph="💙" size="sm" />
+          </footer>
+        </blockquote>
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
@@ -72,16 +89,11 @@ export default function Landing() {
           </Link>
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 rounded-md border border-edge px-5 py-2.5 text-sm font-medium text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+            className="inline-flex items-center gap-2 rounded-md border border-accent/60 px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:border-accent hover:bg-accent-muted"
           >
             Log in
           </Link>
         </div>
-
-        <p className="text-sm text-content-subtle">
-          <span className="font-medium text-content-muted">Free.</span> No ads, no upsells, nothing
-          saved up for a paid tier.
-        </p>
       </header>
 
       {/* --------------------------- the six types, which are also the demo */}
@@ -127,28 +139,6 @@ export default function Landing() {
             </li>
           ))}
         </ul>
-      </section>
-
-      {/* ------------------------------------------------------------ note */}
-      <section className="relative overflow-hidden rounded-card border border-edge bg-surface-raised p-5 sm:p-6">
-        <Critter
-          name="hedgehog"
-          size={36}
-          className="absolute right-5 top-5 hidden text-accent opacity-100 sm:block"
-        />
-        {/* No second button. Asking twice on a page this short reads as
-            pushing, and the one in the hero is a scroll away. */}
-        <p className="max-w-2xl text-sm leading-relaxed text-content-muted">
-          There are no ads here and nothing to buy. I built this planning my own trips, because
-          nothing out there asked the right questions, and I keep it running because the planning
-          should be the easy part of getting somewhere good.{" "}
-          <a
-            href={resumeUrl()}
-            className="font-medium text-content underline-offset-4 hover:text-accent hover:underline"
-          >
-            Saba Wilhelm
-          </a>
-        </p>
       </section>
     </div>
   );
