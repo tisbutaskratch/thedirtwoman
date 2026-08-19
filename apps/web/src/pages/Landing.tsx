@@ -64,9 +64,13 @@ export default function Landing() {
          */}
         <blockquote className="max-w-xl border-l-2 border-accent/50 pl-4">
           <p className="text-lg leading-relaxed text-content-muted">
-            No ads, nothing to buy. I built this for my friend group, which happens to include me.
-            Everything got easier once we could all see the same plan. If it does the same for
-            yours, that is enough.
+            I built this for my friend group, which thankfully happens to include me. Planning
+            should be easy. I hope it is helpful for you as well.
+          </p>
+          {/* The reassurance sits under the warm bit rather than inside it, so
+              the promise is easy to find and the note stays a note. */}
+          <p className="mt-3 text-sm leading-relaxed text-content-subtle">
+            No ads, no upsells, and your data is not for sale.
           </p>
           <footer className="mt-2 text-sm text-content-subtle">
             <a
