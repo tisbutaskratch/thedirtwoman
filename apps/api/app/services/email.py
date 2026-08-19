@@ -29,8 +29,24 @@ def send_invite_email(to_email: str, trip_title: str, invite_url: str) -> None:
     message["To"] = to_email
     message.set_content(body)
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as server:
-        server.starttls()
-        if settings.smtp_user and settings.smtp_password:
-            server.login(settings.smtp_user, settings.smtp_password)
-        server.send_message(message)
+    # Sending must never break inviting. The invite is already saved and its
+    # link already works, so a mail provider being slow, unreachable, or
+    # misconfigured should cost the sender a notification, not the whole
+    # request. Without the timeout a blocked SMTP port hangs the worker until
+    # the gateway gives up, which surfaces as a 502 with nothing in the logs.
+    try:
+        with smtplib.SMTP(
+            settings.smtp_host, settings.smtp_port, timeout=settings.smtp_timeout_seconds
+        ) as server:
+            server.starttls()
+            if settings.smtp_user and settings.smtp_password:
+                server.login(settings.smtp_user, settings.smtp_password)
+            server.send_message(message)
+    except (OSError, smtplib.SMTPException) as exc:
+        logger.error(
+            "Invite email failed to=%s host=%s:%s error=%s",
+            to_email,
+            settings.smtp_host,
+            settings.smtp_port,
+            exc,
+        )

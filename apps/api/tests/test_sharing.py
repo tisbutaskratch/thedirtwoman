@@ -168,3 +168,38 @@ def test_owner_accepting_own_invite_is_a_noop(client, auth_headers):
     collaborators = client.get(f"/trips/{trip_id}/collaborators", headers=headers).json()
     assert [c["email"] for c in collaborators] == ["frodo@bagend.dev"]
     assert collaborators[0]["is_creator"] is True
+
+
+def test_inviting_still_succeeds_when_the_mail_provider_is_down(client, auth_headers, monkeypatch):
+    """The invite is saved and its link works regardless of email.
+
+    This shipped the other way round: an SMTP failure propagated out of the
+    request, so the caller saw a 502 while the invite sat in the database.
+    The form never cleared and the pending list never refreshed, because as
+    far as the browser knew the whole thing had failed.
+    """
+    import smtplib
+
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "smtp_host", "smtp.invalid.example")
+
+    def explode(*args, **kwargs):
+        raise smtplib.SMTPConnectError(421, "unavailable")
+
+    monkeypatch.setattr(smtplib, "SMTP", explode)
+
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _create_trip(client, headers)
+
+    response = client.post(
+        f"/trips/{trip_id}/invites/email",
+        json={"email": "sam@bagend.dev", "role": "editor"},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["email"] == "sam@bagend.dev"
+    # and it is pending, so the sender can copy the link by hand
+    pending = client.get(f"/trips/{trip_id}/pending-invites", headers=headers).json()
+    assert [p["email"] for p in pending] == ["sam@bagend.dev"]

@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     smtp_password: Optional[str] = None
     # Overridden per deployment. Must be an address on a domain you control,
     # or providers will reject the mail outright.
+    # Bounded so a blocked port cannot hang a request until the gateway times
+    # it out; a mail send is never worth holding a worker for.
+    smtp_timeout_seconds: float = 10.0
     smtp_from_email: str = "noreply@thedirthags.com"
 
     @property

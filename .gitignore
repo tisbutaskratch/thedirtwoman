@@ -1,3 +1,13 @@
 .DS_Store
 *.log
 apps/api/media/
+
+# Local environment files. These hold real credentials once anyone points a
+# local run at a deployed service, so they must never be committable.
+.env
+.env.*
+!.env.example
+
+# Local SQLite databases, used to run the API without Postgres installed.
+*.db
+*.sqlite3

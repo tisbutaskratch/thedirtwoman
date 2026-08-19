@@ -50,6 +50,18 @@ cp .env.example .env   # adjust DATABASE_URL if not using Docker's Postgres
 uvicorn app.main:app --reload
 ```
 
+No Postgres installed? SQLite is enough to run the whole API locally. The
+migrations use `batch_alter_table`, so they apply to both. In `apps/api/.env`:
+
+```
+DATABASE_URL=sqlite:///./dev.db
+RATE_LIMIT_ENABLED=false
+```
+
+then `alembic upgrade head`. Local database files and `.env` are gitignored.
+Postgres is still what runs in production, so anything touching SQL behaviour
+is worth checking against the real thing before shipping.
+
 **Web**
 
 ```bash

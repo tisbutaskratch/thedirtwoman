@@ -19,7 +19,11 @@ class Activity(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    day_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Day 1 is the trip's first day, matching the schema default and the way
+    # the timeline renders it. A 0 here draws a day before the trip starts,
+    # which is what happens to any row created without going through the
+    # schema. Python-side default, so no migration.
+    day_index: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     start_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     end_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
