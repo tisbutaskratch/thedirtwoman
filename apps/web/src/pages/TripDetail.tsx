@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
-import { deleteTrip, getTrip, updateTrip } from "@/api/trips";
+import { deleteTrip, downloadTripCalendar, getTrip, updateTrip } from "@/api/trips";
 import type { Trip } from "@/api/types";
 import ActivitiesSection from "@/components/trip/ActivitiesSection";
 import AssignmentsSection from "@/components/trip/AssignmentsSection";
@@ -96,7 +96,7 @@ export default function TripDetail() {
   useEffect(() => {
     if (hintedType === undefined) return;
     const timer = setTimeout(() => setOpenerDone(true), 1000);
-    return () => clearTimeout(timer);
+  return () => clearTimeout(timer);
   }, [hintedType]);
 
   const refreshTrip = useCallback(() => {
@@ -191,6 +191,16 @@ export default function TripDetail() {
     },
   };
 
+  // Takes the trip rather than closing over it: this is a hoisted function
+  // declaration, so the null check above does not narrow inside it.
+  async function handleCalendarDownload(current: Trip) {
+    try {
+      await downloadTripCalendar(current.id, current.title);
+    } catch {
+      setError("Could not build the calendar file.");
+    }
+  }
+
   return (
     <div className="flex flex-col gap-8">
       {/* Trip header, sticky so the way back is always one click away. */}
@@ -228,6 +238,14 @@ export default function TripDetail() {
              * has selectable text and real page breaks.
              */}
             <IconButton onClick={() => window.print()} title="Download as PDF" icon="download" />
+            {/* An .ics file rather than a provider link: Google, Proton,
+                Apple and Outlook all read it, and no provider's own URL
+                scheme works anywhere but that provider. */}
+            <IconButton
+              onClick={() => handleCalendarDownload(trip)}
+              title="Add to calendar"
+              icon="calendar"
+            />
             {canEdit && !editingTrip && (
               <IconButton onClick={startEditTrip} title="Rename or change dates" icon="edit" />
             )}

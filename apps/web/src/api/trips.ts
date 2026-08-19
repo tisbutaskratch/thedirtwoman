@@ -1,4 +1,4 @@
-import { apiRequest } from "@/api/client";
+import { apiRequest, apiRequestBlob } from "@/api/client";
 import type {
   Activity,
   ActivityCreate,
@@ -101,3 +101,26 @@ export const updateNote = (id: number, payload: NoteCreate) =>
   apiRequest<Note>(`/notes/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
 
 export const deleteNote = (id: number) => apiRequest<void>(`/notes/${id}`, { method: "DELETE" });
+
+/**
+ * Download the trip as a calendar file.
+ *
+ * Goes through fetch rather than a plain link because the endpoint needs the
+ * access token, and a navigation cannot carry an Authorization header. The
+ * filename comes from the server's Content-Disposition so it matches the trip
+ * title, with a fallback for the case where the header is unreadable.
+ */
+export async function downloadTripCalendar(tripId: number, title: string): Promise<void> {
+  const blob = await apiRequestBlob(`/trips/${tripId}/calendar.ics`);
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = `${title.replace(/[^a-z0-9-_ ]/gi, "").trim().replace(/ +/g, "-").toLowerCase() || "trip"}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}

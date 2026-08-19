@@ -13,6 +13,7 @@ from app.routers import (
     activities,
     attachments,
     auth,
+    calendar,
     expenses,
     gear,
     health,
@@ -118,6 +119,7 @@ app.include_router(trip_detail.router)
 app.include_router(locations.router)
 app.include_router(activities.router)
 app.include_router(attachments.router)
+app.include_router(calendar.router)
 app.include_router(expenses.router)
 app.include_router(gear.router)
 app.include_router(journal.router)
