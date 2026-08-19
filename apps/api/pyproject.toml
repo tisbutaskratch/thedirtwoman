@@ -1,5 +1,9 @@
 [tool.ruff]
 line-length = 100
+# The Dockerfile and CI both run 3.12; lint against the same language the
+# deployed code runs on, so an idiom that is fine in production is not
+# flagged, and one that would break there is.
+target-version = "py312"
 extend-exclude = ["alembic/versions"]
 
 [tool.ruff.lint]
