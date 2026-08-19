@@ -19,7 +19,9 @@ export default function Contact() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      {/* Three ways to reach her, so three columns once there is room: at two
+          the last card sits alone with a hole beside it. */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {contactLinks.map((link) => {
           const isPlain = link.href === "#";
           const inner = (
