@@ -70,7 +70,7 @@ export default function Home() {
           Why an engineering manager went back to being an engineer
         </h2>
         <p className="mt-3 max-w-3xl text-base leading-relaxed text-content-muted">
-          I managed engineers for nearly three years, and I was good at it. I also noticed that
+          I managed engineers for nearly three years. I also noticed that
           the parts of the job I looked forward to were always the technical ones. So I went back to
           building. I kept the manager's habits: I still think about scope and risk early, and I
           still write things down for the people who need to sign off. Since coming back I have

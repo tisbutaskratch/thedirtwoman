@@ -26,9 +26,17 @@ export const isResume = SITE === "resume";
 const RESUME_ORIGIN = import.meta.env.VITE_RESUME_URL ?? "";
 const PLANNER_ORIGIN = import.meta.env.VITE_PLANNER_URL ?? "";
 
-/** Where the resume's "Adventure Planner" links point. */
-export const plannerUrl = (path = "/dashboard") =>
-  PLANNER_ORIGIN ? `${PLANNER_ORIGIN}${path}` : `/app${path}`;
+/**
+ * Where the resume's "Adventure Planner" links point.
+ *
+ * The front door, not the dashboard. Sending someone from a resume straight
+ * to /dashboard bounces them to a login form, which is the exact thing the
+ * landing page exists to avoid.
+ */
+export const plannerUrl = (path = "/") => {
+  const suffix = path === "/" ? "" : path;
+  return PLANNER_ORIGIN ? `${PLANNER_ORIGIN}${suffix}` : `/app${suffix}`;
+};
 
 /** Where the planner's byline links back to. */
 export const resumeUrl = (path = "/") => (RESUME_ORIGIN ? `${RESUME_ORIGIN}${path}` : path);

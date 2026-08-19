@@ -1,6 +1,6 @@
 import Critter from "@/art/critters";
 import { Card, Icon } from "@/components/ui";
-import { contactLinks, profile } from "@/lib/profile";
+import { contactLinks } from "@/lib/profile";
 import { plannerUrl } from "@/lib/site";
 
 export default function Contact() {
@@ -66,7 +66,7 @@ export default function Contact() {
           <div>
             <h2 className="font-semibold text-content">Rather see the code run?</h2>
             <p className="mt-0.5 text-sm text-content-muted">
-              Adventure Planner is live, built by {profile.name.split(" ")[0]} end to end.
+              A trip planner, live and open to use. Design, frontend, API and deploy.
             </p>
           </div>
         </div>

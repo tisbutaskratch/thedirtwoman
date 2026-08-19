@@ -1,4 +1,4 @@
-import { Navigate, createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "@/components/AppLayout";
 import Layout from "@/components/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -14,6 +14,7 @@ import Projects from "@/pages/Projects";
 import Register from "@/pages/Register";
 import Skills from "@/pages/Skills";
 import TripDetail from "@/pages/TripDetail";
+import PlannerHome from "@/components/PlannerHome";
 import { isPlanner } from "@/lib/site";
 
 /*
@@ -70,10 +71,17 @@ const plannerRoutes = (base: string) => [
 export const router = createBrowserRouter(
   isPlanner
     ? [
-        // The planner's front door is the dashboard; ProtectedRoute bounces
-        // signed-out visitors to /login from there.
-        { path: "/", element: <Navigate to="/dashboard" replace /> },
+        // The front door explains the app to a signed-out visitor and steps
+        // aside for anyone already signed in.
+        { path: "/", element: <PlannerHome /> },
         ...plannerRoutes(""),
       ]
-    : [...resumeRoutes, ...plannerRoutes("/app")],
+    : [
+        ...resumeRoutes,
+        // The same front door in the combined development build, where the
+        // planner hangs off /app and the resume owns the root. Without this
+        // the landing page has nowhere to be seen locally.
+        { path: "/app", element: <PlannerHome /> },
+        ...plannerRoutes("/app"),
+      ],
 );

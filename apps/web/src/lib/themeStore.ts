@@ -3,8 +3,12 @@ export type Theme = "dark" | "light";
 const STORAGE_KEY = "adventure-planner:theme";
 
 function loadInitialTheme(): Theme {
+  // Light by default, on both sites. Anyone who has chosen keeps their
+  // choice, so the check is for an explicit "dark" rather than for the
+  // absence of "light": a first-time visitor has stored nothing and gets
+  // light, and someone who picked dark last week still gets dark.
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === "light" ? "light" : "dark";
+  return stored === "dark" ? "dark" : "light";
 }
 
 let theme: Theme = loadInitialTheme();
