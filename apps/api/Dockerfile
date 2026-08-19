@@ -24,4 +24,8 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Migrations run before the server binds, so a deploy never serves traffic
+# against a schema it was not built for. Render's preDeployCommand would
+# be the tidier home for this, but it is not available on every instance
+# type, and this works on all of them.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

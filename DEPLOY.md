@@ -17,8 +17,8 @@ Do these in order. Each step produces a URL the next step needs.
 
 1. New → Blueprint → connect this repo. It reads `render.yaml` and creates
    both the web service and the Postgres database.
-2. Wait for the first deploy. `preDeployCommand` runs `alembic upgrade head`,
-   so the tables are created before the app takes traffic.
+2. Wait for the first deploy. The container runs `alembic upgrade head` before
+   uvicorn binds, so the schema is in place before the app serves anything.
 3. Check `https://<service>.onrender.com/health` returns OK.
 
 Two environment variables are deliberately not in `render.yaml`, because they
@@ -94,6 +94,13 @@ automatically once DNS resolves; this can take up to an hour to propagate.
   or move attachments to object storage before anyone stores anything they
   care about.
 - **The support footer links are placeholders.** See `apps/web/src/lib/support.ts`.
-- **Free-tier Render sleeps when idle**, so the first visit after a quiet spell
-  waits for a cold start. Worth a paid instance before putting the link on a
-  resume.
+- **The free Postgres database expires 30 days after creation**, with a 14-day
+  grace period before deletion. This is a hard deadline, not a nag: upgrade it
+  or export the data before then. Set a calendar reminder on the day you create
+  it.
+- **Free web services sleep after 15 minutes idle** and take about a minute to
+  wake, so a recruiter clicking through from the resume may sit on a blank
+  screen. Move to `starter` in `render.yaml` before the link goes anywhere
+  public.
+- **Free instances have no persistent disk at all**, so uploads are lost on
+  restart as well as on deploy. Object storage is the only fix on this tier.
