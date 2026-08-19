@@ -93,7 +93,9 @@ def test_a_timed_activity_is_written_in_utc():
 def test_a_timed_activity_without_an_end_gets_a_sensible_one():
     """A zero-length event is invisible in most calendar views."""
     start = datetime(2026, 8, 18, 9, 0, tzinfo=timezone.utc)
-    ics = build_calendar(FakeTrip(start_date=date(2026, 8, 18)), [FakeActivity(1, "Coffee", start_time=start)])
+    ics = build_calendar(
+        FakeTrip(start_date=date(2026, 8, 18)), [FakeActivity(1, "Coffee", start_time=start)]
+    )
 
     assert "DTSTART:20260818T090000Z" in ics
     assert "DTEND:20260818T100000Z" in ics
