@@ -33,7 +33,7 @@ export default function NewTrip() {
         start_date: startDate || null,
         end_date: endDate || null,
       });
-      navigate(`/app/trips/${trip.id}`);
+      navigate(routes.trip(trip.id));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Something went wrong.");
     } finally {

@@ -16,14 +16,12 @@ export const DONATION_URL_IS_PLACEHOLDER = DONATION_URL.includes("example-not-a-
 /**
  * Where feedback lands.
  *
- * ⚠️ PLACEHOLDER: swap for a real inbox before this goes anywhere public.
- *
  * A mailto is the right tool while the app is small: no form to build, no
  * backend to maintain, no third-party service holding people's messages,
  * and the reply thread lands in an inbox that already exists. Worth
  * revisiting only once the volume justifies a real form.
  */
-export const FEEDBACK_EMAIL = "hello@example-not-a-real-address.com";
+export const FEEDBACK_EMAIL = "sababusiness@proton.me";
 
 export const FEEDBACK_URL =
   `mailto:${FEEDBACK_EMAIL}` +

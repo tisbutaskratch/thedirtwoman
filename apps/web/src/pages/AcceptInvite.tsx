@@ -5,6 +5,7 @@ import { acceptInvite, getInvitePreview } from "@/api/sharing";
 import type { InvitePreview } from "@/api/types";
 import { useAuth } from "@/lib/AuthContext";
 import TripMark from "@/art/tripMarks";
+import { routes } from "@/lib/site";
 
 export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
@@ -28,7 +29,7 @@ export default function AcceptInvite() {
     setAccepting(true);
     try {
       const result = await acceptInvite(token);
-      navigate(`/app/trips/${result.trip_id}`, { replace: true });
+      navigate(routes.trip(result.trip_id), { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Could not accept this invite.");
     } finally {
@@ -82,7 +83,7 @@ export default function AcceptInvite() {
             </p>
             {preview.already_member ? (
               <button
-                onClick={() => navigate(`/app/trips/${preview.trip_id}`)}
+                onClick={() => navigate(routes.trip(preview.trip_id))}
                 className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
               >
                 Go to trip
