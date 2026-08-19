@@ -19,19 +19,19 @@ export const profile = {
   tagline: "I like hard problems and code you can build on.",
   location: "Kansas City, MO · Remote",
   summary:
-    "I'm a software engineer at Loop Returns, on the shipping and logistics team. Carrier integrations, label generation, the part of a return that gets a package back to a warehouse. Before this I managed engineers for two and a half years, then went back to building, because that's the work I actually like doing.",
+    "I'm a software engineer at Loop Returns, on the shipping and logistics team. Carrier integrations, label generation, the part of a return that gets a package back to a warehouse. Before this I managed engineers for nearly three years, then went back to building, because that's the work I actually like doing.",
 };
 
 /** The one-liner a recruiter should leave with. */
 export const positioning =
-  "Ten years of production software, two and a half of them managing. I design before I build, ship in pieces small enough to undo, and stay on the hook when something breaks.";
+  "Ten years of production software, nearly three of them managing. I design before I build, ship in pieces small enough to undo, and stay on the hook when something breaks.";
 
 export const about = {
   paragraphs: [
     "I like working on things that actually affect people, with people who know things I don't. And I care about helping people grow, which is most of why I enjoyed managing.",
     "At Loop I work on the shipping side of returns. My team owns carrier integrations and label generation, so when you send something back, we're the part that works out how it physically gets there.",
     "I started at Cerner in 2016 writing healthcare software. Nursing workflows, infusion pump interfaces, medication charting. You learn to be careful fast when a bug shows up in someone's chart.",
-    "I joined Loop as an engineer, moved into a tech lead role, then managed for two and a half years across three product areas. I liked it and I was good at it. I ran the hackathons, set up a mentorship program that got four junior engineers promoted ahead of schedule, and held our area at 99.99% uptime.",
+    "I joined Loop as an engineer, moved into a tech lead role, then managed for nearly three years across three product areas. I liked it and I was good at it. I ran the hackathons, set up a mentorship program that got four junior engineers promoted ahead of schedule, and held our area at 99.99% uptime.",
     "Then I went back to engineering. The parts of managing I looked forward to were always the technical ones, and I missed being close to the thing being built. It's a different job that happens to sit near code.",
     "Since coming back I've designed a carrier-choice system end to end and led a migration off three legacy integrations. I still plan and communicate like someone who has had to defend a roadmap, which turns out to be useful.",
     "I write the design down before I write the code. I ship behind flags and then go back and delete them. When I pick one approach over another I say why, so nobody has to guess a year later. I stay on my own bugs. And when something turns out not to be my bug, I prove it before handing it over.",
@@ -59,7 +59,7 @@ export const roles: Role[] = [
     title: "Software Engineer",
     company: "Loop Returns",
     location: "Remote · Kansas City, MO",
-    start: "Mar 2025",
+    start: "Jul 2025",
     end: "Present",
     current: true,
     summary:
@@ -80,7 +80,7 @@ export const roles: Role[] = [
     company: "Loop Returns",
     location: "Remote · Kansas City, MO",
     start: "Oct 2022",
-    end: "Feb 2025",
+    end: "Jul 2025",
     summary:
       "Led cross-functional teams across three product areas. Shopper portal, point of sale, and the merchant administration platform.",
     highlights: [
