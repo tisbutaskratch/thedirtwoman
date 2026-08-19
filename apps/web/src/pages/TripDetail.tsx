@@ -95,7 +95,9 @@ export default function TripDetail() {
 
   useEffect(() => {
     if (hintedType === undefined) return;
-    const timer = setTimeout(() => setOpenerDone(true), 1000);
+    // Matches trip-traveller-cross in index.css. Shorter and the opener is
+    // cut off mid-stride; longer and the page sits waiting on nothing.
+    const timer = setTimeout(() => setOpenerDone(true), 1300);
   return () => clearTimeout(timer);
   }, [hintedType]);
 

@@ -52,40 +52,65 @@ function Frame({
 export function DirtBikeMark(props: MarkProps) {
   return (
     <Frame {...props}>
-      {/* Bodywork: one continuous profile, lightly washed. */}
+      {/*
+       * Read at a glance this was coming out as a wheelchair: two equal
+       * circles with spokes and a soft mass between them is exactly that
+       * silhouette. What separates a dirt bike from any other two-wheeler is
+       * a raked fork, an engine hung low between the wheels, a tail that
+       * kicks up, an upswept pipe, and knobs on the outside of the tyre. The
+       * spokes are gone because they were doing the most damage.
+       */}
+
+      {/* Engine, hung low and angular. The heaviest mass on the bike. */}
       <path
-        d="M1.5 10.5 L5 9.5 L11 10.5 L15.5 11 L18 7.5 L21.5 8.5 L21 14
-           L19.5 20.5 L17.5 21.5 L12 21.5 L9 17.5 L3.5 15.5 Z"
+        d="M11 14.5 L18 14.5 L19 19.5 L12.5 20 Z"
+        stroke="currentColor"
+        strokeWidth={STROKE}
+        strokeLinejoin="round"
+        fill="currentColor"
+        fillOpacity="0.3"
+      />
+      {/* Tank and seat: a wedge that kicks up hard over the back wheel. */}
+      <path
+        d="M4 9.5 L9 12.5 L14 11 L18 8 L20.5 9.5 L19.5 12.5 L13 14 L9.5 14.5 L6 12.5 Z"
         stroke="currentColor"
         strokeWidth={STROKE}
         strokeLinejoin="round"
         fill="currentColor"
         fillOpacity="0.15"
       />
-      {/* Engine block and tank seam, so the mass reads as machinery. */}
-      <path d="M10.5 16.5 L19 16.5" stroke="currentColor" strokeWidth="1.2" opacity="0.65" />
-      <path d="M13.5 17 L13.5 21" stroke="currentColor" strokeWidth="1.2" opacity="0.65" />
-      <path d="M16.5 17 L16.5 21" stroke="currentColor" strokeWidth="1.2" opacity="0.65" />
-
-      {/* Forks raked forward to the front axle, and narrow bars. */}
-      <path d="M20.5 10 L26.5 5.5" stroke="currentColor" strokeWidth="1.9" />
-      <path d="M26 6.5 L24.5 22.5" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M24.5 3.5 L30 3.5" stroke="currentColor" strokeWidth="1.7" />
-      {/* High front fender, clear of both the tyre and the bars. */}
-      <path d="M20 12.5 Q25.5 9 31 12" stroke="currentColor" strokeWidth="1.7" />
-
-      {/* Fat knobby tyres. Kept heavier than the bodywork on purpose. */}
-      <circle cx="7.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.2" />
-      <circle cx="24.5" cy="22.5" r="5.8" stroke="currentColor" strokeWidth="2.2" />
+      {/* Rear shock and swingarm down to the axle. */}
+      <path d="M12 14.5 L8 21.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M13 19.5 L8 22.5" stroke="currentColor" strokeWidth="1.9" />
+      {/* Upswept exhaust, the most dirt-bike line on the whole shape. */}
       <path
-        d="M7.5 15.5 L7.5 14.1 M14.5 22.5 L15.9 22.5 M7.5 29.5 L7.5 30.9 M0.5 22.5 L-0.9 22.5
-           M24.5 15.5 L24.5 14.1 M31.5 22.5 L32.9 22.5 M24.5 29.5 L24.5 30.9"
+        d="M12 17.5 Q7.5 18.5 5.5 14 Q4.5 11 2 10.5"
         stroke="currentColor"
-        strokeWidth="1.3"
-        opacity="0.55"
+        strokeWidth="1.7"
+        fill="none"
       />
-      <circle cx="7.5" cy="22.5" r="1.4" fill="currentColor" />
-      <circle cx="24.5" cy="22.5" r="1.4" fill="currentColor" />
+      {/* Forks raked forward to the front axle, and a crossbraced bar. */}
+      <path d="M21 7.5 L24.5 22" stroke="currentColor" strokeWidth="2.1" />
+      <path d="M21.5 7 L26.5 7" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M22.5 8.5 L25 8.5" stroke="currentColor" strokeWidth="1.3" opacity="0.7" />
+      {/* Number plate up front, and the high fender clear of the tyre. */}
+      <path d="M20.5 9 L23.5 11.5" stroke="currentColor" strokeWidth="1.5" opacity="0.8" />
+      <path d="M20 13.5 Q25 10.5 30 13.5" stroke="currentColor" strokeWidth="1.7" fill="none" />
+
+      {/* Knobby tyres: the tread sits outside the rim, where spokes used to
+          be inside it. */}
+      <circle cx="7.5" cy="22.5" r="5.6" stroke="currentColor" strokeWidth="2.4" />
+      <circle cx="24.5" cy="22.5" r="5.6" stroke="currentColor" strokeWidth="2.4" />
+      <path
+        d="M7.5 16.1 L7.5 17.3 M12 18 L11.2 18.8 M13.9 22.5 L12.7 22.5 M12 27 L11.2 26.2
+           M7.5 28.9 L7.5 27.7 M3 27 L3.8 26.2 M1.1 22.5 L2.3 22.5 M3 18 L3.8 18.8
+           M24.5 16.1 L24.5 17.3 M29 18 L28.2 18.8 M30.9 22.5 L29.7 22.5 M29 27 L28.2 26.2
+           M24.5 28.9 L24.5 27.7 M20 27 L20.8 26.2 M18.1 22.5 L19.3 22.5 M20 18 L20.8 18.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="7.5" cy="22.5" r="1.2" fill="currentColor" />
+      <circle cx="24.5" cy="22.5" r="1.2" fill="currentColor" />
     </Frame>
   );
 }
