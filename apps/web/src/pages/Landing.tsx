@@ -64,9 +64,9 @@ export default function Landing() {
          */}
         <blockquote className="max-w-xl border-l-2 border-accent/50 pl-4">
           <p className="text-lg leading-relaxed text-content-muted">
-            No ads, nothing to buy. I made this for my own trips and then my friends and family
-            ended up on it too, which has honestly been the nicest part. It is so much easier when
-            everyone can see the same plan. Come and use it, and take someone with you.
+            No ads, nothing to buy. I built this for my friend group, which happens to include me.
+            Everything got easier once we could all see the same plan. Come and use it, and bring
+            the people you go with.
           </p>
           <footer className="mt-2 text-sm text-content-subtle">
             <a
