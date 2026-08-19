@@ -45,30 +45,67 @@ function Scene({ children }: { children: React.ReactNode }) {
 function ChasedBike() {
   return (
     <g transform="translate(44 14.2) scale(0.72)">
-      {/* fat tyres */}
-      <circle cx="18" cy="46" r="12" stroke="currentColor" strokeWidth="3.4" />
-      <circle cx="58" cy="46" r="12" stroke="currentColor" strokeWidth="3.4" />
-      <circle cx="18" cy="46" r="2.6" fill="currentColor" />
-      <circle cx="58" cy="46" r="2.6" fill="currentColor" />
-      {/* bodywork as one closed profile */}
+      {/* Same silhouette as the trip mark, at the loader's scale: engine slung
+          low, tail kicked up, pipe swept over it, knobs outside the rim. */}
+
+      {/* Engine block. */}
       <path
-        d="M2 22 L10 20 L23 22 L33 23 L38 15 L46 17 L45 29 L41 43 L37 46 L25 46 L19 37 L7 33 Z"
+        d="M24 32 L38 32 L40 43 L27 44 Z"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
+        fill="currentColor"
+        fillOpacity="0.3"
+      />
+      {/* Tank and seat, kicking up over the back wheel. */}
+      <path
+        d="M8 21 L20 27 L30 24 L38 17 L44 21 L42 27 L28 30 L21 32 L13 27 Z"
         stroke="currentColor"
         strokeWidth="2.2"
         strokeLinejoin="round"
         fill="currentColor"
         fillOpacity="0.16"
       />
-      {/* forks, bars, high fender */}
-      <path d="M44 21 L57 12" stroke="currentColor" strokeWidth="2.6" />
-      <path d="M56 14 L58 46" stroke="currentColor" strokeWidth="2.4" />
-      <path d="M53 7 L65 7" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M43 26 Q55 18 66 25" stroke="currentColor" strokeWidth="2.2" />
-      {/* rider, tucked in */}
+      {/* Swingarm to the rear axle. */}
+      <path d="M27 42 L18 46" stroke="currentColor" strokeWidth="2.6" />
+      <path d="M25 32 L18 45" stroke="currentColor" strokeWidth="2" />
+      {/* Upswept pipe. */}
+      <path
+        d="M26 38 Q16 40 12 30 Q10 24 4 23"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        fill="none"
+      />
+      {/* Fork through to the front axle, bars with a crossbrace. */}
+      <path d="M47 13 L58 46" stroke="currentColor" strokeWidth="2.6" />
+      <path d="M46 13 L62 13" stroke="currentColor" strokeWidth="2.2" />
+      <path d="M49 16 L55 16" stroke="currentColor" strokeWidth="1.6" opacity="0.7" />
+      <path d="M47 29 Q57 21 68 29" stroke="currentColor" strokeWidth="2.2" fill="none" />
+
+      {/* Rider, tucked in over the tank. */}
       <circle cx="30" cy="9" r="6" stroke="currentColor" strokeWidth="2.2" />
-      <path d="M30 15 L27 24 L42 21" stroke="currentColor" strokeWidth="2.4" />
-      {/* roost off the back tyre */}
-      <path d="M4 48 L-4 44 M5 54 L-5 54 M6 59 L-3 63" stroke="currentColor" strokeWidth="1.8" opacity="0.55" />
+      <path d="M30 15 L27 24 L44 19" stroke="currentColor" strokeWidth="2.4" fill="none" />
+
+      {/* Knobby tyres. */}
+      <circle cx="18" cy="46" r="11.5" stroke="currentColor" strokeWidth="3.4" />
+      <circle cx="58" cy="46" r="11.5" stroke="currentColor" strokeWidth="3.4" />
+      <path
+        d="M18 32.5 L18 35 M27.5 36.5 L25.8 38.2 M31.5 46 L29 46 M27.5 55.5 L25.8 53.8
+           M18 59.5 L18 57 M8.5 55.5 L10.2 53.8 M4.5 46 L7 46 M8.5 36.5 L10.2 38.2
+           M58 32.5 L58 35 M67.5 36.5 L65.8 38.2 M71.5 46 L69 46 M67.5 55.5 L65.8 53.8
+           M58 59.5 L58 57 M48.5 55.5 L50.2 53.8 M44.5 46 L47 46 M48.5 36.5 L50.2 38.2"
+        stroke="currentColor"
+        strokeWidth="2.1"
+      />
+      <circle cx="18" cy="46" r="2.4" fill="currentColor" />
+      <circle cx="58" cy="46" r="2.4" fill="currentColor" />
+      {/* Roost off the back tyre. */}
+      <path
+        d="M4 48 L-4 44 M5 54 L-5 54 M6 59 L-3 63"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        opacity="0.55"
+      />
     </g>
   );
 }
