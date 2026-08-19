@@ -19,5 +19,14 @@ class BackpackingDetail(Base):
     permit_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
     permit_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     resupply_plan: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    # Bear canisters are legally required in parts of the Sierra, Yosemite,
+    # Sequoia/Kings Canyon and the Adirondacks. Worth tracking explicitly.
+    bear_canister_required: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=True)
+    # Water planning drives the whole day: carry capacity vs. the longest
+    # stretch between reliable sources.
+    water_capacity_liters: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    longest_dry_stretch_mi: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    total_distance_mi: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    elevation_gain_ft: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
 
     trip: Mapped[Trip] = relationship(back_populates="backpacking_detail")

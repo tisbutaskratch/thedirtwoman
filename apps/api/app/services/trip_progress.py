@@ -1,3 +1,6 @@
+from typing import Optional
+
+from app.models.common import TripRole
 from app.models.trip import Trip, TripType
 from app.schemas.trip import TripRead
 
@@ -51,11 +54,30 @@ def compute_percent_planned(trip: Trip) -> int:
             bool(detail.destination_currencies),
             detail.primary_timezone is not None,
         ]
+    elif trip.trip_type == TripType.domestic and trip.domestic_detail is not None:
+        detail = trip.domestic_detail
+        # How you're travelling drives everything else, so it counts twice
+        # over: without it none of the mode-specific fields even apply.
+        checks += [
+            detail.travel_mode is not None,
+            detail.booking_ref is not None,
+            detail.destination is not None,
+        ]
 
     return round(100 * sum(checks) / len(checks))
 
 
-def to_trip_read(trip: Trip) -> TripRead:
+def role_for(trip: Trip, user_id: Optional[int]) -> TripRole:
+    """What `user_id` may do with this trip. Creator always edits."""
+    if user_id is None or trip.user_id == user_id:
+        return TripRole.editor
+    for collaborator in trip.collaborators:
+        if collaborator.user_id == user_id:
+            return collaborator.role
+    return TripRole.editor
+
+
+def to_trip_read(trip: Trip, user_id: Optional[int] = None) -> TripRead:
     return TripRead(
         id=trip.id,
         user_id=trip.user_id,
@@ -63,9 +85,10 @@ def to_trip_read(trip: Trip) -> TripRead:
         trip_type=trip.trip_type,
         start_date=trip.start_date,
         end_date=trip.end_date,
-        status=trip.status,
+        archived_at=trip.archived_at,
         owner_vehicle=trip.owner_vehicle,
         owner_fuel_range_miles=trip.owner_fuel_range_miles,
         created_at=trip.created_at,
         percent_planned=compute_percent_planned(trip),
+        my_role=role_for(trip, user_id),
     )

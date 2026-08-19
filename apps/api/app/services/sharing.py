@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.common import TripRole
 from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
 from app.models.trip_invite import TripInvite
@@ -15,25 +16,36 @@ from app.services.email import send_invite_email
 
 
 def to_owner_collaborator_read(trip: Trip) -> CollaboratorRead:
-    """The trip owner isn't a TripCollaborator row, but the roster should
-    still show them alongside everyone else."""
+    """The trip's creator isn't a TripCollaborator row, but the roster should
+    still show them alongside everyone else, as a collaborator, not an
+    "owner"."""
     return CollaboratorRead(
         user_id=trip.user_id,
         name=trip.user.name,
         email=trip.user.email,
+        role=TripRole.editor,
+        is_creator=True,
         vehicle=trip.owner_vehicle,
         fuel_range_miles=trip.owner_fuel_range_miles,
         joined_at=trip.created_at,
     )
 
 
-def get_or_create_invite(db: Session, trip: Trip, created_by_user_id: int) -> TripInvite:
+def get_or_create_invite(
+    db: Session, trip: Trip, created_by_user_id: int, role: TripRole = TripRole.editor
+) -> TripInvite:
+    """The reusable share link, one per access level.
+
+    Editor and viewer links are separate tokens so handing someone the
+    read-only link can never accidentally grant edit rights.
+    """
     now = datetime.now(timezone.utc)
     existing = (
         db.query(TripInvite)
         .filter(
             TripInvite.trip_id == trip.id,
             TripInvite.invitee_email.is_(None),
+            TripInvite.role == role,
             TripInvite.expires_at > now,
         )
         .order_by(TripInvite.created_at.desc())
@@ -46,6 +58,7 @@ def get_or_create_invite(db: Session, trip: Trip, created_by_user_id: int) -> Tr
         trip_id=trip.id,
         token=secrets.token_urlsafe(24),
         created_by_user_id=created_by_user_id,
+        role=role,
         expires_at=now + timedelta(days=settings.trip_invite_expire_days),
     )
     db.add(invite)
@@ -66,6 +79,7 @@ def to_collaborator_read(collaborator: TripCollaborator) -> CollaboratorRead:
         user_id=collaborator.user_id,
         name=collaborator.user.name,
         email=collaborator.user.email,
+        role=collaborator.role,
         vehicle=collaborator.vehicle,
         fuel_range_miles=collaborator.fuel_range_miles,
         joined_at=collaborator.created_at,
@@ -73,7 +87,11 @@ def to_collaborator_read(collaborator: TripCollaborator) -> CollaboratorRead:
 
 
 def create_email_invite(
-    db: Session, trip: Trip, created_by_user_id: int, email: str
+    db: Session,
+    trip: Trip,
+    created_by_user_id: int,
+    email: str,
+    role: TripRole = TripRole.editor,
 ) -> TripInvite:
     now = datetime.now(timezone.utc)
     email = email.lower()
@@ -92,6 +110,7 @@ def create_email_invite(
         token=secrets.token_urlsafe(24),
         created_by_user_id=created_by_user_id,
         invitee_email=email,
+        role=role,
         expires_at=now + timedelta(days=settings.trip_invite_expire_days),
     )
     if existing is None:
@@ -117,7 +136,9 @@ def list_pending_invites(db: Session, trip: Trip) -> list[PendingMemberRead]:
         .all()
     )
     return [
-        PendingMemberRead(id=i.id, email=i.invitee_email, invited_at=i.created_at)
+        PendingMemberRead(
+            id=i.id, email=i.invitee_email, role=i.role, invited_at=i.created_at
+        )
         for i in invites
     ]
 

@@ -16,6 +16,7 @@ from app.routers import (
     expenses,
     gear,
     health,
+    journal,
     locations,
     notes,
     sharing,
@@ -54,7 +55,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/media", StaticFiles(directory=media_dir()), name="media")
+# Local uploads are served straight from disk in development. In deployment
+# uploads live in a private bucket and are reached only through short-lived
+# signed URLs, so there is deliberately nothing mounted here.
+if not settings.uses_object_storage:
+    app.mount("/media", StaticFiles(directory=media_dir()), name="media")
 
 
 @app.middleware("http")
@@ -87,6 +92,7 @@ app.include_router(activities.router)
 app.include_router(attachments.router)
 app.include_router(expenses.router)
 app.include_router(gear.router)
+app.include_router(journal.router)
 app.include_router(notes.router)
 app.include_router(tasks.router)
 app.include_router(sharing.router)

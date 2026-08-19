@@ -19,11 +19,12 @@ function makeTrip(overrides: Partial<Trip> = {}): Trip {
     trip_type: "motocamping",
     start_date: null,
     end_date: null,
-    status: "planning",
+    archived_at: null,
     owner_vehicle: null,
     owner_fuel_range_miles: null,
     created_at: "2026-01-01",
     percent_planned: 0,
+    my_role: "editor",
     ...overrides,
   };
 }
@@ -50,7 +51,7 @@ describe("Dashboard", () => {
 
     renderDashboard();
 
-    expect(screen.getByText("Loading…")).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Loading trips" })).toBeInTheDocument();
     expect(await screen.findByText("Ride to Rivendell")).toBeInTheDocument();
   });
 

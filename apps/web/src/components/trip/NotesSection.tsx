@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
-import { createNote, deleteNote, listNotes } from "@/api/trips";
+import { useEffect, useState, type FormEvent } from "react";
+import { createNote, deleteNote, listNotes, updateNote } from "@/api/trips";
 import type { Note } from "@/api/types";
-
-function bulletLines(text: string): string[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
+import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
 export default function NotesSection({
   tripId,
@@ -17,9 +12,11 @@ export default function NotesSection({
   onChange?: () => void;
 }) {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [editing, setEditing] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [body, setBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
-  const [saving, setSaving] = useState(false);
 
   function refresh() {
     listNotes(tripId).then(setNotes);
@@ -27,101 +24,114 @@ export default function NotesSection({
 
   useEffect(refresh, [tripId]);
 
-  function startEdit() {
-    setDraft(notes.map((n) => n.body).join("\n"));
-    setEditing(true);
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    if (!body.trim()) return;
+    setSubmitting(true);
+    try {
+      await createNote(tripId, { body: body.trim() });
+      setBody("");
+      refresh();
+      onChange?.();
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  async function handleRemoveLine(id: number) {
+  async function saveEdit(id: number) {
+    if (!draft.trim()) return;
+    await updateNote(id, { body: draft.trim() });
+    setEditingId(null);
+    refresh();
+    onChange?.();
+  }
+
+  async function handleDelete(id: number) {
     await deleteNote(id);
     refresh();
     onChange?.();
   }
 
-  async function handleSave() {
-    setSaving(true);
-    try {
-      const newLines = bulletLines(draft);
-      const existingBodies = new Set(notes.map((n) => n.body));
-      const newBodySet = new Set(newLines);
-
-      const toDelete = notes.filter((n) => !newBodySet.has(n.body));
-      const toCreate = newLines.filter((line) => !existingBodies.has(line));
-
-      await Promise.all([
-        ...toDelete.map((n) => deleteNote(n.id)),
-        ...toCreate.map((line) => createNote(tripId, { body: line })),
-      ]);
-
-      setEditing(false);
-      refresh();
-      onChange?.();
-    } finally {
-      setSaving(false);
-    }
-  }
-
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Notes</h2>
-        {!editing && (
-          <button
-            onClick={startEdit}
-            title="Edit"
-            className="text-slate-500 hover:text-emerald-300"
-          >
-            ✎
-          </button>
-        )}
-      </div>
-
-      {editing ? (
-        <div className="flex flex-col gap-2">
+    <Section
+      glyph={SECTION_META.notes.glyph}
+      title="Notes"
+      tone={SECTION_META.notes.tone}
+      count={notes.length}
+      actions={
+        !showAdd && <IconButton onClick={() => setShowAdd(true)} title="Add note" icon="add" />
+      }
+    >
+      {showAdd && (
+        <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
           <textarea
-            rows={6}
+            rows={2}
             autoFocus
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={"One note per line\ne.g. Red River Gorge area is a lot of fun"}
-            className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="e.g. Red River Gorge area is a lot of fun"
+            className={inputClass}
           />
-          <div className="flex gap-3">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              title="Save"
-              className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
-            <button
-              onClick={() => setEditing(false)}
-              title="Cancel"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      ) : notes.length > 0 ? (
-        <ul className="list-disc space-y-1 pl-5 text-sm text-slate-300">
-          {notes.map((note) => (
-            <li key={note.id} className="group flex items-start justify-between gap-2">
-              <span>{note.body}</span>
-              <button
-                onClick={() => handleRemoveLine(note.id)}
-                title="Remove"
-                className="shrink-0 text-slate-600 hover:text-red-400"
-              >
-                −
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="text-sm text-slate-500">No notes yet.</p>
+        </AddForm>
       )}
-    </section>
+
+      {notes.length === 0 ? (
+        <EmptyState glyph="📝" message="No notes yet." />
+      ) : (
+        <ul className="flex flex-col gap-1.5">
+          {notes.map((note) =>
+            editingId === note.id ? (
+              <li
+                key={note.id}
+                className="flex flex-col gap-1.5 rounded-md border border-edge bg-surface-overlay p-2"
+              >
+                <textarea
+                  rows={2}
+                  autoFocus
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  className={`${inputClass} py-1 text-sm`}
+                />
+                <div className="flex justify-end gap-1">
+                  <IconButton onClick={() => setEditingId(null)} title="Cancel" icon="close" />
+                  <IconButton
+                    onClick={() => saveEdit(note.id)}
+                    title="Save"
+                    variant="confirm"
+                    icon="confirm"
+                    size={19}
+                  />
+                </div>
+              </li>
+            ) : (
+              <li
+                key={note.id}
+                className="group flex items-start gap-2 rounded-md border border-edge bg-surface-raised px-3 py-2"
+              >
+                <span className="min-w-0 flex-1 whitespace-pre-wrap text-sm leading-relaxed text-content-muted">
+                  {note.body}
+                </span>
+                <div className="flex shrink-0 gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                  <IconButton
+                    onClick={() => {
+                      setEditingId(note.id);
+                      setDraft(note.body);
+                    }}
+                    title="Edit"
+                    icon="edit"
+                  />
+                  <IconButton
+                    onClick={() => handleDelete(note.id)}
+                    title="Remove"
+                    variant="danger"
+                    icon="remove"
+                  />
+                </div>
+              </li>
+            ),
+          )}
+        </ul>
+      )}
+    </Section>
   );
 }

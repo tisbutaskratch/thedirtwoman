@@ -6,11 +6,18 @@ import type {
   InviteAcceptResult,
   InvitePreview,
   PendingMember,
+  TripRole,
   VehicleUpdate,
 } from "@/api/types";
 
-export const getOrCreateInvite = (tripId: number) =>
-  apiRequest<Invite>(`/trips/${tripId}/invite`, { method: "POST" });
+export const getOrCreateInvite = (tripId: number, role: TripRole = "editor") =>
+  apiRequest<Invite>(`/trips/${tripId}/invite?role=${role}`, { method: "POST" });
+
+export const setCollaboratorRole = (tripId: number, userId: number, role: TripRole) =>
+  apiRequest<Collaborator>(`/trips/${tripId}/collaborators/${userId}/role`, {
+    method: "PATCH",
+    body: JSON.stringify({ role }),
+  });
 
 export const revokeInvite = (tripId: number) =>
   apiRequest<void>(`/trips/${tripId}/invite`, { method: "DELETE" });

@@ -14,9 +14,11 @@ if TYPE_CHECKING:
     from app.models.attachment import Attachment
     from app.models.backpacking_detail import BackpackingDetail
     from app.models.camping_detail import CampingDetail
+    from app.models.domestic_detail import DomesticDetail
     from app.models.expense import Expense
     from app.models.gear import Gear
     from app.models.international_detail import InternationalDetail
+    from app.models.journal_entry import JournalEntry
     from app.models.location import Location
     from app.models.motocamping_detail import MotocampingDetail
     from app.models.note import Note
@@ -33,13 +35,10 @@ class TripType(str, enum.Enum):
     camping = "camping"
     overlanding = "overlanding"
     backpacking = "backpacking"
+    # Crossing a border. Labelled "Leisure" in the UI.
     international = "international"
-
-
-class TripStatus(str, enum.Enum):
-    planning = "planning"
-    active = "active"
-    completed = "completed"
+    # In-country travel by car, rail, or a domestic flight.
+    domestic = "domestic"
 
 
 class Trip(Base):
@@ -51,13 +50,16 @@ class Trip(Base):
     trip_type: Mapped[TripType] = mapped_column(Enum(TripType, native_enum=False), nullable=False)
     start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
-    status: Mapped[TripStatus] = mapped_column(
-        Enum(TripStatus, native_enum=False), nullable=False, default=TripStatus.planning
+    # Archiving replaces the old planning/active/completed status: a trip is
+    # either current or filed away in the past, which is the only distinction
+    # that turned out to matter.
+    archived_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
     # The owner's own vehicle for this trip (collaborators get theirs on
-    # TripCollaborator.vehicle) — real usage always lists a full rider roster.
+    # TripCollaborator.vehicle), real usage always lists a full rider roster.
     owner_vehicle: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    # Owner's tank range in miles (full to empty) — collaborators get theirs
+    # Owner's tank range in miles (full to empty). Collaborators get theirs
     # on TripCollaborator.fuel_range_miles.
     owner_fuel_range_miles: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -98,7 +100,13 @@ class Trip(Base):
     international_detail: Mapped[Optional[InternationalDetail]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
+    domestic_detail: Mapped[Optional[DomesticDetail]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", uselist=False
+    )
     collaborators: Mapped[list[TripCollaborator]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan"
+    )
+    journal_entries: Mapped[list[JournalEntry]] = relationship(
         back_populates="trip", cascade="all, delete-orphan"
     )
     invites: Mapped[list[TripInvite]] = relationship(

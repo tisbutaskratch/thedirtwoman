@@ -1,5 +1,13 @@
-export type TripType = "motocamping" | "camping" | "overlanding" | "backpacking" | "international";
-export type TripStatus = "planning" | "active" | "completed";
+export type TripType =
+  | "motocamping"
+  | "camping"
+  | "overlanding"
+  | "backpacking"
+  | "international"
+  | "domestic";
+
+/** Access level someone has on a trip. */
+export type TripRole = "editor" | "viewer";
 
 export interface Trip {
   id: number;
@@ -8,11 +16,12 @@ export interface Trip {
   trip_type: TripType;
   start_date: string | null;
   end_date: string | null;
-  status: TripStatus;
+  archived_at: string | null;
   owner_vehicle: string | null;
   owner_fuel_range_miles: number | null;
   created_at: string;
   percent_planned: number;
+  my_role: TripRole;
 }
 
 export interface TripCreate {
@@ -26,7 +35,7 @@ export interface TripUpdate {
   title?: string;
   start_date?: string | null;
   end_date?: string | null;
-  status?: TripStatus;
+  archived?: boolean;
   owner_vehicle?: string | null;
   owner_fuel_range_miles?: number | null;
 }
@@ -148,7 +157,11 @@ export interface SettleUpdate {
   settled: boolean;
 }
 
-export type GearRequiredLevel = "required" | "optional";
+/** Shared by the packing list and the prep checklist. */
+export type RequiredLevel = "required" | "optional";
+
+/** @deprecated kept as an alias while call sites migrate to RequiredLevel. */
+export type GearRequiredLevel = RequiredLevel;
 
 export interface Gear {
   id: number;
@@ -159,6 +172,7 @@ export interface Gear {
   packed: boolean;
   required_level: GearRequiredLevel;
   assigned_to_user_id: number | null;
+  assigned_to_all: boolean;
   notes: string | null;
 }
 
@@ -169,6 +183,7 @@ export interface GearCreate {
   packed?: boolean;
   required_level?: GearRequiredLevel;
   assigned_to_user_id?: number | null;
+  assigned_to_all?: boolean;
   notes?: string | null;
 }
 
@@ -179,6 +194,7 @@ export interface GearUpdate {
   packed?: boolean;
   required_level?: GearRequiredLevel;
   assigned_to_user_id?: number | null;
+  assigned_to_all?: boolean;
   notes?: string | null;
 }
 
@@ -198,7 +214,9 @@ export interface Task {
   trip_id: number;
   title: string;
   done: boolean;
+  required_level: RequiredLevel;
   assigned_to_user_id: number | null;
+  assigned_to_all: boolean;
   due_date: string | null;
   notes: string | null;
   created_at: string;
@@ -207,7 +225,9 @@ export interface Task {
 export interface TaskCreate {
   title: string;
   done?: boolean;
+  required_level?: RequiredLevel;
   assigned_to_user_id?: number | null;
+  assigned_to_all?: boolean;
   due_date?: string | null;
   notes?: string | null;
 }
@@ -215,12 +235,16 @@ export interface TaskCreate {
 export interface TaskUpdate {
   title?: string;
   done?: boolean;
+  required_level?: RequiredLevel;
   assigned_to_user_id?: number | null;
+  assigned_to_all?: boolean;
   due_date?: string | null;
   notes?: string | null;
 }
 
 export interface Collaborator {
+  role: TripRole;
+  is_creator: boolean;
   user_id: number;
   name: string;
   email: string;
@@ -236,9 +260,11 @@ export interface VehicleUpdate {
 
 export interface EmailInviteCreate {
   email: string;
+  role?: TripRole;
 }
 
 export interface PendingMember {
+  role: TripRole;
   id: number;
   email: string;
   invited_at: string;
@@ -253,6 +279,7 @@ export interface Attachment {
   title: string;
   description: string | null;
   url: string;
+  download_url: string;
   original_filename: string;
   content_type: string;
   created_at: string;
@@ -265,13 +292,37 @@ export interface Invite {
 }
 
 export interface InvitePreview {
+  role: TripRole;
   trip_id: number;
   trip_title: string;
   trip_type: TripType;
-  owner_name: string;
+  invited_by_name: string;
   already_member: boolean;
 }
 
 export interface InviteAcceptResult {
   trip_id: number;
+}
+
+/**
+ * A private diary entry. Only ever your own: the API never returns another
+ * member's entries, which is why there is no author field to display.
+ */
+export interface JournalEntry {
+  id: number;
+  trip_id: number;
+  entry_date: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JournalEntryCreate {
+  entry_date: string;
+  body: string;
+}
+
+export interface JournalEntryUpdate {
+  entry_date?: string;
+  body?: string;
 }

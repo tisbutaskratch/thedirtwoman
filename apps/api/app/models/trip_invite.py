@@ -3,10 +3,11 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, ForeignKey, String, func
+from sqlalchemy import DateTime, Enum, ForeignKey, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from app.models.common import TripRole
 
 if TYPE_CHECKING:
     from app.models.trip import Trip
@@ -20,6 +21,10 @@ class TripInvite(Base):
     trip_id: Mapped[int] = mapped_column(ForeignKey("trips.id"), nullable=False, index=True)
     token: Mapped[str] = mapped_column(String(64), unique=True, index=True, nullable=False)
     created_by_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    # The access level accepting this invite grants.
+    role: Mapped[TripRole] = mapped_column(
+        Enum(TripRole, native_enum=False), nullable=False, default=TripRole.editor
+    )
     # Set for a targeted email invite (shows as "pending" until accepted);
     # null for the reusable generic share link.
     invitee_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, index=True)

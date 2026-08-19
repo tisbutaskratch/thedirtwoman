@@ -1,13 +1,9 @@
 # Render Blueprint for the API — https://render.com/docs/blueprint-spec
 #
-# Deploy: connect this repo in the Render dashboard and it will detect this
-# file automatically ("New +" -> "Blueprint"). After the first deploy, set
-# CORS_ORIGINS in the dashboard to your deployed frontend's URL (Vercel or
-# Netlify), e.g. ["https://your-app.vercel.app"].
+# Deploy: New + -> Blueprint, connect this repo. Full walkthrough in
+# DEPLOY.md at the repo root.
 #
-# The frontend (apps/web) isn't listed here — per the architecture doc it
-# deploys to Vercel or Netlify instead (see apps/web/vercel.json and
-# netlify.toml at the repo root).
+# The frontend isn't here: both sites deploy to Netlify from netlify.toml.
 services:
   - type: web
     name: adventure-planner-api
@@ -15,6 +11,11 @@ services:
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: ./apps/api
     healthCheckPath: /health
+    # Free web services sleep after 15 minutes idle and take about a minute to
+    # wake. Change to starter before putting this link on a resume.
+    plan: free
+    # Migrations run from the Dockerfile's CMD, not preDeployCommand, so this
+    # deploys on any instance type. See apps/api/Dockerfile.
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -25,6 +26,10 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: CORS_ORIGINS
+        sync: false
+      # Invite links are built from this. Left at its default it emails
+      # people a localhost URL, so it has to be the real site.
+      - key: FRONTEND_BASE_URL
         sync: false
 
 databases:

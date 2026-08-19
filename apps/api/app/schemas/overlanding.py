@@ -18,4 +18,12 @@ class OverlandingDetailRead(BaseModel):
     has_recovery_gear: Optional[bool]
     comms_plan: Optional[str]
     emergency_contact: Optional[str]
+    tire_pressure_offroad_psi: Optional[float]
+    tire_pressure_highway_psi: Optional[float]
+    water_capacity_gal: Optional[float]
+    aux_fuel_gal: Optional[float]
     est_range_miles: Optional[float]
+    # Range including jerry cans. The number that actually matters when
+    # committing to a remote stretch.
+    est_total_range_miles: Optional[float]
+    water_days_supported: Optional[float]

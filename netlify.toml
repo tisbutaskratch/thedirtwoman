@@ -1,15 +1,32 @@
-# Netlify build config for the frontend (apps/web). Per the architecture
-# doc, the frontend deploys to Vercel or Netlify — pick one; this file and
-# apps/web/vercel.json can coexist harmlessly if you're undecided.
+# Netlify build config for the frontend (apps/web).
 #
-# Deploy: connect this repo in the Netlify dashboard; it auto-detects this
-# file. Set VITE_API_BASE_URL in the dashboard's environment variables to
-# your deployed API's URL (e.g. https://adventure-planner-api.onrender.com).
+# TWO Netlify sites are created from this one repo and this one branch. They
+# share this file and differ only in environment variables, set per site in
+# Site settings -> Environment variables:
+#
+#   Resume site (e.g. sabawilhelm.com)
+#     VITE_SITE          unset, or "resume"
+#     VITE_PLANNER_URL   https://<planner domain>
+#     VITE_API_BASE_URL  https://<api host>
+#
+#   Planner site (e.g. thedirthags.com)
+#     VITE_SITE          planner
+#     VITE_RESUME_URL    https://<resume domain>
+#     VITE_API_BASE_URL  https://<api host>
+#
+# Each site ships only its own routes (see apps/web/src/lib/site.ts), so the
+# resume bundle carries no planner code and vice versa. Both redeploy on
+# every push to main.
+#
+# Only the planner talks to the API; every resume page renders from
+# compile-time data. So Render's CORS_ORIGINS needs the planner origin only,
+# and the resume site needs no VITE_API_BASE_URL. See DEPLOY.md.
 [build]
   base = "apps/web"
   command = "npm run build"
   publish = "dist"
 
+# Single-page app: every path is served index.html and routed client side.
 [[redirects]]
   from = "/*"
   to = "/index.html"

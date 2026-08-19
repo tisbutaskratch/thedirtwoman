@@ -66,7 +66,7 @@ def test_percent_planned_factors_in_camping_fields(client, auth_headers):
         headers=headers,
     )
     trip_id = created.json()["id"]
-    # 2 of 7 checks true (start_date, end_date) — camping only adds 2 mode checks
+    # 2 of 7 checks true (start_date, end_date), camping only adds 2 mode checks
     assert created.json()["percent_planned"] == 29
 
     client.patch(

@@ -2,21 +2,36 @@ import { useEffect, useState, type FormEvent } from "react";
 import { listCollaborators } from "@/api/sharing";
 import { createActivity, deleteActivity, listActivities, updateActivity } from "@/api/trips";
 import type { Activity, Collaborator } from "@/api/types";
+import {
+  AddForm,
+  EmptyHint,
+  EmptyState,
+  Field,
+  IconButton,
+  Section,
+  TONE_EDGE,
+  TONE_SOFT,
+  inputClass,
+  type Tone,
+} from "@/components/ui";
+import { ALL_ASSIGNEE } from "@/lib/assignment";
+import { SECTION_META } from "@/lib/tripTypes";
 
-const DAY_COLORS = [
-  { badge: "border-emerald-800 bg-emerald-950/40 text-emerald-300", accent: "border-l-emerald-600" },
-  { badge: "border-sky-800 bg-sky-950/40 text-sky-300", accent: "border-l-sky-600" },
-  { badge: "border-violet-800 bg-violet-950/40 text-violet-300", accent: "border-l-violet-600" },
-  { badge: "border-amber-800 bg-amber-950/40 text-amber-300", accent: "border-l-amber-600" },
-  { badge: "border-rose-800 bg-rose-950/40 text-rose-300", accent: "border-l-rose-600" },
-  { badge: "border-cyan-800 bg-cyan-950/40 text-cyan-300", accent: "border-l-cyan-600" },
-  { badge: "border-orange-800 bg-orange-950/40 text-orange-300", accent: "border-l-orange-600" },
-  { badge: "border-fuchsia-800 bg-fuchsia-950/40 text-fuchsia-300", accent: "border-l-fuchsia-600" },
+/** Days cycle through the palette so each one is distinguishable at a glance. */
+const DAY_TONES: Tone[] = [
+  "emerald",
+  "sky",
+  "violet",
+  "amber",
+  "rose",
+  "cyan",
+  "orange",
+  "fuchsia",
 ];
 
-function dayColors(dayIndex: number) {
-  const i = ((dayIndex - 1) % DAY_COLORS.length + DAY_COLORS.length) % DAY_COLORS.length;
-  return DAY_COLORS[i];
+function dayTone(dayIndex: number): Tone {
+  const i = (((dayIndex - 1) % DAY_TONES.length) + DAY_TONES.length) % DAY_TONES.length;
+  return DAY_TONES[i];
 }
 
 function dayDate(tripStartDate: string | null | undefined, dayIndex: number): string | null {
@@ -39,13 +54,25 @@ function bulletLines(text: string | null): string[] {
     .filter(Boolean);
 }
 
+/*
+ * Details and todos sit side by side, so both use the same ROW_HEIGHT
+ * rhythm, otherwise the two columns drift apart line by line and stop
+ * reading as one row of the day.
+ */
+const ROW = "flex min-h-7 items-center px-1.5 leading-5";
+
 function BulletList({ text }: { text: string | null }) {
   const lines = bulletLines(text);
-  if (lines.length === 0) return <span className="text-slate-600">—</span>;
+  if (lines.length === 0) return <EmptyHint>Nothing noted</EmptyHint>;
   return (
-    <ul className="list-disc space-y-0.5 pl-4">
+    <ul>
       {lines.map((line, i) => (
-        <li key={i}>{line}</li>
+        <li key={i} className={`${ROW} gap-2`}>
+          <span aria-hidden className="text-content-subtle">
+            •
+          </span>
+          <span className="min-w-0">{line}</span>
+        </li>
       ))}
     </ul>
   );
@@ -54,7 +81,8 @@ function BulletList({ text }: { text: string | null }) {
 interface TodoItem {
   text: string;
   done: boolean;
-  assignedTo: number | null;
+  /** A member's user id, the ALL_ASSIGNEE sentinel, or null for unclaimed. */
+  assignedTo: number | typeof ALL_ASSIGNEE | null;
 }
 
 // todos is stored as a JSON-encoded TodoItem[] so each line can carry its
@@ -68,7 +96,12 @@ function parseTodos(raw: string | null): TodoItem[] {
       return parsed.map((item) => ({
         text: item.text,
         done: !!item.done,
-        assignedTo: item.assignedTo ?? null,
+        assignedTo:
+          item.assignedTo === ALL_ASSIGNEE
+            ? ALL_ASSIGNEE
+            : typeof item.assignedTo === "number"
+              ? item.assignedTo
+              : null,
       }));
     }
   } catch {
@@ -103,33 +136,52 @@ function TodoList({
     onSaved();
   }
 
-  async function assign(index: number, userId: string) {
-    const next = items.map((item, i) =>
-      i === index ? { ...item, assignedTo: userId ? Number(userId) : null } : item,
-    );
+  async function assign(index: number, value: string) {
+    const assignedTo: TodoItem["assignedTo"] =
+      value === ALL_ASSIGNEE ? ALL_ASSIGNEE : value ? Number(value) : null;
+    const next = items.map((item, i) => (i === index ? { ...item, assignedTo } : item));
     await updateActivity(activity.id, { todos: serializeTodos(next) });
     onSaved();
   }
 
-  if (items.length === 0) return <span className="text-slate-600">—</span>;
+  if (items.length === 0) return <EmptyHint>No todos</EmptyHint>;
 
+  /*
+   * Each todo is one striped, full-width row with the assignee pinned to a
+   * fixed right-hand column. The stripe is what carries the eye across the
+   * gap, with twenty todos, whitespace alone stops telling you which name
+   * belongs to which line.
+   */
   return (
-    <div className="flex flex-col gap-1">
+    <div>
       {items.map((item, i) => (
-        <div key={i} className="flex items-center gap-1.5">
+        <div
+          key={i}
+          className={`${ROW} gap-2 rounded-sm odd:bg-surface-overlay/50 hover:bg-surface-overlay`}
+        >
           <input
             type="checkbox"
             checked={item.done}
             onChange={() => toggle(i)}
             className="h-3.5 w-3.5 shrink-0 accent-emerald-500"
           />
-          <span className={item.done ? "text-slate-600 line-through" : ""}>{item.text}</span>
+          <span className={`min-w-0 flex-1 ${item.done ? "text-content-subtle line-through" : ""}`}>
+            {item.text}
+          </span>
           <select
             value={item.assignedTo ?? ""}
             onChange={(e) => assign(i, e.target.value)}
-            className="ml-1 rounded-full border border-slate-700 bg-slate-800/60 px-1.5 py-0 text-[11px] text-slate-400 outline-none"
+            aria-label="Assign to"
+            className={`w-24 shrink-0 truncate rounded-full border px-1.5 py-0 text-[11px] outline-none ${
+              item.assignedTo === ALL_ASSIGNEE
+                ? "border-violet-800/60 bg-violet-950/50 text-violet-300"
+                : item.assignedTo === null
+                  ? "border-dashed border-edge bg-transparent text-content-subtle"
+                  : "border-edge bg-surface-overlay text-content-muted"
+            }`}
           >
             <option value="">Unassigned</option>
+            <option value={ALL_ASSIGNEE}>Everyone</option>
             {roster.map((r) => (
               <option key={r.user_id} value={r.user_id}>
                 {r.name}
@@ -216,22 +268,11 @@ export default function ActivitiesSection({
     onChange?.();
   }
 
-  function startEdit(activity: Activity) {
-    setEditingId(activity.id);
-    setDraft(draftFrom(activity));
-  }
-
-  function cancelEdit() {
-    setEditingId(null);
-    setDraft(null);
-  }
-
   async function saveEdit(activity: Activity) {
     if (!draft) return;
     setSaving(true);
     try {
-      const existing = parseTodos(activity.todos);
-      const reconciled = reconcileTodos(existing, bulletLines(draft.todos));
+      const reconciled = reconcileTodos(parseTodos(activity.todos), bulletLines(draft.todos));
       await updateActivity(activity.id, {
         title: draft.title,
         day_index: draft.dayIndex,
@@ -259,224 +300,209 @@ export default function ActivitiesSection({
   ).sort(([a], [b]) => a - b);
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Timeline</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add activity"
-            className="text-slate-500 hover:text-emerald-300"
-          >
-            +
-          </button>
-        )}
-      </div>
-
+    <Section
+      glyph={SECTION_META.timeline.glyph}
+      title="Timeline"
+      tone={SECTION_META.timeline.tone}
+      count={groupedByDay.length}
+      actions={
+        !showAdd && (
+          <IconButton onClick={() => setShowAdd(true)} title="Add activity" icon="add" />
+        )
+      }
+    >
       {showAdd && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
-        >
-          <div className="flex items-start justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex flex-wrap items-end gap-2">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs text-slate-500">Day #</span>
+        <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
+          <div className="flex flex-wrap items-end gap-3">
+            <Field label="Day #">
               <input
                 type="number"
                 min={1}
                 autoFocus
                 value={dayIndex}
                 onChange={(e) => setDayIndex(Number(e.target.value))}
-                className="w-20 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+                className={`${inputClass} w-20`}
               />
-            </label>
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-slate-500">Activity</span>
-              <input
-                type="text"
-                placeholder="e.g. Ride the DBBB off-road"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
-              />
-            </label>
+            </Field>
+            <div className="flex-1">
+              <Field label="Activity">
+                <input
+                  type="text"
+                  placeholder="e.g. Ride the DBBB off-road"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={inputClass}
+                />
+              </Field>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-slate-500">Details (one bullet per line, optional)</span>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Details (one bullet per line)">
               <textarea
-                rows={2}
+                rows={3}
                 placeholder={"Nada Tunnel\nNatural Bridge hike"}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+                className={inputClass}
               />
-            </label>
-            <label className="flex flex-1 flex-col gap-1">
-              <span className="text-xs text-slate-500">To-Do (one item per line, optional)</span>
+            </Field>
+            <Field label="To-do (one item per line)">
               <textarea
-                rows={2}
+                rows={3}
                 placeholder={"Book Lil Abner's for night 2\nCheck tire pressure"}
                 value={todos}
                 onChange={(e) => setTodos(e.target.value)}
-                className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+                className={inputClass}
               />
-            </label>
+            </Field>
           </div>
-          <button
-            type="submit"
-            disabled={submitting}
-            title="Add"
-            className="w-fit text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-          >
-            ✓
-          </button>
-        </form>
+        </AddForm>
       )}
 
-      {groupedByDay.length === 0 && <p className="text-sm text-slate-500">No activities yet.</p>}
-
-      <div className="flex flex-col gap-3">
-        {groupedByDay.map(([day, dayActivities]) => {
-          const colors = dayColors(day);
-          const date = dayDate(tripStartDate, day);
-          return (
-            <div
-              key={day}
-              className={`overflow-hidden rounded-md border border-slate-800 border-l-4 ${colors.accent}`}
-            >
+      {groupedByDay.length === 0 ? (
+        <EmptyState glyph="🗓️" message="No days planned yet. Add the first activity." />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {groupedByDay.map(([day, dayActivities]) => {
+            const tone = dayTone(day);
+            const date = dayDate(tripStartDate, day);
+            return (
               <div
-                className={`flex items-center justify-between border-b border-slate-800 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest ${colors.badge}`}
+                key={day}
+                className={`overflow-hidden rounded-card border border-edge border-l-4 bg-surface-raised ${TONE_EDGE[tone]}`}
               >
-                <span>
-                  Day {day}
-                  {date && <span className="ml-2 font-normal normal-case text-slate-400">{date}</span>}
-                </span>
-              </div>
-              <table className="w-full border-collapse text-sm">
-                <thead>
-                  <tr className="border-t border-slate-800/60 text-left text-xs uppercase tracking-wider text-slate-600">
-                    <th className="w-10 px-2 py-1.5" />
-                    <th className="w-1/4 px-3 py-1.5 font-medium">Activity</th>
-                    <th className="px-3 py-1.5 font-medium">Details</th>
-                    <th className="px-3 py-1.5 font-medium">To-Do</th>
-                  </tr>
-                </thead>
-                <tbody>
+                <div
+                  className={`flex items-center gap-2 border-b border-edge px-3 py-2 text-xs font-semibold uppercase tracking-wider ${TONE_SOFT[tone]}`}
+                >
+                  <span>Day {day}</span>
+                  {date && (
+                    <span className="font-normal normal-case opacity-80">{date}</span>
+                  )}
+                </div>
+
+                {/*
+                 * One grid rather than a table, so the same markup is columns
+                 * on a laptop and a stack on a phone. A timeline you can't
+                 * read at a trailhead isn't much use, and a horizontally
+                 * scrolling table is exactly that.
+                 */}
+                <div className="hidden grid-cols-[2.5rem_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.5fr)] gap-2 border-b border-edge px-2 py-1.5 text-[11px] uppercase tracking-wider text-content-subtle sm:grid">
+                  <span />
+                  <span className="font-medium">Activity</span>
+                  <span className="font-medium">Details</span>
+                  <span className="font-medium">To-do</span>
+                </div>
+
+                <div className="divide-y divide-edge">
                   {dayActivities.map((activity) =>
                     editingId === activity.id && draft ? (
-                      <tr key={activity.id} className="border-t border-slate-800/60 align-top">
-                        <td className="px-2 py-2">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <button
-                              onClick={() => saveEdit(activity)}
-                              disabled={saving}
-                              title="Save"
-                              className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-                            >
-                              ✓
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              title="Cancel"
-                              className="text-slate-500 hover:text-slate-300"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex flex-col gap-1">
-                            <input
-                              type="number"
-                              min={1}
-                              value={draft.dayIndex}
-                              onChange={(e) =>
-                                setDraft({ ...draft, dayIndex: Number(e.target.value) })
-                              }
-                              className="w-16 rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                            />
-                            <input
-                              type="text"
-                              value={draft.title}
-                              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                              className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                            />
-                          </div>
-                        </td>
-                        <td className="px-3 py-2">
+                      <div
+                        key={activity.id}
+                        className="grid gap-2 p-2 sm:grid-cols-[2.5rem_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.5fr)]"
+                      >
+                        <div className="flex gap-1 sm:flex-col sm:items-center">
+                          <IconButton
+                            onClick={() => saveEdit(activity)}
+                            disabled={saving}
+                            title="Save"
+                            variant="confirm"
+                            icon="confirm"
+                          />
+                          <IconButton
+                            onClick={() => setEditingId(null)}
+                            title="Cancel"
+                            icon="close"
+                          />
+                        </div>
+                        <div className="flex gap-1.5 sm:flex-col">
+                          <input
+                            type="number"
+                            min={1}
+                            aria-label="Day number"
+                            value={draft.dayIndex}
+                            onChange={(e) =>
+                              setDraft({ ...draft, dayIndex: Number(e.target.value) })
+                            }
+                            className={`${inputClass} w-14 shrink-0 py-1 text-xs sm:w-full`}
+                          />
+                          <input
+                            type="text"
+                            aria-label="Activity"
+                            value={draft.title}
+                            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                            className={`${inputClass} py-1 text-xs`}
+                          />
+                        </div>
+                        <label className="flex flex-col gap-1">
+                          <span className="text-[11px] uppercase tracking-wider text-content-subtle sm:hidden">
+                            Details
+                          </span>
                           <textarea
                             rows={3}
                             value={draft.notes}
                             onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-                            className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                            className={`${inputClass} py-1 text-xs`}
                           />
-                        </td>
-                        <td className="px-3 py-2">
+                        </label>
+                        <label className="flex flex-col gap-1">
+                          <span className="text-[11px] uppercase tracking-wider text-content-subtle sm:hidden">
+                            To-do
+                          </span>
                           <textarea
                             rows={3}
                             value={draft.todos}
                             onChange={(e) => setDraft({ ...draft, todos: e.target.value })}
-                            className="w-full rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
+                            className={`${inputClass} py-1 text-xs`}
                           />
-                        </td>
-                      </tr>
+                        </label>
+                      </div>
                     ) : (
-                      <tr key={activity.id} className="border-t border-slate-800/60 align-top">
-                        <td className="px-2 py-2">
-                          <div className="flex flex-col items-center gap-1.5">
-                            <button
-                              onClick={() => startEdit(activity)}
-                              title="Edit"
-                              className="text-slate-500 hover:text-emerald-300"
-                            >
-                              ✎
-                            </button>
-                            <button
-                              onClick={() => handleDelete(activity.id)}
-                              title="Remove"
-                              className="text-slate-600 hover:text-red-400"
-                            >
-                              −
-                            </button>
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 font-medium text-slate-100">
+                      <div
+                        key={activity.id}
+                        className="group grid gap-2 p-2 text-sm transition-colors hover:bg-surface-overlay/50 sm:grid-cols-[2.5rem_minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1.5fr)]"
+                      >
+                        {/* Controls are always visible on touch. There is no
+                            hover to reveal them with. */}
+                        <div className="order-2 flex gap-1 opacity-100 transition-opacity sm:order-none sm:flex-col sm:items-center sm:opacity-0 sm:focus-within:opacity-100 sm:group-hover:opacity-100">
+                          <IconButton
+                            onClick={() => {
+                              setEditingId(activity.id);
+                              setDraft(draftFrom(activity));
+                            }}
+                            title="Edit"
+                            icon="edit"
+                          />
+                          <IconButton
+                            onClick={() => handleDelete(activity.id)}
+                            title="Remove"
+                            variant="danger"
+                            icon="remove"
+                          />
+                        </div>
+                        <p className="order-1 font-medium text-content sm:order-none">
                           {activity.title}
-                          {activity.start_time && (
-                            <div className="mt-0.5 text-xs font-normal text-slate-500">
-                              {new Date(activity.start_time).toLocaleTimeString(undefined, {
-                                hour: "numeric",
-                                minute: "2-digit",
-                              })}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 text-slate-300">
+                        </p>
+                        <div className="order-3 text-content-muted sm:order-none">
+                          <p className="mb-0.5 text-[11px] uppercase tracking-wider text-content-subtle sm:hidden">
+                            Details
+                          </p>
                           <BulletList text={activity.notes} />
-                        </td>
-                        <td className="px-3 py-2 text-slate-300">
+                        </div>
+                        <div className="order-4 text-content-muted sm:order-none">
+                          <p className="mb-0.5 text-[11px] uppercase tracking-wider text-content-subtle sm:hidden">
+                            To-do
+                          </p>
                           <TodoList activity={activity} roster={roster} onSaved={refresh} />
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     ),
                   )}
-                </tbody>
-              </table>
-            </div>
-          );
-        })}
-      </div>
-    </section>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </Section>
   );
 }

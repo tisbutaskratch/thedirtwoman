@@ -4,7 +4,7 @@ import { ApiError } from "@/api/client";
 import { acceptInvite, getInvitePreview } from "@/api/sharing";
 import type { InvitePreview } from "@/api/types";
 import { useAuth } from "@/lib/AuthContext";
-import { TRIP_TYPE_META } from "@/lib/tripTypes";
+import TripMark from "@/art/tripMarks";
 
 export default function AcceptInvite() {
   const { token } = useParams<{ token: string }>();
@@ -38,22 +38,22 @@ export default function AcceptInvite() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
-        <div className="w-full max-w-sm rounded-lg border border-slate-800 p-6 text-center">
+      <div className="flex min-h-screen items-center justify-center bg-surface px-4 text-content">
+        <div className="w-full max-w-sm rounded-lg border border-edge p-6 text-center">
           <h1 className="mb-2 text-xl font-semibold">You've been invited to a trip</h1>
-          <p className="mb-6 text-sm text-slate-400">Log in or create an account to see it.</p>
+          <p className="mb-6 text-sm text-content-muted">Log in or create an account to see it.</p>
           <div className="flex justify-center gap-3">
             <Link
               to="/login"
               state={{ from: `/invite/${token}` }}
-              className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+              className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
             >
               Log in
             </Link>
             <Link
               to="/register"
               state={{ from: `/invite/${token}` }}
-              className="rounded-md border border-slate-700 px-4 py-2 text-sm text-slate-100 transition-colors hover:border-slate-500"
+              className="rounded-md border border-edge px-4 py-2 text-sm text-content transition-colors hover:border-edge-strong"
             >
               Register
             </Link>
@@ -64,21 +64,26 @@ export default function AcceptInvite() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100">
-      <div className="w-full max-w-sm rounded-lg border border-slate-800 p-6 text-center">
-        {error && <p className="text-sm text-red-400">{error}</p>}
-        {!error && !preview && <p className="text-sm text-slate-500">Loading…</p>}
+    <div className="flex min-h-screen items-center justify-center bg-surface px-4 text-content">
+      <div className="w-full max-w-sm rounded-lg border border-edge p-6 text-center">
+        {error && <p className="text-sm text-rose-400">{error}</p>}
+        {!error && !preview && <p className="text-sm text-content-subtle">Loading…</p>}
         {preview && (
           <>
-            <p className="mb-1 text-3xl">{TRIP_TYPE_META[preview.trip_type].icon}</p>
+            <div className="mb-1 flex justify-center text-accent">
+              <TripMark type={preview.trip_type} size={36} />
+            </div>
             <h1 className="mb-1 text-xl font-semibold">{preview.trip_title}</h1>
-            <p className="mb-6 text-sm text-slate-400">
-              {preview.owner_name} invited you to plan this trip together.
+            <p className="mb-6 text-sm text-content-muted">
+              {preview.invited_by_name} invited you
+              {preview.role === "viewer"
+                ? " to follow along with this trip."
+                : " to plan this trip together."}
             </p>
             {preview.already_member ? (
               <button
                 onClick={() => navigate(`/app/trips/${preview.trip_id}`)}
-                className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400"
+                className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
               >
                 Go to trip
               </button>
@@ -86,7 +91,7 @@ export default function AcceptInvite() {
               <button
                 onClick={handleAccept}
                 disabled={accepting}
-                className="rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-emerald-400 disabled:opacity-50"
+                className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-50"
               >
                 {accepting ? "Joining…" : "Join trip"}
               </button>

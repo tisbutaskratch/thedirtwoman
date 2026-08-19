@@ -6,7 +6,7 @@ def test_create_and_list_trip(client, auth_headers):
     assert response.status_code == 201
     body = response.json()
     assert body["title"] == "Ride to Rivendell"
-    assert body["status"] == "planning"
+    assert body["archived_at"] is None
     assert body["percent_planned"] == 0
 
     response = client.get("/trips", headers=headers)
@@ -37,9 +37,9 @@ def test_update_and_delete_trip(client, auth_headers):
     )
     trip_id = created.json()["id"]
 
-    response = client.patch(f"/trips/{trip_id}", json={"status": "active"}, headers=headers)
+    response = client.patch(f"/trips/{trip_id}", json={"archived": True}, headers=headers)
     assert response.status_code == 200
-    assert response.json()["status"] == "active"
+    assert response.json()["archived_at"] is not None
 
     response = client.delete(f"/trips/{trip_id}", headers=headers)
     assert response.status_code == 204

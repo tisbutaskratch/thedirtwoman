@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { attachmentUrl, deleteAttachment, listPhotos, uploadPhoto } from "@/api/attachments";
+import {
+  attachmentUrl,
+  deleteAttachment,
+  downloadAttachment,
+  listPhotos,
+  uploadPhoto,
+} from "@/api/attachments";
 import type { Attachment } from "@/api/types";
+import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
 export default function PhotosSection({ tripId }: { tripId: number }) {
   const [photos, setPhotos] = useState<Attachment[]>([]);
@@ -16,6 +24,16 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
   }
 
   useEffect(refresh, [tripId]);
+
+  // Escape closes the lightbox. Expected behaviour for any modal overlay.
+  useEffect(() => {
+    if (!viewing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setViewing(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [viewing]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -40,133 +58,133 @@ export default function PhotosSection({ tripId }: { tripId: number }) {
   }
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Photos</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add photo"
-            className="text-slate-500 hover:text-emerald-300"
-          >
-            +
-          </button>
-        )}
-      </div>
-
+    <Section
+      glyph={SECTION_META.screenshots.glyph}
+      title="Screenshots"
+      tone={SECTION_META.screenshots.tone}
+      count={photos.length}
+      actions={
+        !showAdd && (
+          <IconButton onClick={() => setShowAdd(true)} title="Add screenshot" icon="add" />
+        )
+      }
+    >
       {showAdd && (
-        <form
+        <AddForm
           onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-4"
+          onClose={() => setShowAdd(false)}
+          submitting={submitting}
+          submitTitle="Upload"
         >
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid gap-2 sm:grid-cols-2">
             <input
               type="text"
               autoFocus
               placeholder="Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={inputClass}
             />
             <input
               type="text"
               placeholder="Short summary (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={inputClass}
             />
           </div>
-          <div className="flex items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="flex-1 text-sm text-slate-400 file:mr-3 file:rounded-md file:border-0 file:bg-slate-800 file:px-3 file:py-1.5 file:text-xs file:text-slate-200"
-            />
-            <button
-              type="submit"
-              disabled={submitting}
-              title="Upload"
-              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
-          </div>
-        </form>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="text-sm text-content-muted file:mr-3 file:rounded-md file:border-0 file:bg-surface-sunken file:px-3 file:py-1.5 file:text-xs file:text-content"
+          />
+        </AddForm>
       )}
 
-      {photos.length === 0 && <p className="text-sm text-slate-500">No photos yet.</p>}
+      {photos.length === 0 ? (
+        <EmptyState glyph="📷" message="No screenshots yet." />
+      ) : (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+          {photos.map((photo) => (
+            <div
+              key={photo.id}
+              className="group relative overflow-hidden rounded-card border border-edge bg-surface-raised transition-all hover:border-accent hover:shadow-lg"
+            >
+              <button
+                onClick={() => setViewing(photo)}
+                className="block w-full text-left"
+                title={`Open ${photo.title}`}
+              >
+                <img
+                  src={attachmentUrl(photo)}
+                  alt={photo.title}
+                  loading="lazy"
+                  className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <span className="block truncate px-2 py-1.5 text-xs text-content-muted group-hover:text-accent">
+                  {photo.title}
+                </span>
+              </button>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-        {photos.map((photo) => (
-          <button
-            key={photo.id}
-            onClick={() => setViewing(photo)}
-            className="group flex flex-col overflow-hidden rounded-md border border-slate-800 text-left transition-colors hover:border-emerald-600"
-          >
-            <img
-              src={attachmentUrl(photo)}
-              alt={photo.title}
-              className="aspect-square w-full object-cover"
-            />
-            <span className="truncate px-2 py-1.5 text-xs text-slate-300 group-hover:text-emerald-300">
-              {photo.title}
-            </span>
-          </button>
-        ))}
-      </div>
+              {/*
+               * Saving a screenshot shouldn't mean opening it first. Always
+               * visible on touch, where there is no hover to reveal it.
+               */}
+              <span className="absolute right-1 top-1 rounded-md bg-surface/85 backdrop-blur transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+                <IconButton
+                  onClick={() => downloadAttachment(photo)}
+                  title={`Download ${photo.original_filename}`}
+                  icon="download"
+                />
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {viewing && (
         <div
           onClick={() => setViewing(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6"
+          role="dialog"
+          aria-modal
+          aria-label={viewing.title}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 backdrop-blur-sm"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex max-h-full max-w-3xl flex-col gap-3 overflow-hidden rounded-lg border border-slate-800 bg-slate-950"
+            className="flex max-h-full max-w-4xl flex-col overflow-hidden rounded-card border border-edge bg-surface-raised"
           >
             <img
               src={attachmentUrl(viewing)}
               alt={viewing.title}
               className="max-h-[70vh] w-full object-contain"
             />
-            <div className="flex items-start justify-between gap-4 px-4 pb-4">
+            <div className="flex items-start justify-between gap-4 p-4">
               <div>
-                <h3 className="font-semibold text-slate-100">{viewing.title}</h3>
+                <h3 className="font-semibold text-content">{viewing.title}</h3>
                 {viewing.description && (
-                  <p className="mt-1 text-sm text-slate-400">{viewing.description}</p>
+                  <p className="mt-1 text-sm text-content-muted">{viewing.description}</p>
                 )}
               </div>
-              <div className="flex shrink-0 gap-3">
-                <button
+              <div className="flex shrink-0 gap-1">
+                <IconButton
+                  onClick={() => downloadAttachment(viewing)}
+                  title={`Download ${viewing.original_filename}`}
+                  icon="download"
+                />
+                <IconButton
                   onClick={() => handleDelete(viewing.id)}
                   title="Delete"
-                  className="text-slate-500 hover:text-red-400"
-                >
-                  −
-                </button>
-                <button
-                  onClick={() => setViewing(null)}
-                  title="Close"
-                  className="text-slate-500 hover:text-slate-300"
-                >
-                  ×
-                </button>
+                  variant="danger"
+                  icon="remove"
+                />
+                <IconButton onClick={() => setViewing(null)} title="Close" icon="close" />
               </div>
             </div>
           </div>
         </div>
       )}
-    </section>
+    </Section>
   );
 }

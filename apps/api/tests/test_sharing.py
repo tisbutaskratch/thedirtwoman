@@ -62,7 +62,8 @@ def test_invite_preview_shows_trip_and_owner(client, auth_headers):
     assert response.status_code == 200
     body = response.json()
     assert body["trip_id"] == trip_id
-    assert body["owner_name"] == "Samwise Gamgee"
+    assert body["invited_by_name"] == "Samwise Gamgee"
+    assert body["role"] == "editor"
     assert body["already_member"] is False
 
 
@@ -100,7 +101,7 @@ def test_collaborator_can_edit_but_not_delete_trip(client, auth_headers):
 
     # can edit trip metadata
     response = client.patch(
-        f"/trips/{trip_id}", json={"status": "active"}, headers=collaborator_headers
+        f"/trips/{trip_id}", json={"archived": True}, headers=collaborator_headers
     )
     assert response.status_code == 200
 
@@ -120,10 +121,14 @@ def test_owner_can_list_and_remove_collaborator(client, auth_headers):
     token = client.post(f"/trips/{trip_id}/invite", headers=owner_headers).json()["token"]
     client.post(f"/invites/{token}/accept", headers=collaborator_headers)
 
+    # The creator is listed alongside everyone else, flagged is_creator, because
+    # the UI calls the whole roster collaborators and never says "owner".
     collaborators = client.get(f"/trips/{trip_id}/collaborators", headers=owner_headers).json()
-    assert len(collaborators) == 1
-    collaborator_user_id = collaborators[0]["user_id"]
-    assert collaborators[0]["email"] == "sam@bagend.dev"
+    assert [(c["email"], c["is_creator"]) for c in collaborators] == [
+        ("frodo@bagend.dev", True),
+        ("sam@bagend.dev", False),
+    ]
+    collaborator_user_id = next(c["user_id"] for c in collaborators if not c["is_creator"])
 
     response = client.delete(
         f"/trips/{trip_id}/collaborators/{collaborator_user_id}", headers=owner_headers
@@ -159,5 +164,7 @@ def test_owner_accepting_own_invite_is_a_noop(client, auth_headers):
     response = client.post(f"/invites/{token}/accept", headers=headers)
     assert response.status_code == 200
 
+    # Accepting your own invite adds nobody: the creator is already on the roster.
     collaborators = client.get(f"/trips/{trip_id}/collaborators", headers=headers).json()
-    assert collaborators == []
+    assert [c["email"] for c in collaborators] == ["frodo@bagend.dev"]
+    assert collaborators[0]["is_creator"] is True

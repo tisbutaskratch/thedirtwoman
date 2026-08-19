@@ -3,7 +3,12 @@ from typing import Optional
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_accessible_trip, get_current_user, trip_access_filter
+from app.core.deps import (
+    get_accessible_trip,
+    get_current_user,
+    get_editable_trip,
+    trip_write_filter,
+)
 from app.db.session import get_db
 from app.models.attachment import Attachment, AttachmentKind
 from app.models.trip import Trip
@@ -22,7 +27,7 @@ def get_owned_attachment(
     attachment = (
         db.query(Attachment)
         .join(Trip, Attachment.trip_id == Trip.id)
-        .filter(Attachment.id == attachment_id, trip_access_filter(current_user.id))
+        .filter(Attachment.id == attachment_id, trip_write_filter(current_user.id))
         .first()
     )
     if attachment is None:
@@ -70,7 +75,7 @@ async def upload_photo(
     title: str = Form(...),
     description: Optional[str] = Form(None),
     file: UploadFile = File(...),
-    trip: Trip = Depends(get_accessible_trip),
+    trip: Trip = Depends(get_editable_trip),
     db: Session = Depends(get_db),
 ) -> AttachmentRead:
     return await _create_attachment(AttachmentKind.photo, trip, title, description, file, db)
@@ -88,7 +93,7 @@ async def upload_file(
     title: str = Form(...),
     description: Optional[str] = Form(None),
     file: UploadFile = File(...),
-    trip: Trip = Depends(get_accessible_trip),
+    trip: Trip = Depends(get_editable_trip),
     db: Session = Depends(get_db),
 ) -> AttachmentRead:
     return await _create_attachment(AttachmentKind.file, trip, title, description, file, db)

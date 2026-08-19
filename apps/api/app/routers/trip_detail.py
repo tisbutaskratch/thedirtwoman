@@ -4,17 +4,19 @@ from typing import Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_accessible_trip
+from app.core.deps import get_accessible_trip, get_editable_trip
 from app.db.session import get_db
 from app.models.trip import Trip, TripType
 from app.schemas.backpacking import BackpackingDetailRead
 from app.schemas.camping import CampingDetailRead
+from app.schemas.domestic import DomesticDetailRead
 from app.schemas.international import InternationalDetailRead
 from app.schemas.motocamping import MotocampingDetailRead
 from app.schemas.overlanding import OverlandingDetailRead
 from app.schemas.trip_detail import TripDetailUpdate
 from app.services.backpacking import to_backpacking_detail_read
 from app.services.camping import to_camping_detail_read
+from app.services.domestic import to_domestic_detail_read
 from app.services.international import to_international_detail_read
 from app.services.motocamping import to_motocamping_detail_read
 from app.services.overlanding import to_overlanding_detail_read
@@ -27,6 +29,7 @@ DetailRead = Union[
     OverlandingDetailRead,
     CampingDetailRead,
     InternationalDetailRead,
+    DomesticDetailRead,
 ]
 
 # Each mode with a detail model: the Trip relationship holding it, the
@@ -41,7 +44,17 @@ _MODE_CONFIG: dict[TripType, tuple[str, set[str], Callable[[object, Trip], objec
     ),
     TripType.backpacking: (
         "backpacking_detail",
-        {"base_pack_weight_oz", "permit_required", "permit_notes", "resupply_plan"},
+        {
+            "base_pack_weight_oz",
+            "permit_required",
+            "permit_notes",
+            "resupply_plan",
+            "bear_canister_required",
+            "water_capacity_liters",
+            "longest_dry_stretch_mi",
+            "total_distance_mi",
+            "elevation_gain_ft",
+        },
         to_backpacking_detail_read,
     ),
     TripType.overlanding: (
@@ -55,18 +68,67 @@ _MODE_CONFIG: dict[TripType, tuple[str, set[str], Callable[[object, Trip], objec
             "has_recovery_gear",
             "comms_plan",
             "emergency_contact",
+            "tire_pressure_offroad_psi",
+            "tire_pressure_highway_psi",
+            "water_capacity_gal",
+            "aux_fuel_gal",
         },
-        lambda detail, trip: to_overlanding_detail_read(detail),
+        to_overlanding_detail_read,
     ),
     TripType.camping: (
         "camping_detail",
-        {"campground_reservation_ref", "fire_restrictions_checked"},
-        lambda detail, trip: to_camping_detail_read(detail),
+        {
+            "campground_reservation_ref",
+            "fire_restrictions_checked",
+            "potable_water_available",
+            "firewood_policy",
+            "check_in_time",
+            "quiet_hours",
+            "meal_plan",
+        },
+        to_camping_detail_read,
     ),
     TripType.international: (
         "international_detail",
-        {"home_currency", "destination_currencies", "primary_timezone"},
-        lambda detail, trip: to_international_detail_read(detail),
+        {
+            "home_currency",
+            "destination_currencies",
+            "primary_timezone",
+            "passport_expiry",
+            "visa_required",
+            "visa_notes",
+            "vaccinations_notes",
+            "travel_insurance_ref",
+            "embassy_contact",
+            "step_enrolled",
+        },
+        to_international_detail_read,
+    ),
+    TripType.domestic: (
+        "domestic_detail",
+        {
+            "travel_mode",
+            "booking_ref",
+            "origin",
+            "destination",
+            "is_rental",
+            "rental_company",
+            "total_distance_mi",
+            "vehicle_mpg",
+            "fuel_price_per_gallon",
+            "rail_operator",
+            "rail_pass_type",
+            "seat_reservation_required",
+            "seat_reservations_booked",
+            "airline",
+            "checked_bags",
+            "carry_on_only",
+            "separate_tickets",
+            "layover_notes",
+            "lodging_type",
+            "lodging_ref",
+        },
+        to_domestic_detail_read,
     ),
 }
 
@@ -98,7 +160,7 @@ def get_trip_detail(trip: Trip = Depends(get_accessible_trip)) -> DetailRead:
 @router.patch("", response_model=DetailRead)
 def update_trip_detail(
     payload: TripDetailUpdate,
-    trip: Trip = Depends(get_accessible_trip),
+    trip: Trip = Depends(get_editable_trip),
     db: Session = Depends(get_db),
 ) -> DetailRead:
     detail, fields, to_read = _get_detail(trip)

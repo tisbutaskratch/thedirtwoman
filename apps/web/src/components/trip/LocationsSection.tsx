@@ -1,8 +1,18 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createLocation, deleteLocation, listLocations, updateLocation } from "@/api/trips";
 import type { Location, LocationKind } from "@/api/types";
+import { AddForm, Emoji, EmptyHint, EmptyState, Icon, IconButton, Section, inputClass } from "@/components/ui";
+import { SECTION_META } from "@/lib/tripTypes";
 
 const KIND_OPTIONS: LocationKind[] = ["waypoint", "campsite", "hotel", "poi", "fuel_stop"];
+
+const KIND_META: Record<LocationKind, { glyph: string; label: string }> = {
+  waypoint: { glyph: "📌", label: "Waypoint" },
+  campsite: { glyph: "⛺", label: "Campsite" },
+  hotel: { glyph: "🏨", label: "Hotel" },
+  poi: { glyph: "⭐", label: "Point of interest" },
+  fuel_stop: { glyph: "⛽", label: "Fuel stop" },
+};
 
 interface Draft {
   address: string;
@@ -21,6 +31,11 @@ export default function LocationsSection({
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
   const [kind, setKind] = useState<LocationKind>("waypoint");
+  // The add form asks for exactly what the edit form shows, so you're never
+  // made to save a bare name and immediately reopen it to fill in the rest.
+  const [address, setAddress] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [confirmationRef, setConfirmationRef] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -36,8 +51,17 @@ export default function LocationsSection({
     if (!name.trim()) return;
     setSubmitting(true);
     try {
-      await createLocation(tripId, { name, kind });
+      await createLocation(tripId, {
+        name,
+        kind,
+        address: address.trim() || null,
+        contact_phone: contactPhone.trim() || null,
+        confirmation_ref: confirmationRef.trim() || null,
+      });
       setName("");
+      setAddress("");
+      setContactPhone("");
+      setConfirmationRef("");
       refresh();
       onChange?.();
     } finally {
@@ -60,11 +84,6 @@ export default function LocationsSection({
     });
   }
 
-  function cancelEdit() {
-    setEditingId(null);
-    setDraft(null);
-  }
-
   async function saveEdit(id: number) {
     if (!draft) return;
     await updateLocation(id, {
@@ -78,147 +97,164 @@ export default function LocationsSection({
   }
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex items-center gap-2">
-        <h2 className="text-xl font-semibold">Locations</h2>
-        {!showAdd && (
-          <button
-            onClick={() => setShowAdd(true)}
-            title="Add location"
-            className="text-slate-500 hover:text-emerald-300"
-          >
-            +
-          </button>
-        )}
-      </div>
-
+    <Section
+      glyph={SECTION_META.locations.glyph}
+      title="Locations"
+      tone={SECTION_META.locations.tone}
+      count={locations.length}
+      actions={
+        !showAdd && (
+          <IconButton onClick={() => setShowAdd(true)} title="Add location" icon="add" />
+        )
+      }
+    >
       {showAdd && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-2 rounded-lg border border-slate-800 bg-slate-900/40 p-3"
-        >
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={() => setShowAdd(false)}
-              title="Close"
-              className="text-slate-500 hover:text-slate-300"
-            >
-              ×
-            </button>
-          </div>
-          <div className="flex items-center gap-2">
+        <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
+          {/*
+           * Grid tracks, not flex widths: the inputs already carry w-full, so
+           * pairing that with flex-1 collapsed the name field to nothing and
+           * let the kind dropdown swallow the row.
+           */}
+          <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem]">
             <input
               type="text"
               autoFocus
               placeholder="Location name"
+              aria-label="Location name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="flex-1 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-emerald-500"
+              className={inputClass}
             />
             <select
               value={kind}
+              aria-label="Location kind"
               onChange={(e) => setKind(e.target.value as LocationKind)}
-              className="rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100"
+              className={inputClass}
             >
               {KIND_OPTIONS.map((k) => (
                 <option key={k} value={k}>
-                  {k}
+                  {KIND_META[k].label}
                 </option>
               ))}
             </select>
-            <button
-              type="submit"
-              disabled={submitting}
-              title="Add"
-              className="text-xl text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
-            >
-              ✓
-            </button>
           </div>
-        </form>
+          <input
+            type="text"
+            placeholder="Address"
+            aria-label="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            className={inputClass}
+          />
+          <div className="grid gap-2 sm:grid-cols-2">
+            <input
+              type="tel"
+              placeholder="Contact phone"
+              aria-label="Contact phone"
+              value={contactPhone}
+              onChange={(e) => setContactPhone(e.target.value)}
+              className={inputClass}
+            />
+            <input
+              type="text"
+              placeholder="Confirmation #"
+              aria-label="Confirmation number"
+              value={confirmationRef}
+              onChange={(e) => setConfirmationRef(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+        </AddForm>
       )}
 
-      {locations.length === 0 && <p className="text-sm text-slate-500">No locations yet.</p>}
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {locations.map((location) => (
-          <div key={location.id} className="rounded-lg border border-slate-800 p-4">
-            <div className="mb-1 flex items-start justify-between gap-2">
-              <div>
-                <span className="text-xs uppercase tracking-widest text-slate-500">
-                  {location.kind}
-                </span>
-                <h3 className="font-medium text-slate-100">{location.name}</h3>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <button
-                  onClick={() => startEdit(location)}
-                  title="Edit"
-                  className="text-slate-500 hover:text-emerald-300"
-                >
-                  ✎
-                </button>
-                <button
-                  onClick={() => handleDelete(location.id)}
-                  title="Delete"
-                  className="text-slate-600 hover:text-red-400"
-                >
-                  −
-                </button>
-              </div>
-            </div>
-
-            {editingId === location.id && draft ? (
-              <div className="mt-2 flex flex-col gap-1.5">
-                <input
-                  type="text"
-                  placeholder="Address"
-                  value={draft.address}
-                  onChange={(e) => setDraft({ ...draft, address: e.target.value })}
-                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Contact phone"
-                  value={draft.contactPhone}
-                  onChange={(e) => setDraft({ ...draft, contactPhone: e.target.value })}
-                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Confirmation #"
-                  value={draft.confirmationRef}
-                  onChange={(e) => setDraft({ ...draft, confirmationRef: e.target.value })}
-                  className="rounded-md border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-100 outline-none focus:border-emerald-500"
-                />
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => saveEdit(location.id)}
-                    title="Save"
-                    className="text-emerald-400 hover:text-emerald-300"
-                  >
-                    ✓
-                  </button>
-                  <button
-                    onClick={cancelEdit}
-                    title="Cancel"
-                    className="text-slate-500 hover:text-slate-300"
-                  >
-                    ×
-                  </button>
+      {locations.length === 0 ? (
+        <EmptyState glyph="📍" message="No locations yet." />
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {locations.map((location) => (
+            <div
+              key={location.id}
+              className="rounded-card border border-edge bg-surface-raised p-3"
+            >
+              <div className="flex items-start gap-2.5">
+                <Emoji glyph={KIND_META[location.kind].glyph} size="lg" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] uppercase tracking-wider text-content-subtle">
+                    {KIND_META[location.kind].label}
+                  </p>
+                  <h3 className="truncate text-sm font-medium text-content">{location.name}</h3>
+                </div>
+                <div className="flex shrink-0 gap-1">
+                  <IconButton onClick={() => startEdit(location)} title="Edit" icon="edit" />
+                  <IconButton
+                    onClick={() => handleDelete(location.id)}
+                    title="Delete"
+                    variant="danger"
+                    icon="remove"
+                  />
                 </div>
               </div>
-            ) : (
-              <div className="mt-1 flex flex-col gap-0.5 text-xs text-slate-500">
-                {location.address && <span>📍 {location.address}</span>}
-                {location.contact_phone && <span>☎ {location.contact_phone}</span>}
-                {location.confirmation_ref && <span>Conf# {location.confirmation_ref}</span>}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
+
+              {editingId === location.id && draft ? (
+                <div className="mt-2 flex flex-col gap-1.5">
+                  <input
+                    type="text"
+                    placeholder="Address"
+                    value={draft.address}
+                    onChange={(e) => setDraft({ ...draft, address: e.target.value })}
+                    className={`${inputClass} py-1 text-xs`}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Contact phone"
+                    value={draft.contactPhone}
+                    onChange={(e) => setDraft({ ...draft, contactPhone: e.target.value })}
+                    className={`${inputClass} py-1 text-xs`}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Confirmation #"
+                    value={draft.confirmationRef}
+                    onChange={(e) => setDraft({ ...draft, confirmationRef: e.target.value })}
+                    className={`${inputClass} py-1 text-xs`}
+                  />
+                  <div className="flex justify-end gap-1">
+                    <IconButton onClick={() => saveEdit(location.id)} title="Save" variant="confirm" icon="confirm" />
+                    <IconButton onClick={() => setEditingId(null)} title="Cancel" icon="close" />
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-2 flex flex-col gap-1 border-t border-edge pt-2 text-xs text-content-subtle">
+                  {location.address && (
+                    <span className="flex items-start gap-1.5">
+                      <Icon name="address" size={13} className="mt-px shrink-0" />
+                      {location.address}
+                    </span>
+                  )}
+                  {location.contact_phone && (
+                    <a
+                      href={`tel:${location.contact_phone}`}
+                      className="flex items-center gap-1.5 hover:text-accent"
+                    >
+                      <Icon name="phone" size={13} className="shrink-0" />
+                      {location.contact_phone}
+                    </a>
+                  )}
+                  {location.confirmation_ref && (
+                    <span className="flex items-center gap-1.5">
+                      <Icon name="confirmation" size={13} className="shrink-0" />
+                      {location.confirmation_ref}
+                    </span>
+                  )}
+                  {!location.address && !location.contact_phone && !location.confirmation_ref && (
+                    <EmptyHint>No address or contact saved</EmptyHint>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
   );
 }

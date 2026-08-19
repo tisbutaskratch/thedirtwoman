@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import InvalidTokenError, decode_token
 from app.db.session import get_db
+from app.models.common import TripRole
 from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
 from app.models.user import User
@@ -54,14 +55,27 @@ def get_owned_trip(
 
 
 def trip_access_filter(user_id: int) -> ColumnElement[bool]:
-    """True when user_id owns the trip or is a collaborator on it.
-
-    Shared by every trip-scoped resource query so viewing/editing trip
-    content works the same for the owner and for invited collaborators.
-    """
+    """True when user_id can *see* the trip: any role, plus the creator."""
     return or_(
         Trip.user_id == user_id,
         Trip.id.in_(select(TripCollaborator.trip_id).where(TripCollaborator.user_id == user_id)),
+    )
+
+
+def trip_write_filter(user_id: int) -> ColumnElement[bool]:
+    """True when user_id can *change* the trip: creator or editor.
+
+    Viewers pass trip_access_filter but not this one, which is the whole
+    point of the read-only audience.
+    """
+    return or_(
+        Trip.user_id == user_id,
+        Trip.id.in_(
+            select(TripCollaborator.trip_id).where(
+                TripCollaborator.user_id == user_id,
+                TripCollaborator.role == TripRole.editor,
+            )
+        ),
     )
 
 
@@ -70,24 +84,50 @@ def get_accessible_trip(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Trip:
-    """Owner or collaborator: viewing/editing trip content and metadata."""
+    """Read access: creator, editor, or viewer."""
     trip = db.query(Trip).filter(Trip.id == trip_id, trip_access_filter(current_user.id)).first()
     if trip is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
     return trip
 
 
-def validate_trip_member(trip: Trip, user_id: Optional[int], db: Session) -> None:
-    """Raise 400 if user_id isn't the trip owner or a collaborator.
+def get_editable_trip(
+    trip_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Trip:
+    """Write access: creator or editor. Viewers get a 403, not a 404:
+    they can legitimately see this trip, they just can't change it."""
+    trip = db.query(Trip).filter(Trip.id == trip_id, trip_access_filter(current_user.id)).first()
+    if trip is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
+    editable = (
+        db.query(Trip).filter(Trip.id == trip_id, trip_write_filter(current_user.id)).first()
+    )
+    if editable is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You have view-only access to this trip",
+        )
+    return editable
 
-    Shared by gear/task assignment so an item can only be assigned to
-    someone who's actually on the trip.
+
+def validate_trip_member(trip: Trip, user_id: Optional[int], db: Session) -> None:
+    """Raise 400 if user_id isn't the trip creator or an editor.
+
+    Shared by gear/task assignment. Viewers are deliberately excluded: the
+    audience is along to watch, so handing them a task nobody can act on
+    would be a silent dead end.
     """
     if user_id is None or user_id == trip.user_id:
         return
     is_collaborator = (
         db.query(TripCollaborator)
-        .filter(TripCollaborator.trip_id == trip.id, TripCollaborator.user_id == user_id)
+        .filter(
+            TripCollaborator.trip_id == trip.id,
+            TripCollaborator.user_id == user_id,
+            TripCollaborator.role == TripRole.editor,
+        )
         .first()
         is not None
     )

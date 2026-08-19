@@ -16,6 +16,19 @@ class Settings(BaseSettings):
     trip_invite_expire_days: int = 7
     cors_origins: list[str] = ["http://localhost:5173"]
     media_root: str = "media"
+
+    # Object storage for uploads. Set these and attachments go to an
+    # S3-compatible bucket (Cloudflare R2); leave them unset and they go to
+    # media_root on local disk. Deployments must set them: Render's
+    # filesystem is ephemeral, so disk-backed uploads do not survive a
+    # restart. The bucket is private; the API hands out short-lived signed
+    # URLs after checking trip access.
+    s3_bucket: Optional[str] = None
+    s3_endpoint_url: Optional[str] = None
+    s3_access_key_id: Optional[str] = None
+    s3_secret_access_key: Optional[str] = None
+    s3_region: str = "auto"
+    attachment_url_ttl_seconds: int = 900
     frontend_base_url: str = "http://localhost:5173"
 
     # Email invites: if smtp_host is unset, invite emails are logged instead
@@ -25,6 +38,22 @@ class Settings(BaseSettings):
     smtp_user: Optional[str] = None
     smtp_password: Optional[str] = None
     smtp_from_email: str = "noreply@adventureplanner.local"
+
+    @property
+    def uses_object_storage(self) -> bool:
+        """True when a bucket and its credentials are fully configured.
+
+        All four are required together: a half-set bucket would otherwise
+        fail at upload time rather than at start-up.
+        """
+        return all(
+            (
+                self.s3_bucket,
+                self.s3_endpoint_url,
+                self.s3_access_key_id,
+                self.s3_secret_access_key,
+            )
+        )
 
     @field_validator("database_url")
     @classmethod

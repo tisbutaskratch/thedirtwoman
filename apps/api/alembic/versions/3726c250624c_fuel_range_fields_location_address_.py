@@ -25,7 +25,7 @@ def upgrade() -> None:
     op.add_column('trips', sa.Column('owner_fuel_range_miles', sa.Float(), nullable=True))
     # ### end Alembic commands ###
 
-    # required_level dropped its 'suggested' tier — fold those rows into
+    # required_level dropped its 'suggested' tier, fold those rows into
     # 'optional' so existing data still deserializes against the new enum.
     op.execute("UPDATE gear SET required_level = 'optional' WHERE required_level = 'suggested'")
 

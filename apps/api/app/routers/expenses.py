@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 from app.core.deps import (
     get_accessible_trip,
     get_current_user,
-    trip_access_filter,
+    get_editable_trip,
+    trip_write_filter,
     validate_trip_member,
 )
 from app.db.session import get_db
@@ -25,7 +26,7 @@ def get_owned_expense(
     expense = (
         db.query(Expense)
         .join(Trip, Expense.trip_id == Trip.id)
-        .filter(Expense.id == expense_id, trip_access_filter(current_user.id))
+        .filter(Expense.id == expense_id, trip_write_filter(current_user.id))
         .first()
     )
     if expense is None:
@@ -51,7 +52,7 @@ def list_expenses(trip: Trip = Depends(get_accessible_trip)) -> list[ExpenseRead
 )
 def create_expense(
     payload: ExpenseCreate,
-    trip: Trip = Depends(get_accessible_trip),
+    trip: Trip = Depends(get_editable_trip),
     db: Session = Depends(get_db),
 ) -> ExpenseRead:
     validate_trip_member(trip, payload.paid_by_user_id, db)

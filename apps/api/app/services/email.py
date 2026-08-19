@@ -18,7 +18,7 @@ def send_invite_email(to_email: str, trip_title: str, invite_url: str) -> None:
     )
 
     if not settings.smtp_host:
-        # No SMTP provider configured — log instead of sending so the invite
+        # No SMTP provider configured. Log instead of sending so the invite
         # flow stays usable (and testable) in local dev.
         logger.info("Invite email (SMTP not configured) to=%s\n%s\n%s", to_email, subject, body)
         return
