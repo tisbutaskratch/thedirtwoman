@@ -115,7 +115,6 @@ automatically once DNS resolves; this can take up to an hour to propagate.
 
 ## Known gaps before real users
 
-- **The support footer links are placeholders.** See `apps/web/src/lib/support.ts`.
 - **The free Postgres database expires 30 days after creation**, with a 14-day
   grace period before deletion. This is a hard deadline, not a nag: upgrade it
   or export the data before then. Set a calendar reminder on the day you create

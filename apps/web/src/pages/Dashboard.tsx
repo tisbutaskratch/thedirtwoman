@@ -143,7 +143,7 @@ function TripCard({ trip, shared, dimmed }: { trip: Trip; shared: boolean; dimme
   const days = countdown(trip.start_date);
   return (
     <Link
-      to={`/app/trips/${trip.id}`}
+      to={routes.trip(trip.id)}
       // Hand the type across so the trip page can play the right opener
       // before its own fetch resolves.
       state={{ tripType: trip.trip_type }}

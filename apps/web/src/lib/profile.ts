@@ -620,12 +620,6 @@ export const contactLinks: ContactLink[] = [
     external: true,
   },
   {
-    label: "Phone",
-    value: "816-514-1816",
-    href: "tel:+18165141816",
-    icon: "phone",
-  },
-  {
     label: "Location",
     value: "Kansas City, MO · Remote",
     href: "#",
