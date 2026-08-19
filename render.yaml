@@ -15,6 +15,12 @@ services:
     dockerfilePath: ./apps/api/Dockerfile
     dockerContext: ./apps/api
     healthCheckPath: /health
+    # Migrations run before the new version takes traffic. Without this the
+    # database is empty on first deploy and every later migration is silently
+    # skipped. If this service is on an instance type that doesn't support
+    # preDeployCommand, fold it into the Dockerfile CMD instead:
+    #   sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    preDeployCommand: alembic upgrade head
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -25,6 +31,10 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: CORS_ORIGINS
+        sync: false
+      # Invite links are built from this. Left at its default it emails
+      # people a localhost URL, so it has to be the real site.
+      - key: FRONTEND_BASE_URL
         sync: false
 
 databases:
