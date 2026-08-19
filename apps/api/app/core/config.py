@@ -37,7 +37,9 @@ class Settings(BaseSettings):
     smtp_port: int = 587
     smtp_user: Optional[str] = None
     smtp_password: Optional[str] = None
-    smtp_from_email: str = "noreply@adventureplanner.local"
+    # Overridden per deployment. Must be an address on a domain you control,
+    # or providers will reject the mail outright.
+    smtp_from_email: str = "noreply@thedirthags.com"
 
     @property
     def uses_object_storage(self) -> bool:
