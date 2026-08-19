@@ -18,8 +18,9 @@
 # resume bundle carries no planner code and vice versa. Both redeploy on
 # every push to main.
 #
-# The API's CORS_ORIGINS on Render must list BOTH origins, or the planner
-# site's requests will be rejected by the browser.
+# Only the planner talks to the API; every resume page renders from
+# compile-time data. So Render's CORS_ORIGINS needs the planner origin only,
+# and the resume site needs no VITE_API_BASE_URL. See DEPLOY.md.
 [build]
   base = "apps/web"
   command = "npm run build"
