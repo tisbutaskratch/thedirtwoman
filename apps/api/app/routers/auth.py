@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user
+from app.core.ratelimit import check_identity_limit, rate_limit
 from app.core.security import (
     InvalidTokenError,
     create_token,
@@ -25,7 +26,12 @@ def _issue_token_pair(user: User) -> TokenPair:
     )
 
 
-@router.post("/register", response_model=TokenPair, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=TokenPair,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(rate_limit("register", limit=5, window_seconds=3600))],
+)
 def register(payload: UserCreate, db: Session = Depends(get_db)) -> TokenPair:
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing is not None:
@@ -41,8 +47,15 @@ def register(payload: UserCreate, db: Session = Depends(get_db)) -> TokenPair:
     return _issue_token_pair(user)
 
 
-@router.post("/login", response_model=TokenPair)
+@router.post(
+    "/login",
+    response_model=TokenPair,
+    dependencies=[Depends(rate_limit("login", limit=10, window_seconds=900))],
+)
 def login(payload: UserLogin, db: Session = Depends(get_db)) -> TokenPair:
+    # Per-address limiting alone does not stop guesses at one account spread
+    # across many addresses, so the account being targeted is bounded too.
+    check_identity_limit(payload.email, limit=10, window_seconds=900)
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password"
     )

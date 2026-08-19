@@ -5,14 +5,16 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.limits import LONG_TEXT_MAX
+
 
 class ActivityCreate(BaseModel):
     title: str = Field(min_length=1, max_length=255)
     day_index: int = 1
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
-    notes: Optional[str] = None
-    todos: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
+    todos: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     location_id: Optional[int] = None
 
 
@@ -21,8 +23,8 @@ class ActivityUpdate(BaseModel):
     day_index: Optional[int] = None
     start_time: Optional[datetime] = None
     end_time: Optional[datetime] = None
-    notes: Optional[str] = None
-    todos: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
+    todos: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     location_id: Optional[int] = None
 
 

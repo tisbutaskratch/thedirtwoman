@@ -608,8 +608,8 @@ export interface ContactLink {
 export const contactLinks: ContactLink[] = [
   {
     label: "Email",
-    value: "sabadwtech@proton.me",
-    href: "mailto:sabadwtech@proton.me",
+    value: "sabadwtech@protonmail.com",
+    href: "mailto:sabadwtech@protonmail.com",
     icon: "feedback",
   },
   {

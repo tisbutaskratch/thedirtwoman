@@ -6,6 +6,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from app.models.domestic_detail import DomesticTravelMode
+from app.schemas.limits import LONG_TEXT_MAX
 
 
 class TripDetailUpdate(BaseModel):
@@ -26,8 +27,8 @@ class TripDetailUpdate(BaseModel):
     # backpacking
     base_pack_weight_oz: Optional[float] = Field(default=None, ge=0)
     permit_required: Optional[bool] = None
-    permit_notes: Optional[str] = None
-    resupply_plan: Optional[str] = None
+    permit_notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
+    resupply_plan: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     bear_canister_required: Optional[bool] = None
     water_capacity_liters: Optional[float] = Field(default=None, ge=0)
     longest_dry_stretch_mi: Optional[float] = Field(default=None, ge=0)
@@ -39,7 +40,7 @@ class TripDetailUpdate(BaseModel):
     ground_clearance_in: Optional[float] = Field(default=None, ge=0)
     drivetrain: Optional[str] = Field(default=None, max_length=50)
     has_recovery_gear: Optional[bool] = None
-    comms_plan: Optional[str] = None
+    comms_plan: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     emergency_contact: Optional[str] = Field(default=None, max_length=255)
     tire_pressure_offroad_psi: Optional[float] = Field(default=None, ge=0)
     tire_pressure_highway_psi: Optional[float] = Field(default=None, ge=0)
@@ -53,7 +54,7 @@ class TripDetailUpdate(BaseModel):
     firewood_policy: Optional[str] = Field(default=None, max_length=50)
     check_in_time: Optional[str] = Field(default=None, max_length=50)
     quiet_hours: Optional[str] = Field(default=None, max_length=50)
-    meal_plan: Optional[str] = None
+    meal_plan: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
 
     # international
     home_currency: Optional[str] = Field(default=None, min_length=3, max_length=3)
@@ -61,8 +62,8 @@ class TripDetailUpdate(BaseModel):
     primary_timezone: Optional[str] = Field(default=None, max_length=100)
     passport_expiry: Optional[date] = None
     visa_required: Optional[bool] = None
-    visa_notes: Optional[str] = None
-    vaccinations_notes: Optional[str] = None
+    visa_notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
+    vaccinations_notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     travel_insurance_ref: Optional[str] = Field(default=None, max_length=255)
     embassy_contact: Optional[str] = Field(default=None, max_length=255)
     step_enrolled: Optional[bool] = None
@@ -84,6 +85,6 @@ class TripDetailUpdate(BaseModel):
     checked_bags: Optional[int] = Field(default=None, ge=0)
     carry_on_only: Optional[bool] = None
     separate_tickets: Optional[bool] = None
-    layover_notes: Optional[str] = None
+    layover_notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     lodging_type: Optional[str] = Field(default=None, max_length=50)
     lodging_ref: Optional[str] = Field(default=None, max_length=255)

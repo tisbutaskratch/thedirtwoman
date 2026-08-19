@@ -6,6 +6,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.common import RequiredLevel
+from app.schemas.limits import LONG_TEXT_MAX
 
 
 class TaskCreate(BaseModel):
@@ -15,7 +16,7 @@ class TaskCreate(BaseModel):
     assigned_to_user_id: Optional[int] = None
     assigned_to_all: bool = False
     due_date: Optional[date] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
 
 
 class TaskUpdate(BaseModel):
@@ -25,7 +26,7 @@ class TaskUpdate(BaseModel):
     assigned_to_user_id: Optional[int] = None
     assigned_to_all: Optional[bool] = None
     due_date: Optional[date] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
 
 
 class TaskRead(BaseModel):

@@ -48,8 +48,12 @@ export default function SupportFooter() {
       }
     }
 
+    // Only the URL. The native sheet takes text and link as separate fields
+    // and presents them properly, but a clipboard holds one string: paste
+    // "Adventure Planner: ... https://..." into an address bar and the
+    // browser searches for the sentence instead of opening the site.
     try {
-      await navigator.clipboard.writeText(`${SHARE_TEXT} ${url}`);
+      await navigator.clipboard.writeText(url);
       setShared(true);
       setTimeout(() => setShared(false), 2500);
     } catch {

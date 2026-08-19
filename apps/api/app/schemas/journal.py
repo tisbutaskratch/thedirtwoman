@@ -5,15 +5,17 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.limits import LONG_TEXT_MAX
+
 
 class JournalEntryCreate(BaseModel):
     entry_date: date
-    body: str = Field(min_length=1)
+    body: str = Field(min_length=1, max_length=LONG_TEXT_MAX)
 
 
 class JournalEntryUpdate(BaseModel):
     entry_date: Optional[date] = None
-    body: Optional[str] = Field(default=None, min_length=1)
+    body: Optional[str] = Field(default=None, min_length=1, max_length=LONG_TEXT_MAX)
 
 
 class JournalEntryRead(BaseModel):
