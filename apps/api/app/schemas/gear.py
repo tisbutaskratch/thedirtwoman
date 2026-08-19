@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.gear import GearRequiredLevel
+from app.schemas.limits import LONG_TEXT_MAX
 
 
 class GearCreate(BaseModel):
@@ -15,7 +16,7 @@ class GearCreate(BaseModel):
     required_level: GearRequiredLevel = GearRequiredLevel.required
     assigned_to_user_id: Optional[int] = None
     assigned_to_all: bool = False
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
 
 
 class GearUpdate(BaseModel):
@@ -26,7 +27,7 @@ class GearUpdate(BaseModel):
     required_level: Optional[GearRequiredLevel] = None
     assigned_to_user_id: Optional[int] = None
     assigned_to_all: Optional[bool] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
 
 
 class GearRead(BaseModel):

@@ -4,9 +4,25 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.config import settings
+from app.core.ratelimit import limiter
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def no_rate_limiting(monkeypatch):
+    """Tests register many accounts from one address on purpose.
+
+    Off by default so every other test is unaffected, and the counters are
+    cleared around each test so the limiter's own tests, which turn it back
+    on, cannot leak state into anything else.
+    """
+    monkeypatch.setattr(settings, "rate_limit_enabled", False)
+    limiter.reset()
+    yield
+    limiter.reset()
 
 
 @pytest.fixture()

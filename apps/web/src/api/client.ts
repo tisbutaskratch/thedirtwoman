@@ -78,3 +78,26 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
 }
+
+/**
+ * Like apiRequest, but for endpoints that return a file rather than JSON.
+ *
+ * Shares the same token handling and refresh-on-401 retry; the only
+ * difference is what comes back, so the auth logic is not duplicated.
+ */
+export async function apiRequestBlob(path: string, options: RequestInit = {}): Promise<Blob> {
+  const { accessToken } = getAuthState();
+  let response = await rawRequest(path, options, accessToken);
+
+  if (response.status === 401 && accessToken) {
+    const newToken = await refreshAccessToken();
+    if (newToken) {
+      response = await rawRequest(path, options, newToken);
+    }
+  }
+
+  if (!response.ok) {
+    throw new ApiError(response.status, `Request failed: ${response.status}`);
+  }
+  return response.blob();
+}

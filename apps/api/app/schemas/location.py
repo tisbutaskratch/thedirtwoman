@@ -6,6 +6,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.location import LocationKind
+from app.schemas.limits import LONG_TEXT_MAX
 
 
 class LocationCreate(BaseModel):
@@ -14,7 +15,7 @@ class LocationCreate(BaseModel):
     lng: Optional[float] = None
     kind: LocationKind
     arrival_time: Optional[datetime] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     order_index: int = 0
     contact_phone: Optional[str] = Field(default=None, max_length=50)
     confirmation_ref: Optional[str] = Field(default=None, max_length=255)
@@ -27,7 +28,7 @@ class LocationUpdate(BaseModel):
     lng: Optional[float] = None
     kind: Optional[LocationKind] = None
     arrival_time: Optional[datetime] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     order_index: Optional[int] = None
     contact_phone: Optional[str] = Field(default=None, max_length=50)
     confirmation_ref: Optional[str] = Field(default=None, max_length=255)

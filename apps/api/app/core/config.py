@@ -17,6 +17,17 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:5173"]
     media_root: str = "media"
 
+    # Rate limiting. Disabled in tests, where hundreds of accounts are created
+    # from one address on purpose.
+    rate_limit_enabled: bool = True
+    # How many proxies of our own sit in front of the app. Render terminates
+    # TLS and forwards, so one. Used to find the caller's real address in
+    # X-Forwarded-For without trusting entries the caller invented.
+    trusted_proxy_hops: int = 1
+    # The largest request body we will read, in bytes. Uploads are the only
+    # legitimately large thing here.
+    max_request_bytes: int = 25 * 1024 * 1024
+
     # Object storage for uploads. Set these and attachments go to an
     # S3-compatible bucket (Cloudflare R2); leave them unset and they go to
     # media_root on local disk. Deployments must set them: Render's

@@ -2,13 +2,15 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.schemas.limits import LONG_TEXT_MAX
+
 
 class NoteCreate(BaseModel):
-    body: str = Field(min_length=1)
+    body: str = Field(min_length=1, max_length=LONG_TEXT_MAX)
 
 
 class NoteUpdate(BaseModel):
-    body: str = Field(min_length=1)
+    body: str = Field(min_length=1, max_length=LONG_TEXT_MAX)
 
 
 class NoteRead(BaseModel):

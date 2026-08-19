@@ -2,7 +2,7 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -13,6 +13,7 @@ from app.routers import (
     activities,
     attachments,
     auth,
+    calendar,
     expenses,
     gear,
     health,
@@ -63,6 +64,34 @@ if not settings.uses_object_storage:
 
 
 @app.middleware("http")
+async def limit_request_size(request: Request, call_next):
+    """Refuse oversized bodies before anything reads them.
+
+    Field-level caps stop a huge journal entry, but they only apply after the
+    body has been parsed, by which point it is already in memory. This rejects
+    on the declared length first, so an instance with a few hundred megabytes
+    of RAM cannot be exhausted by one request.
+
+    Content-Length can be absent or a lie, so this is a cheap first gate
+    rather than the only one; the field caps behind it are the real limit.
+    """
+    declared = request.headers.get("content-length")
+    if declared is not None:
+        try:
+            if int(declared) > settings.max_request_bytes:
+                return JSONResponse(
+                    status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                    content={"detail": "Request body too large"},
+                )
+        except ValueError:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"detail": "Invalid Content-Length"},
+            )
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def log_requests(request: Request, call_next):
     start = time.perf_counter()
     response = await call_next(request)
@@ -90,6 +119,7 @@ app.include_router(trip_detail.router)
 app.include_router(locations.router)
 app.include_router(activities.router)
 app.include_router(attachments.router)
+app.include_router(calendar.router)
 app.include_router(expenses.router)
 app.include_router(gear.router)
 app.include_router(journal.router)
