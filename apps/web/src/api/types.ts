@@ -11,7 +11,8 @@ export type TripRole = "editor" | "viewer";
 
 export interface Trip {
   id: number;
-  user_id: number;
+  /** Null once the creator has deleted their account and left the trip. */
+  user_id: number | null;
   title: string;
   trip_type: TripType;
   start_date: string | null;
@@ -40,7 +41,13 @@ export interface TripUpdate {
   owner_fuel_range_miles?: number | null;
 }
 
-export type LocationKind = "waypoint" | "campsite" | "hotel" | "poi" | "fuel_stop";
+export type LocationKind =
+  | "waypoint"
+  | "campsite"
+  | "lodging"
+  | "transit"
+  | "poi"
+  | "fuel_stop";
 
 export interface Location {
   id: number;
@@ -264,6 +271,11 @@ export interface EmailInviteCreate {
 }
 
 export interface PendingMember {
+  /**
+   * Whether the invitation email actually reached the provider. Null when
+   * listing existing invites, which says nothing about the original send.
+   */
+  email_sent?: boolean | null;
   role: TripRole;
   id: number;
   email: string;

@@ -45,7 +45,13 @@ class Trip(Base):
     __tablename__ = "trips"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    # Nullable because a trip outlives the person who created it. When they
+    # delete their account and leave a shared trip behind, this becomes null
+    # and the trip is governed entirely by its collaborator rows, so there is
+    # no single inherited owner to go inactive and strand everyone else.
+    user_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     trip_type: Mapped[TripType] = mapped_column(Enum(TripType, native_enum=False), nullable=False)
     start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
@@ -64,7 +70,7 @@ class Trip(Base):
     owner_fuel_range_miles: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    user: Mapped[User] = relationship(back_populates="trips")
+    user: Mapped[Optional[User]] = relationship(back_populates="trips")
     locations: Mapped[list[Location]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", order_by="Location.order_index"
     )

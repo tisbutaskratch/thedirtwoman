@@ -119,7 +119,10 @@ def create_email_invite(
         db.refresh(invite)
 
     invite_url = f"{settings.frontend_base_url}/invite/{invite.token}"
-    send_invite_email(email, trip.title, invite_url)
+    # Whether the mail went is the caller's problem to report, not something
+    # to swallow: an invite nobody was told about looks exactly like a
+    # working one until somebody asks why they never joined.
+    invite.email_was_sent = send_invite_email(email, trip.title, invite_url)
     return invite
 
 

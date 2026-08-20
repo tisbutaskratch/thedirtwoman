@@ -38,6 +38,7 @@ async def lifespan(app: FastAPI):
             "JWT_SECRET_KEY is still the default value in a production environment. "
             "Set a real secret via the JWT_SECRET_KEY environment variable."
         )
+
     yield
 
 

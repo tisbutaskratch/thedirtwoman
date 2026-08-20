@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.config import settings
+from app.core.policy import PRIVACY_POLICY_VERSION
 from app.core.ratelimit import limiter
 from app.db.base import Base
 from app.db.session import get_db
@@ -58,7 +59,12 @@ def auth_headers(client):
     def _register(email: str = "sam@bagend.dev", password: str = "gardenpath1") -> dict[str, str]:
         response = client.post(
             "/auth/register",
-            json={"email": email, "password": password, "name": "Samwise Gamgee"},
+            json={
+                "email": email,
+                "password": password,
+                "name": "Samwise Gamgee",
+                "accepted_privacy_version": PRIVACY_POLICY_VERSION,
+            },
         )
         assert response.status_code == 201, response.text
         token = response.json()["access_token"]

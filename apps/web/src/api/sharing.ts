@@ -50,3 +50,13 @@ export const getInvitePreview = (token: string) => apiRequest<InvitePreview>(`/i
 
 export const acceptInvite = (token: string) =>
   apiRequest<InviteAcceptResult>(`/invites/${token}/accept`, { method: "POST" });
+
+/**
+ * Leave a trip you are on.
+ *
+ * Available to editors and viewers alike. Your private journal entries for
+ * it go with you, and the trip itself is deleted only when the last person
+ * leaves, so nobody loses planning because you did.
+ */
+export const leaveTrip = (tripId: number) =>
+  apiRequest<void>(`/trips/${tripId}/collaborators/me`, { method: "DELETE" });

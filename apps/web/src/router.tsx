@@ -15,6 +15,9 @@ import Register from "@/pages/Register";
 import Skills from "@/pages/Skills";
 import TripDetail from "@/pages/TripDetail";
 import PlannerHome from "@/components/PlannerHome";
+import Privacy from "@/pages/Privacy";
+import Settings from "@/pages/Settings";
+import WhatsNew from "@/pages/WhatsNew";
 import { isPlanner } from "@/lib/site";
 
 /*
@@ -41,6 +44,8 @@ const resumeRoutes = [
 
 /** Auth and invite screens belong to the planner; the resume has no accounts. */
 const authRoutes = [
+  { path: "/privacy", element: <Privacy /> },
+  { path: "/whats-new", element: <WhatsNew /> },
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
   { path: "/invite/:token", element: <AcceptInvite /> },
@@ -62,6 +67,7 @@ const plannerRoutes = (base: string) => [
           { path: "dashboard", element: <Dashboard /> },
           { path: "trips/new", element: <NewTrip /> },
           { path: "trips/:tripId", element: <TripDetail /> },
+          { path: "settings", element: <Settings /> },
         ],
       },
     ],

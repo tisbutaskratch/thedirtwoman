@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useSyncExternalStore, type ReactNode } from "react";
 import { loginUser, registerUser } from "@/api/auth";
+import { PRIVACY_POLICY_VERSION } from "@/lib/privacy";
 import {
   clearAuthState,
   getAuthState,
@@ -31,7 +32,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(async (email: string, password: string, name: string) => {
-    const tokens = await registerUser({ email, password, name });
+    const tokens = await registerUser({
+      email,
+      password,
+      name,
+      accepted_privacy_version: PRIVACY_POLICY_VERSION,
+    });
     setAuthState({
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,

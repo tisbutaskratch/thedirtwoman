@@ -271,3 +271,54 @@ def test_a_rejected_send_still_leaves_a_usable_invite(client, auth_headers, monk
     assert response.status_code == 200
     pending = client.get(f"/trips/{trip_id}/pending-invites", headers=headers).json()
     assert [p["email"] for p in pending] == ["sam@bagend.dev"]
+
+
+def test_the_response_says_when_the_email_did_not_go(client, auth_headers, monkeypatch):
+    """An invite nobody was told about looks exactly like a working one, so
+    the caller has to be able to tell the difference and say so."""
+    import httpx
+
+    from app.core.config import settings
+
+    class Rejected:
+        is_success = False
+        status_code = 403
+        text = '{"message":"domain is not verified"}'
+
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", lambda url, **kw: Rejected())
+
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _create_trip(client, headers)
+    response = client.post(
+        f"/trips/{trip_id}/invites/email",
+        json={"email": "sam@bagend.dev", "role": "editor"},
+        headers=headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["email_sent"] is False
+
+
+def test_the_response_says_when_the_email_did_go(client, auth_headers, monkeypatch):
+    import httpx
+
+    from app.core.config import settings
+
+    class Accepted:
+        is_success = True
+        status_code = 200
+        text = "{}"
+
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", lambda url, **kw: Accepted())
+
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _create_trip(client, headers)
+    response = client.post(
+        f"/trips/{trip_id}/invites/email",
+        json={"email": "sam@bagend.dev", "role": "editor"},
+        headers=headers,
+    )
+
+    assert response.json()["email_sent"] is True

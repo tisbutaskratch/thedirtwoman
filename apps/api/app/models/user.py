@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,4 +19,19 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    trips: Mapped[list["Trip"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    # Consent, recorded rather than assumed. The version matters as much as
+    # the timestamp: agreeing to one policy is not agreeing to a later one,
+    # so when the policy changes this is what identifies who needs asking
+    # again. Nullable because accounts created before consent existed have
+    # not given it, and pretending otherwise would be the whole problem.
+    privacy_policy_version: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    privacy_accepted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+
+    # Deliberately no delete cascade. Deleting an account is not a single
+    # statement: solo trips go, shared ones are detached or scheduled, and
+    # which happens is the user's choice. An ORM cascade would make that
+    # decision silently, and delete-orphan would destroy a shared trip the
+    # moment its creator was detached from it.
+    trips: Mapped[list["Trip"]] = relationship(back_populates="user")

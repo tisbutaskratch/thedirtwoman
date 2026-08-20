@@ -36,10 +36,19 @@ class RoleUpdate(BaseModel):
 
 
 class PendingMemberRead(BaseModel):
+    """A pending invite, and whether the recipient was actually told.
+
+    email_sent is not stored: it describes this attempt, so a listing of
+    older invites reports None rather than guessing.
+    """
+
     id: int
     email: str
     role: TripRole
     invited_at: datetime
+    #: None when listing existing invites, since that says nothing about
+    #: whether the original mail arrived.
+    email_sent: Optional[bool] = None
 
 
 class InviteRead(BaseModel):

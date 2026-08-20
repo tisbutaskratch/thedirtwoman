@@ -8,7 +8,12 @@ export interface TokenPair {
   user: AuthUser;
 }
 
-export const registerUser = (payload: { email: string; password: string; name: string }) =>
+export const registerUser = (payload: {
+  email: string;
+  password: string;
+  name: string;
+  accepted_privacy_version: string;
+}) =>
   apiRequest<TokenPair>("/auth/register", { method: "POST", body: JSON.stringify(payload) });
 
 export const loginUser = (payload: { email: string; password: string }) =>

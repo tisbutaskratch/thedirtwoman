@@ -191,3 +191,169 @@ def test_a_stranger_cannot_download_someone_elses_calendar(client, auth_headers)
     ).json()["id"]
 
     assert client.get(f"/trips/{trip_id}/calendar.ics", headers=stranger).status_code == 404
+
+
+# ---------------------------------------------------------- emailing it
+
+
+class _Capture:
+    """Stands in for the mail provider and records what it was asked to send."""
+
+    def __init__(self, succeed: bool = True):
+        self.succeed = succeed
+        self.calls: list[dict] = []
+
+    def __call__(self, url, **kwargs):
+        self.calls.append(kwargs.get("json", {}))
+        outcome = self.succeed
+
+        class Response:
+            is_success = outcome
+            status_code = 200 if outcome else 403
+            text = "{}"
+
+        return Response()
+
+
+def _trip_with_dates(client, headers, title="Ride to Rivendell") -> int:
+    return client.post(
+        "/trips",
+        json={
+            "title": title,
+            "trip_type": "motocamping",
+            "start_date": "2026-08-18",
+            "end_date": "2026-08-20",
+        },
+        headers=headers,
+    ).json()["id"]
+
+
+def test_emailing_yourself_attaches_the_calendar(client, auth_headers, monkeypatch):
+    import httpx
+
+    from app.core.config import settings
+
+    capture = _Capture()
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", capture)
+
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _trip_with_dates(client, headers)
+
+    response = client.post(
+        f"/trips/{trip_id}/calendar/email", json={"to": "me"}, headers=headers
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "sent": 1,
+        "failed": 0,
+        "recipients": ["frodo@bagend.dev"],
+    }
+
+    import base64
+
+    sent = capture.calls[0]
+    assert sent["to"] == ["frodo@bagend.dev"]
+    attachment = sent["attachments"][0]
+    assert attachment["filename"] == "ride-to-rivendell.ics"
+    assert attachment["content_type"] == "text/calendar"
+    assert base64.b64decode(attachment["content"]).startswith(b"BEGIN:VCALENDAR")
+
+
+def test_emailing_everyone_reaches_the_whole_trip_once_each(
+    client, auth_headers, monkeypatch
+):
+    import httpx
+
+    from app.core.config import settings
+
+    capture = _Capture()
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", capture)
+
+    owner = auth_headers("frodo@bagend.dev")
+    guest = auth_headers("sam@bagend.dev")
+    trip_id = _trip_with_dates(client, owner)
+    token = client.post(f"/trips/{trip_id}/invite", headers=owner).json()["token"]
+    client.post(f"/invites/{token}/accept", headers=guest)
+
+    body = client.post(
+        f"/trips/{trip_id}/calendar/email", json={"to": "everyone"}, headers=owner
+    ).json()
+
+    assert body["sent"] == 2
+    assert sorted(body["recipients"]) == ["frodo@bagend.dev", "sam@bagend.dev"]
+    # nobody is mailed twice for being both creator and collaborator
+    assert len(body["recipients"]) == len(set(body["recipients"]))
+
+
+def test_a_viewer_cannot_mail_the_whole_trip(client, auth_headers, monkeypatch):
+    """Putting a message in other people's inboxes with your name on it is a
+    write action, whatever it contains."""
+    import httpx
+
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", _Capture())
+
+    owner = auth_headers("frodo@bagend.dev")
+    viewer = auth_headers("pippin@tookborough.dev")
+    trip_id = _trip_with_dates(client, owner)
+    token = client.post(f"/trips/{trip_id}/invite?role=viewer", headers=owner).json()["token"]
+    client.post(f"/invites/{token}/accept", headers=viewer)
+
+    everyone = client.post(
+        f"/trips/{trip_id}/calendar/email", json={"to": "everyone"}, headers=viewer
+    )
+    assert everyone.status_code == 403
+
+    # but a viewer can still send it to themselves
+    mine = client.post(
+        f"/trips/{trip_id}/calendar/email", json={"to": "me"}, headers=viewer
+    )
+    assert mine.status_code == 200
+
+
+def test_a_stranger_cannot_mail_a_trip_at_all(client, auth_headers):
+    owner = auth_headers("frodo@bagend.dev")
+    stranger = auth_headers("gollum@misty.dev")
+    trip_id = _trip_with_dates(client, owner)
+
+    response = client.post(
+        f"/trips/{trip_id}/calendar/email", json={"to": "me"}, headers=stranger
+    )
+    assert response.status_code == 404
+
+
+def test_an_arbitrary_address_cannot_be_named_as_a_recipient(client, auth_headers):
+    """The endpoint takes an audience, not an address, so it cannot be used to
+    send mail from this domain to anyone who is not already on the trip."""
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _trip_with_dates(client, headers)
+
+    response = client.post(
+        f"/trips/{trip_id}/calendar/email",
+        json={"to": "stranger@example.com"},
+        headers=headers,
+    )
+    assert response.status_code == 422
+
+
+def test_a_failed_send_is_counted_rather_than_hidden(client, auth_headers, monkeypatch):
+    import httpx
+
+    from app.core.config import settings
+
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", _Capture(succeed=False))
+
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _trip_with_dates(client, headers)
+
+    body = client.post(
+        f"/trips/{trip_id}/calendar/email", json={"to": "me"}, headers=headers
+    ).json()
+
+    assert body == {"sent": 0, "failed": 1, "recipients": ["frodo@bagend.dev"]}

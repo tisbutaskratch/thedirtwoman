@@ -1,7 +1,11 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.deps import get_current_user
+from app.core.policy import PRIVACY_POLICY_VERSION
 from app.core.ratelimit import check_identity_limit, rate_limit
 from app.core.security import (
     InvalidTokenError,
@@ -13,7 +17,15 @@ from app.core.security import (
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import AccessTokenResponse, RefreshRequest, TokenPair
-from app.schemas.user import UserCreate, UserLogin, UserRead
+from app.schemas.user import (
+    AccountDeleteRequest,
+    AccountDeleteSummary,
+    UserCreate,
+    UserLogin,
+    UserRead,
+)
+from app.services.account import delete_account
+from app.services.email import send_trip_left_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -33,12 +45,25 @@ def _issue_token_pair(user: User) -> TokenPair:
     dependencies=[Depends(rate_limit("register", limit=5, window_seconds=3600))],
 )
 def register(payload: UserCreate, db: Session = Depends(get_db)) -> TokenPair:
+    # A client sending an older version was shown an older policy, so the
+    # agreement it is reporting is not agreement to this one. Rejecting is
+    # the honest response; the page reloads and shows the current text.
+    if payload.accepted_privacy_version != PRIVACY_POLICY_VERSION:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="The privacy policy has changed. Reload the page and read the current one.",
+        )
+
     existing = db.query(User).filter(User.email == payload.email).first()
     if existing is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
 
     user = User(
-        email=payload.email, name=payload.name, hashed_password=hash_password(payload.password)
+        email=payload.email,
+        name=payload.name,
+        hashed_password=hash_password(payload.password),
+        privacy_policy_version=PRIVACY_POLICY_VERSION,
+        privacy_accepted_at=datetime.now(timezone.utc),
     )
     db.add(user)
     db.commit()
@@ -88,3 +113,44 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> AccessTok
 @router.get("/me", response_model=UserRead)
 def read_current_user(current_user: User = Depends(get_current_user)) -> User:
     return current_user
+
+
+#: What the user has to type. Their own email, because it is the one string
+#: they cannot produce by muscle memory on the wrong account.
+CONFIRMATION_PHRASE_FIELD = "your email address"
+
+
+@router.delete("/me", response_model=AccountDeleteSummary)
+def delete_me(
+    payload: AccountDeleteRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AccountDeleteSummary:
+    """Delete the signed-in account.
+
+    Irreversible, so it asks for the account's own email typed back. A
+    confirmation dialog can be clicked through on autopilot; typing the
+    address of the account you are signed into cannot be done by accident on
+    the wrong one.
+    """
+    if payload.confirm.strip().lower() != current_user.email.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"To confirm, type {CONFIRMATION_PHRASE_FIELD}.",
+        )
+
+    who = current_user.name or current_user.email
+    summary = delete_account(db, current_user, payload.shared_trips)
+
+    # Sent after the account is gone, so a mail provider having a bad day
+    # cannot leave someone half-deleted. The worst case is a trip nobody was
+    # told about, which is the same trip they still have.
+    for email, trip_title in summary.notify:
+        send_trip_left_email(email, trip_title, who, settings.frontend_base_url)
+
+    return AccountDeleteSummary(
+        trips_deleted=summary.trips_deleted,
+        trips_left_with_collaborators=summary.trips_left_with_collaborators,
+        collaborators_asked=summary.collaborators_asked,
+        journal_entries_deleted=summary.journal_entries_deleted,
+    )
