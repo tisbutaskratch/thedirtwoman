@@ -28,7 +28,13 @@ export default function AppLayout() {
             Adventure Planner
           </NavLink>
           <div className="flex items-center gap-2 text-sm">
-            <span className="hidden text-content-muted sm:inline">{user?.name}</span>
+            {/* The name is how people expect to reach their account. */}
+            <NavLink
+              to={routes.settings}
+              className="hidden text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline sm:inline"
+            >
+              {user?.name}
+            </NavLink>
             <ThemeToggle />
             <button
               onClick={handleLogout}
