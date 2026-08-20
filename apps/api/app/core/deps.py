@@ -47,11 +47,35 @@ def get_owned_trip(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> Trip:
-    """Owner-only: deleting the trip, managing invites, removing collaborators."""
+    """The creator's own actions: deleting the trip, managing invites,
+    removing collaborators.
+
+    A trip can outlive its creator. Once they delete their account the trip
+    has none, and these rights pass to every remaining editor rather than to
+    one inherited owner, so no single inactive account can leave a trip
+    unmanageable. Viewers stay read-only either way.
+    """
     trip = db.get(Trip, trip_id)
-    if trip is None or trip.user_id != current_user.id:
+    if trip is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
-    return trip
+
+    if trip.user_id == current_user.id:
+        return trip
+
+    if trip.user_id is None:
+        is_editor = (
+            db.query(TripCollaborator)
+            .filter(
+                TripCollaborator.trip_id == trip.id,
+                TripCollaborator.user_id == current_user.id,
+                TripCollaborator.role == TripRole.editor,
+            )
+            .first()
+        )
+        if is_editor is not None:
+            return trip
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Trip not found")
 
 
 def trip_access_filter(user_id: int) -> ColumnElement[bool]:

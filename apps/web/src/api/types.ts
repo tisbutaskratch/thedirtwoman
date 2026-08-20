@@ -11,7 +11,8 @@ export type TripRole = "editor" | "viewer";
 
 export interface Trip {
   id: number;
-  user_id: number;
+  /** Null once the creator has deleted their account and left the trip. */
+  user_id: number | null;
   title: string;
   trip_type: TripType;
   start_date: string | null;

@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.db.session import SessionLocal
 from app.routers import (
     activities,
     attachments,
@@ -25,6 +26,7 @@ from app.routers import (
     trip_detail,
     trips,
 )
+from app.services.account import sweep_scheduled_deletions
 from app.services.attachments import media_dir
 
 logger = logging.getLogger("app")
@@ -38,6 +40,20 @@ async def lifespan(app: FastAPI):
             "JWT_SECRET_KEY is still the default value in a production environment. "
             "Set a real secret via the JWT_SECRET_KEY environment variable."
         )
+
+    # Enact any shared-trip deletions whose grace period has passed. Done on
+    # boot rather than on a schedule because the deployment has no cron, and
+    # a service that exists to run one query is not worth having. A trip
+    # outliving its window until the next restart harms nobody.
+    try:
+        with SessionLocal() as db:
+            swept = sweep_scheduled_deletions(db)
+        if swept:
+            logger.info("Deleted %s trip(s) whose grace period had passed", swept)
+    except Exception:
+        # Never let housekeeping stop the app from starting.
+        logger.exception("Could not sweep scheduled trip deletions")
+
     yield
 
 

@@ -16,7 +16,14 @@ from app.core.security import (
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import AccessTokenResponse, RefreshRequest, TokenPair
-from app.schemas.user import UserCreate, UserLogin, UserRead
+from app.schemas.user import (
+    AccountDeleteRequest,
+    AccountDeleteSummary,
+    UserCreate,
+    UserLogin,
+    UserRead,
+)
+from app.services.account import delete_account
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -104,3 +111,36 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)) -> AccessTok
 @router.get("/me", response_model=UserRead)
 def read_current_user(current_user: User = Depends(get_current_user)) -> User:
     return current_user
+
+
+#: What the user has to type. Their own email, because it is the one string
+#: they cannot produce by muscle memory on the wrong account.
+CONFIRMATION_PHRASE_FIELD = "your email address"
+
+
+@router.delete("/me", response_model=AccountDeleteSummary)
+def delete_me(
+    payload: AccountDeleteRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> AccountDeleteSummary:
+    """Delete the signed-in account.
+
+    Irreversible, so it asks for the account's own email typed back. A
+    confirmation dialog can be clicked through on autopilot; typing the
+    address of the account you are signed into cannot be done by accident on
+    the wrong one.
+    """
+    if payload.confirm.strip().lower() != current_user.email.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"To confirm, type {CONFIRMATION_PHRASE_FIELD}.",
+        )
+
+    summary = delete_account(db, current_user, payload.shared_trips)
+    return AccountDeleteSummary(
+        trips_deleted=summary.trips_deleted,
+        trips_left_with_collaborators=summary.trips_left_with_collaborators,
+        trips_scheduled=summary.trips_scheduled,
+        journal_entries_deleted=summary.journal_entries_deleted,
+    )

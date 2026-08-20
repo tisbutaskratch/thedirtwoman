@@ -29,7 +29,9 @@ class TripRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    user_id: int
+    # None once the creator has deleted their account and left the trip
+    # with its collaborators.
+    user_id: Optional[int]
     title: str
     trip_type: TripType
     start_date: Optional[date]

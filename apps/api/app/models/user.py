@@ -29,4 +29,9 @@ class User(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    trips: Mapped[list["Trip"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    # Deliberately no delete cascade. Deleting an account is not a single
+    # statement: solo trips go, shared ones are detached or scheduled, and
+    # which happens is the user's choice. An ORM cascade would make that
+    # decision silently, and delete-orphan would destroy a shared trip the
+    # moment its creator was detached from it.
+    trips: Mapped[list["Trip"]] = relationship(back_populates="user")
