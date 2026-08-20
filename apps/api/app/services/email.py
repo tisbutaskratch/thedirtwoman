@@ -78,12 +78,14 @@ def _deliver_over_smtp(to_email: str, subject: str, body: str) -> bool:
         return False
 
 
-def send_invite_email(to_email: str, trip_title: str, invite_url: str) -> None:
-    """Tell someone they have been invited.
+def send_invite_email(to_email: str, trip_title: str, invite_url: str) -> bool:
+    """Tell someone they have been invited. Returns whether the mail went.
 
     Never raises. The invite is already saved and its link already works, so a
     mail provider being slow, blocked or misconfigured costs the sender a
-    notification, not the invite itself.
+    notification, not the invite itself. The caller is told, though, because
+    an invite the recipient never hears about looks identical to a working
+    one until somebody asks why nobody joined.
     """
     subject = f"You're invited to plan \"{trip_title}\""
     body = (
@@ -93,13 +95,13 @@ def send_invite_email(to_email: str, trip_title: str, invite_url: str) -> None:
     )
 
     if settings.resend_api_key:
-        _deliver_over_https(to_email, subject, body)
-        return
+        return _deliver_over_https(to_email, subject, body)
 
     if settings.smtp_host:
-        _deliver_over_smtp(to_email, subject, body)
-        return
+        return _deliver_over_smtp(to_email, subject, body)
 
     # Nothing configured. Log the invite so the flow stays usable in
-    # development, where there is no provider and no need for one.
+    # development, where there is no provider and no need for one. Reported
+    # as not sent, because it was not.
     logger.info("Invite email (no provider configured) to=%s\n%s\n%s", to_email, subject, body)
+    return False

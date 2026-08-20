@@ -265,6 +265,11 @@ export interface EmailInviteCreate {
 }
 
 export interface PendingMember {
+  /**
+   * Whether the invitation email actually reached the provider. Null when
+   * listing existing invites, which says nothing about the original send.
+   */
+  email_sent?: boolean | null;
   role: TripRole;
   id: number;
   email: string;

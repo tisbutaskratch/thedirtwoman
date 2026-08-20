@@ -72,6 +72,7 @@ def invite_by_email(
         email=invite.invitee_email,
         role=invite.role,
         invited_at=invite.created_at,
+        email_sent=getattr(invite, "email_was_sent", None),
     )
 
 

@@ -46,6 +46,8 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<TripRole>("editor");
   const [inviteError, setInviteError] = useState<string | null>(null);
+  // The invite is saved either way; this says whether anyone was told.
+  const [inviteNotice, setInviteNotice] = useState<string | null>(null);
   const [inviting, setInviting] = useState(false);
   // The roster sits above the timeline, so it collapses to a single avatar
   // strip once you know who's coming and want the schedule back at the top.
@@ -102,7 +104,18 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
     setInviting(true);
     setInviteError(null);
     try {
-      await inviteByEmail(tripId, { email: inviteEmail.trim(), role: inviteRole });
+      const pending = await inviteByEmail(tripId, {
+        email: inviteEmail.trim(),
+        role: inviteRole,
+      });
+      // A silent failure here is the worst outcome: the invite exists, so
+      // everything looks fine, and the sender only finds out when nobody
+      // turns up. Say it plainly and point at the share link instead.
+      setInviteNotice(
+        pending.email_sent === false
+          ? "Invite created, but the email could not be sent. Copy the share link and send it yourself."
+          : null,
+      );
       setInviteEmail("");
       refresh();
     } catch (err) {
@@ -188,6 +201,13 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
           </div>
           {inviteError && <p className="text-xs text-rose-400">{inviteError}</p>}
         </AddForm>
+      )}
+
+      {/* Amber, not red: the invite worked, only the notification did not. */}
+      {inviteNotice && (
+        <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+          {inviteNotice}
+        </p>
       )}
 
       {collapsed ? (
