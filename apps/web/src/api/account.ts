@@ -1,11 +1,11 @@
 import { apiRequest } from "@/api/client";
 
-export type SharedTripAction = "keep" | "delete";
+export type SharedTripAction = "keep" | "ask";
 
 export interface AccountDeleteSummary {
   trips_deleted: number;
   trips_left_with_collaborators: number;
-  trips_scheduled: number;
+  collaborators_asked: number;
   journal_entries_deleted: number;
 }
 

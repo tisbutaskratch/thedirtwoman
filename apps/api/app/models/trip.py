@@ -52,12 +52,6 @@ class Trip(Base):
     user_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id"), nullable=True, index=True
     )
-    # Set when a departing creator asked for a shared trip to go too. The
-    # trip stays readable until then so collaborators have time to object or
-    # take a copy.
-    deletion_scheduled_at: Mapped[Optional[datetime]] = mapped_column(
-        DateTime(timezone=True), nullable=True
-    )
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     trip_type: Mapped[TripType] = mapped_column(Enum(TripType, native_enum=False), nullable=False)
     start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)

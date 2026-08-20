@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { emailTripCalendar, type CalendarRecipients } from "@/api/calendar";
+import { leaveTrip } from "@/api/sharing";
 import { deleteTrip, downloadTripCalendar, getTrip, updateTrip } from "@/api/trips";
 import type { Trip } from "@/api/types";
 import ActivitiesSection from "@/components/trip/ActivitiesSection";
@@ -60,7 +61,7 @@ function formatRangeCompact(start: string | null, end: string | null) {
 }
 
 /** Which destructive action the confirmation modal is currently guarding. */
-type PendingAction = "delete" | "archive" | "unarchive" | null;
+type PendingAction = "delete" | "archive" | "unarchive" | "leave" | null;
 
 export default function TripDetail() {
   const { tripId } = useParams<{ tripId: string }>();
@@ -127,6 +128,10 @@ export default function TripDetail() {
   async function handleConfirm() {
     const action = pending;
     setPending(null);
+    if (action === "leave") {
+      await handleLeave(trip!);
+      return;
+    }
     if (action === "delete") {
       await deleteTrip(id);
       navigate(routes.dashboard);
@@ -179,6 +184,12 @@ export default function TripDetail() {
   const compactRange = formatRangeCompact(trip.start_date, trip.end_date);
 
   const confirmCopy = {
+    leave: {
+      title: "Leave this trip?",
+      body: `You will be removed from “${trip.title}” and your private journal entries for it go with you. The trip stays for everyone else, and is deleted only once the last person leaves.`,
+      confirmLabel: "Leave trip",
+      tone: "rose" as const,
+    },
     delete: {
       title: "Delete this trip?",
       body: `“${trip.title}” and everything in it (timeline, packing list, expenses, screenshots) will be permanently removed. This cannot be undone.`,
@@ -201,6 +212,15 @@ export default function TripDetail() {
 
   // Takes the trip rather than closing over it: this is a hoisted function
   // declaration, so the null check above does not narrow inside it.
+  async function handleLeave(current: Trip) {
+    try {
+      await leaveTrip(current.id);
+      navigate(routes.dashboard, { replace: true });
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not leave this trip.");
+    }
+  }
+
   async function handleCalendarDownload(current: Trip) {
     setCalendarMenuOpen(false);
     try {
@@ -284,6 +304,15 @@ export default function TripDetail() {
             />
             {canEdit && !editingTrip && (
               <IconButton onClick={startEditTrip} title="Rename or change dates" icon="edit" />
+            )}
+            {!isOwner && (
+              // Leaving is the counterpart of archive and delete for someone
+              // who was invited: the way out of something you joined.
+              <IconButton
+                onClick={() => setPending("leave")}
+                title="Leave this trip"
+                icon="close"
+              />
             )}
             {isOwner && (
               <>

@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.deps import get_current_user
 from app.core.policy import PRIVACY_POLICY_VERSION
 from app.core.ratelimit import check_identity_limit, rate_limit
@@ -24,6 +25,7 @@ from app.schemas.user import (
     UserRead,
 )
 from app.services.account import delete_account
+from app.services.email import send_trip_left_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -137,10 +139,18 @@ def delete_me(
             detail=f"To confirm, type {CONFIRMATION_PHRASE_FIELD}.",
         )
 
+    who = current_user.name or current_user.email
     summary = delete_account(db, current_user, payload.shared_trips)
+
+    # Sent after the account is gone, so a mail provider having a bad day
+    # cannot leave someone half-deleted. The worst case is a trip nobody was
+    # told about, which is the same trip they still have.
+    for email, trip_title in summary.notify:
+        send_trip_left_email(email, trip_title, who, settings.frontend_base_url)
+
     return AccountDeleteSummary(
         trips_deleted=summary.trips_deleted,
         trips_left_with_collaborators=summary.trips_left_with_collaborators,
-        trips_scheduled=summary.trips_scheduled,
+        collaborators_asked=summary.collaborators_asked,
         journal_entries_deleted=summary.journal_entries_deleted,
     )

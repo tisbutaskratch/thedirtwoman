@@ -1,4 +1,4 @@
-"""Deleting an account.
+"""Deleting an account, and leaving a trip.
 
 The hard part is not the user row. It is that a person is referenced from
 other people's trips, and those references mean different things:
@@ -12,14 +12,18 @@ other people's trips, and those references mean different things:
     make rather than ours, because a trip with other people on it holds
     their planning too.
 
-Solo trips always go: nobody else is on them. For shared trips the choice
-is to leave them behind or to take them with you, and taking them with you
-does not happen immediately.
+Solo trips always go: nobody else is on them. Shared trips are never
+destroyed on someone else's behalf. Deleting is per person: you leave, and
+the trip carries on for whoever is still on it. Asking for a shared trip to
+be deleted means asking the others to leave as well, which they decide for
+themselves.
+
+The trip disappears when the last person leaves it, which is the only
+moment nobody loses anything by its going.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 from enum import Enum
 
 from sqlalchemy import select
@@ -35,21 +39,16 @@ from app.models.trip_invite import TripInvite
 from app.models.user import User
 from app.services.storage import get_storage
 
-#: How long a shared trip stays readable after its creator asks for it to go.
-#: Long enough for people who only look at a trip when they are about to
-#: leave, short enough that it is not indefinite.
-SHARED_TRIP_GRACE = timedelta(days=30)
-
 
 class SharedTripAction(str, Enum):
-    """What happens to trips the departing user created with others on them."""
+    """What to do about trips the departing user created with others on them."""
 
-    #: Leave them. The creator field becomes null and the trip belongs to
-    #: everyone still on it, with no one inheriting and no one to go inactive.
+    #: Leave quietly. The trip carries on for everyone still on it, with no
+    #: creator, so nobody inherits it and no single account can strand the rest.
     keep = "keep"
-    #: Schedule them. They stay readable for the grace period so collaborators
-    #: can object or take a copy, then go.
-    delete = "delete"
+    #: Leave, and ask the others whether they want rid of it too. Each of them
+    #: decides; the trip goes only if they all leave.
+    ask_others_to_leave = "ask"
 
 
 class AccountDeletionSummary:
@@ -58,8 +57,84 @@ class AccountDeletionSummary:
     def __init__(self) -> None:
         self.trips_deleted = 0
         self.trips_left_with_collaborators = 0
-        self.trips_scheduled = 0
+        self.collaborators_asked = 0
         self.journal_entries_deleted = 0
+        #: Who to tell, and about what. The caller sends the mail so this
+        #: stays a database function that a test can run without a provider.
+        self.notify: list[tuple[str, str]] = []
+
+
+def delete_trip(db: Session, trip: Trip) -> None:
+    """Remove a trip and the objects its attachments point at.
+
+    The rows cascade from the relationships; the stored files do not, and an
+    object nobody has a row for is one nobody will ever delete.
+    """
+    storage = get_storage()
+    for attachment in trip.attachments:
+        storage.delete(attachment.filename)
+    db.delete(trip)
+
+
+def _members(db: Session, trip_id: int) -> list[TripCollaborator]:
+    return db.query(TripCollaborator).filter(TripCollaborator.trip_id == trip_id).all()
+
+
+def delete_trip_if_empty(db: Session, trip: Trip) -> bool:
+    """Delete a trip once nobody is on it. Returns whether it went.
+
+    A trip with no creator and no collaborators belongs to nobody and is
+    reachable by nobody, so leaving it in the database is just holding
+    somebody's data after the last person with a claim to it walked away.
+    """
+    if trip.user_id is not None:
+        return False
+    if _members(db, trip.id):
+        return False
+    delete_trip(db, trip)
+    return True
+
+
+def leave_trip(db: Session, trip: Trip, user: User) -> bool:
+    """Remove one person from a trip. Returns whether the trip went with them.
+
+    Their journal entries go too: those were never anyone else's to read, and
+    leaving them behind on a trip they walked away from is the one thing a
+    private journal must not do.
+    """
+    db.query(TripCollaborator).filter(
+        TripCollaborator.trip_id == trip.id, TripCollaborator.user_id == user.id
+    ).delete(synchronize_session=False)
+    db.query(JournalEntry).filter(
+        JournalEntry.trip_id == trip.id, JournalEntry.author_user_id == user.id
+    ).delete(synchronize_session=False)
+
+    if trip.user_id == user.id:
+        trip.user_id = None
+
+    _release_assignments(db, trip.id, user.id)
+    db.flush()
+
+    gone = delete_trip_if_empty(db, trip)
+    db.commit()
+    return gone
+
+
+def _release_assignments(db: Session, trip_id: int, user_id: int) -> None:
+    """Unpick a person from a trip's contents without deleting the contents.
+
+    The tent is still on the list and the expense still happened. They are
+    just nobody's now.
+    """
+    db.query(Gear).filter(Gear.trip_id == trip_id, Gear.assigned_to_user_id == user_id).update(
+        {Gear.assigned_to_user_id: None}, synchronize_session=False
+    )
+    db.query(Task).filter(Task.trip_id == trip_id, Task.assigned_to_user_id == user_id).update(
+        {Task.assigned_to_user_id: None}, synchronize_session=False
+    )
+    db.query(Expense).filter(
+        Expense.trip_id == trip_id, Expense.paid_by_user_id == user_id
+    ).update({Expense.paid_by_user_id: None}, synchronize_session=False)
 
 
 def _shared_trip_ids(db: Session, user_id: int) -> set[int]:
@@ -76,35 +151,31 @@ def _shared_trip_ids(db: Session, user_id: int) -> set[int]:
     }
 
 
-def _delete_trip(db: Session, trip: Trip) -> None:
-    """Remove a trip and the objects its attachments point at.
-
-    The rows cascade from the relationships; the stored files do not, and
-    an object nobody has a row for is one nobody will ever delete.
-    """
-    storage = get_storage()
-    for attachment in trip.attachments:
-        storage.delete(attachment.filename)
-    db.delete(trip)
-
-
 def delete_account(db: Session, user: User, shared: SharedTripAction) -> AccountDeletionSummary:
     """Delete a user, and decide what becomes of what they touched."""
     summary = AccountDeletionSummary()
-    now = datetime.now(timezone.utc)
     shared_ids = _shared_trip_ids(db, user.id)
 
     for trip in list(db.query(Trip).filter(Trip.user_id == user.id).all()):
         if trip.id not in shared_ids:
-            _delete_trip(db, trip)
+            # Nobody else is on it, so nobody else loses anything.
+            delete_trip(db, trip)
             summary.trips_deleted += 1
-        elif shared is SharedTripAction.keep:
-            trip.user_id = None
-            summary.trips_left_with_collaborators += 1
-        else:
-            trip.user_id = None
-            trip.deletion_scheduled_at = now + SHARED_TRIP_GRACE
-            summary.trips_scheduled += 1
+            continue
+
+        trip.user_id = None
+        summary.trips_left_with_collaborators += 1
+
+        if shared is SharedTripAction.ask_others_to_leave:
+            # An ask, not an instruction. Each of them decides, and the trip
+            # goes only once they have all left.
+            for member in _members(db, trip.id):
+                if member.user_id == user.id:
+                    continue
+                member_user = db.get(User, member.user_id)
+                if member_user is not None:
+                    summary.notify.append((member_user.email, trip.title))
+                    summary.collaborators_asked += 1
 
     # Journal entries are private, so they die with the account wherever they
     # are, including on trips that outlive it.
@@ -125,8 +196,6 @@ def delete_account(db: Session, user: User, shared: SharedTripAction) -> Account
         synchronize_session=False
     )
 
-    # Assignments survive without a name attached: the tent is still on the
-    # list and the expense still happened, they are just nobody's now.
     db.query(Gear).filter(Gear.assigned_to_user_id == user.id).update(
         {Gear.assigned_to_user_id: None}, synchronize_session=False
     )
@@ -138,26 +207,14 @@ def delete_account(db: Session, user: User, shared: SharedTripAction) -> Account
     )
 
     db.delete(user)
+    db.flush()
+
+    # A trip whose only other members had already gone is now empty.
+    for trip_id in shared_ids:
+        trip = db.get(Trip, trip_id)
+        if trip is not None and delete_trip_if_empty(db, trip):
+            summary.trips_left_with_collaborators -= 1
+            summary.trips_deleted += 1
+
     db.commit()
     return summary
-
-
-def sweep_scheduled_deletions(db: Session, now: datetime | None = None) -> int:
-    """Delete shared trips whose grace period has run out.
-
-    Called on start-up rather than from a scheduler, because the deployment
-    has no cron and one query on boot is cheaper than a service that exists
-    to run one query. A trip that outlives its window by a few hours until
-    the next restart harms nobody.
-    """
-    moment = now or datetime.now(timezone.utc)
-    due = (
-        db.query(Trip)
-        .filter(Trip.deletion_scheduled_at.isnot(None), Trip.deletion_scheduled_at <= moment)
-        .all()
-    )
-    for trip in due:
-        _delete_trip(db, trip)
-    if due:
-        db.commit()
-    return len(due)

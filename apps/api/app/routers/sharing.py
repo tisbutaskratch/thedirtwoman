@@ -20,6 +20,7 @@ from app.schemas.sharing import (
     RoleUpdate,
     VehicleUpdate,
 )
+from app.services.account import leave_trip
 from app.services.sharing import (
     cancel_email_invite,
     create_email_invite,
@@ -145,6 +146,27 @@ def update_collaborator_role(
     db.commit()
     db.refresh(collaborator)
     return to_collaborator_read(collaborator)
+
+
+@router.delete("/trips/{trip_id}/collaborators/me", status_code=status.HTTP_204_NO_CONTENT)
+def leave_this_trip(
+    trip: Trip = Depends(get_accessible_trip),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    """Leave a trip you are on.
+
+    Available to anyone on it, editor or viewer, at any time. Being unable
+    to leave something you were invited to is its own kind of trap.
+
+    Your private journal entries for this trip go with you. Leaving them on
+    a trip you walked away from is the one thing a private journal must not
+    do.
+
+    The trip itself is deleted only when the last person leaves, so nobody
+    loses planning because somebody else did.
+    """
+    leave_trip(db, trip, current_user)
 
 
 @router.delete("/trips/{trip_id}/collaborators/{user_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -45,5 +45,7 @@ class AccountDeleteRequest(BaseModel):
 class AccountDeleteSummary(BaseModel):
     trips_deleted: int
     trips_left_with_collaborators: int
-    trips_scheduled: int
+    #: How many people were asked whether they still want a shared trip.
+    #: Nothing happens to those trips unless they decide it should.
+    collaborators_asked: int
     journal_entries_deleted: int

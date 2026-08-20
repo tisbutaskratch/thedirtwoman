@@ -181,3 +181,30 @@ def send_calendar_email(
 
     logger.info("Calendar email (no provider configured) to=%s trip=%s", to_email, trip_title)
     return False
+
+
+def send_trip_left_email(to_email: str, trip_title: str, who: str, trip_url: str) -> bool:
+    """Tell someone a trip's creator has gone, and that the choice is theirs.
+
+    Deliberately not a countdown. Nothing happens to this trip unless the
+    people still on it decide it should, so the message asks rather than
+    warns.
+    """
+    subject = f"{who} has left \"{trip_title}\""
+    body = (
+        f"{who} deleted their Adventure Planner account and asked whether the rest of you "
+        f"still want \"{trip_title}\".\n\n"
+        "Nothing has happened to it. It is still there, and it is yours and the others' to "
+        "keep for as long as any of you want it.\n\n"
+        f"Open it here: {trip_url}\n\n"
+        "If you would rather not keep it, you can leave the trip from that page. It is "
+        "deleted only once everybody has left.\n"
+    )
+
+    if settings.resend_api_key:
+        return _deliver_over_https(to_email, subject, body)
+    if settings.smtp_host:
+        return _deliver_over_smtp(to_email, subject, body)
+
+    logger.info("Trip-left email (no provider configured) to=%s trip=%s", to_email, trip_title)
+    return False

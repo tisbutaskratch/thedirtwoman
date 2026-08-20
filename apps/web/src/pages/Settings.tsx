@@ -117,7 +117,8 @@ export default function Settings() {
                 <span className="font-medium text-content">Leave them with everyone else</span>
                 <span className="mt-0.5 block text-content-muted">
                   The trip stays exactly as it is and belongs to everyone still on it. Nobody
-                  inherits it, so it cannot get stuck behind one inactive account.
+                  inherits it, so it cannot get stuck behind one inactive account, and nobody
+                  is bothered about it.
                 </span>
               </span>
             </label>
@@ -126,16 +127,18 @@ export default function Settings() {
               <input
                 type="radio"
                 name="shared-trips"
-                value="delete"
-                checked={sharedTrips === "delete"}
-                onChange={() => setSharedTrips("delete")}
+                value="ask"
+                checked={sharedTrips === "ask"}
+                onChange={() => setSharedTrips("ask")}
                 className="mt-0.5 h-4 w-4 shrink-0 accent-rose-600"
               />
               <span>
-                <span className="font-medium text-content">Delete them too</span>
+                <span className="font-medium text-content">
+                  Ask the others if they want them too
+                </span>
                 <span className="mt-0.5 block text-content-muted">
-                  They stay readable for 30 days so the people on them can save anything they
-                  need, then they are deleted.
+                  Everyone on the trip is emailed and decides for themselves. Anyone who wants
+                  it keeps it, and it is deleted only once everybody has left.
                 </span>
               </span>
             </label>

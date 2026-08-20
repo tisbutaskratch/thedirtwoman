@@ -7,14 +7,11 @@ belonging to anyone else goes with it.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-
 from app.models.gear import Gear
 from app.models.journal_entry import JournalEntry
 from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
 from app.models.user import User
-from app.services.account import SHARED_TRIP_GRACE, sweep_scheduled_deletions
 
 
 def _trip(client, headers, title="Solo trip") -> int:
@@ -112,42 +109,6 @@ def test_a_viewer_does_not_inherit_the_creator_s_powers(client, auth_headers, db
     assert db_session.get(Trip, trip_id) is not None
 
 
-def test_taking_a_shared_trip_with_you_schedules_it_rather_than_dropping_it(
-    client, auth_headers, db_session
-):
-    """Collaborators get the grace period to object or take a copy."""
-    owner = auth_headers("frodo@bagend.dev")
-    guest = auth_headers("sam@bagend.dev")
-    trip_id = _trip(client, owner, "Fellowship")
-    _share(client, owner, guest, trip_id)
-
-    response = _delete_account(client, owner, "frodo@bagend.dev", shared="delete")
-
-    assert response.json()["trips_scheduled"] == 1
-    trip = db_session.get(Trip, trip_id)
-    assert trip is not None
-    assert trip.deletion_scheduled_at is not None
-    # still readable in the meantime
-    assert client.get(f"/trips/{trip_id}", headers=guest).status_code == 200
-
-
-def test_the_sweep_only_takes_trips_whose_grace_has_run_out(
-    client, auth_headers, db_session
-):
-    owner = auth_headers("frodo@bagend.dev")
-    guest = auth_headers("sam@bagend.dev")
-    trip_id = _trip(client, owner, "Fellowship")
-    _share(client, owner, guest, trip_id)
-    _delete_account(client, owner, "frodo@bagend.dev", shared="delete")
-
-    assert sweep_scheduled_deletions(db_session) == 0
-    assert db_session.get(Trip, trip_id) is not None
-
-    later = datetime.now(timezone.utc) + SHARED_TRIP_GRACE + timedelta(days=1)
-    assert sweep_scheduled_deletions(db_session, now=later) == 1
-    assert db_session.get(Trip, trip_id) is None
-
-
 def test_deleting_does_not_touch_a_trip_somebody_else_created(
     client, auth_headers, db_session
 ):
@@ -211,3 +172,124 @@ def test_deleting_requires_being_signed_in(client):
         "DELETE", "/auth/me", json={"shared_trips": "keep", "confirm": "x@example.com"}
     )
     assert response.status_code == 401
+
+
+# --------------------------------------------- leaving, and per-person deletes
+
+
+def test_asking_the_others_to_leave_does_not_touch_their_trip(
+    client, auth_headers, db_session, monkeypatch
+):
+    """The point of the rebuild: nobody loses planning because somebody else
+    left. Asking is an ask, not a countdown."""
+    import httpx
+
+    from app.core.config import settings
+
+    class Accepted:
+        is_success = True
+        status_code = 200
+        text = "{}"
+
+    monkeypatch.setattr(settings, "resend_api_key", "re_test_key")
+    monkeypatch.setattr(httpx, "post", lambda url, **kw: Accepted())
+
+    owner = auth_headers("frodo@bagend.dev")
+    guest = auth_headers("sam@bagend.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+    _share(client, owner, guest, trip_id)
+
+    body = _delete_account(client, owner, "frodo@bagend.dev", shared="ask").json()
+
+    assert body["collaborators_asked"] == 1
+    assert body["trips_left_with_collaborators"] == 1
+    # the trip is untouched and still theirs
+    assert db_session.get(Trip, trip_id) is not None
+    assert client.get(f"/trips/{trip_id}", headers=guest).status_code == 200
+
+
+def test_anyone_on_a_trip_can_leave_it_whenever_they_like(client, auth_headers, db_session):
+    owner = auth_headers("frodo@bagend.dev")
+    guest = auth_headers("sam@bagend.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+    _share(client, owner, guest, trip_id)
+
+    assert client.delete(f"/trips/{trip_id}/collaborators/me", headers=guest).status_code == 204
+
+    # gone for them, still there for the creator
+    assert client.get(f"/trips/{trip_id}", headers=guest).status_code == 404
+    assert client.get(f"/trips/{trip_id}", headers=owner).status_code == 200
+
+
+def test_a_viewer_can_leave_too(client, auth_headers):
+    owner = auth_headers("frodo@bagend.dev")
+    viewer = auth_headers("pippin@tookborough.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+    token = client.post(f"/trips/{trip_id}/invite?role=viewer", headers=owner).json()["token"]
+    client.post(f"/invites/{token}/accept", headers=viewer)
+
+    assert client.delete(f"/trips/{trip_id}/collaborators/me", headers=viewer).status_code == 204
+    assert client.get(f"/trips/{trip_id}", headers=viewer).status_code == 404
+
+
+def test_leaving_takes_your_private_journal_with_you(client, auth_headers, db_session):
+    """Leaving entries behind on a trip you walked away from is the one thing
+    a private journal must not do."""
+    owner = auth_headers("frodo@bagend.dev")
+    guest = auth_headers("sam@bagend.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+    _share(client, owner, guest, trip_id)
+    client.post(
+        f"/trips/{trip_id}/journal",
+        json={"entry_date": "2026-08-19", "body": "Mine"},
+        headers=guest,
+    )
+
+    client.delete(f"/trips/{trip_id}/collaborators/me", headers=guest)
+
+    assert db_session.query(JournalEntry).count() == 0
+
+
+def test_the_trip_goes_when_the_last_person_leaves(client, auth_headers, db_session):
+    """Only then does its going cost nobody anything."""
+    owner = auth_headers("frodo@bagend.dev")
+    guest = auth_headers("sam@bagend.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+    _share(client, owner, guest, trip_id)
+
+    # creator deletes their account, leaving the trip with the guest
+    _delete_account(client, owner, "frodo@bagend.dev", shared="ask")
+    assert db_session.get(Trip, trip_id) is not None
+
+    # the last person leaves, so there is nobody left with a claim to it
+    client.delete(f"/trips/{trip_id}/collaborators/me", headers=guest)
+    db_session.expire_all()
+    assert db_session.get(Trip, trip_id) is None
+
+
+def test_leaving_frees_your_assignments_without_deleting_them(
+    client, auth_headers, db_session
+):
+    owner = auth_headers("frodo@bagend.dev")
+    guest = auth_headers("sam@bagend.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+    _share(client, owner, guest, trip_id)
+
+    guest_id = db_session.query(User).filter(User.email == "sam@bagend.dev").first().id
+    db_session.add(Gear(trip_id=trip_id, name="Rope", assigned_to_user_id=guest_id))
+    db_session.commit()
+
+    client.delete(f"/trips/{trip_id}/collaborators/me", headers=guest)
+
+    db_session.expire_all()
+    rope = db_session.query(Gear).filter_by(trip_id=trip_id).one()
+    assert rope.name == "Rope"
+    assert rope.assigned_to_user_id is None
+
+
+def test_a_stranger_cannot_leave_a_trip_they_were_never_on(client, auth_headers):
+    owner = auth_headers("frodo@bagend.dev")
+    stranger = auth_headers("gollum@misty.dev")
+    trip_id = _trip(client, owner, "Fellowship")
+
+    assert client.delete(f"/trips/{trip_id}/collaborators/me", headers=stranger).status_code == 404
