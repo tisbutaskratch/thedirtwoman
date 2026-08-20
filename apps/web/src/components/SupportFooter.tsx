@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Critter from "@/art/critters";
 import { Icon } from "@/components/ui";
 import { resumeUrl } from "@/lib/site";
+import { APP_VERSION } from "@/lib/changelog";
 import { AUTHOR, CREATED, DONATION_URL, FEEDBACK_URL, SHARE_TEXT } from "@/lib/support";
 
 /*
@@ -121,7 +123,23 @@ export default function SupportFooter() {
           >
             {AUTHOR}
           </a>{" "}
-          · {CREATED}
+          · {CREATED} ·{" "}
+          {/* The version doubles as the way into the changelog: it is the
+              thing someone quotes in a bug report, and the thing they click
+              when they want to know what moved since last week. */}
+          <Link
+            to="/whats-new"
+            className="font-medium text-content-muted underline-offset-4 hover:text-accent hover:underline"
+          >
+            v{APP_VERSION}
+          </Link>{" "}
+          ·{" "}
+          <Link
+            to="/privacy"
+            className="underline-offset-4 hover:text-accent hover:underline"
+          >
+            Privacy
+          </Link>
         </p>
       </div>
     </footer>
