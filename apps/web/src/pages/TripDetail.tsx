@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { ApiError } from "@/api/client";
+import { emailTripCalendar, type CalendarRecipients } from "@/api/calendar";
 import { deleteTrip, downloadTripCalendar, getTrip, updateTrip } from "@/api/trips";
 import type { Trip } from "@/api/types";
 import ActivitiesSection from "@/components/trip/ActivitiesSection";
@@ -92,6 +94,10 @@ export default function TripDetail() {
    * wait on a page they loaded directly.
    */
   const [openerDone, setOpenerDone] = useState(hintedType === undefined);
+  // Three ways to get the calendar out is one too many for three icons, so
+  // they share one button and a small menu.
+  const [calendarMenuOpen, setCalendarMenuOpen] = useState(false);
+  const [calendarNotice, setCalendarNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (hintedType === undefined) return;
@@ -196,10 +202,38 @@ export default function TripDetail() {
   // Takes the trip rather than closing over it: this is a hoisted function
   // declaration, so the null check above does not narrow inside it.
   async function handleCalendarDownload(current: Trip) {
+    setCalendarMenuOpen(false);
     try {
       await downloadTripCalendar(current.id, current.title);
     } catch {
       setError("Could not build the calendar file.");
+    }
+  }
+
+  async function handleCalendarEmail(current: Trip, to: CalendarRecipients) {
+    setCalendarMenuOpen(false);
+    setCalendarNotice(null);
+    try {
+      const result = await emailTripCalendar(current.id, to);
+      // Say what happened rather than "sent": a message that never left
+      // looks exactly like one that did until somebody asks.
+      if (result.failed > 0 && result.sent === 0) {
+        setCalendarNotice("The calendar could not be emailed. Download it instead.");
+      } else if (result.failed > 0) {
+        setCalendarNotice(
+          `Sent to ${result.sent} of ${result.recipients.length}. The rest did not go.`,
+        );
+      } else {
+        setCalendarNotice(
+          to === "me"
+            ? "Sent to your email."
+            : `Sent to everyone on this trip (${result.sent}).`,
+        );
+      }
+    } catch (err) {
+      setCalendarNotice(
+        err instanceof ApiError ? err.message : "Could not email the calendar.",
+      );
     }
   }
 
@@ -244,8 +278,8 @@ export default function TripDetail() {
                 Apple and Outlook all read it, and no provider's own URL
                 scheme works anywhere but that provider. */}
             <IconButton
-              onClick={() => handleCalendarDownload(trip)}
-              title="Add to calendar"
+              onClick={() => setCalendarMenuOpen((open) => !open)}
+              title="Calendar"
               icon="calendar"
             />
             {canEdit && !editingTrip && (
@@ -368,6 +402,48 @@ export default function TripDetail() {
           </div>
         </div>
       </header>
+
+      {/*
+       * Calendar actions, in a panel rather than a dropdown: the sticky
+       * header clips its own overflow to contain the backdrop art, so a menu
+       * anchored inside it gets cut off. This also gives the options room to
+       * be readable on a phone.
+       */}
+      {calendarMenuOpen && (
+        <div className="flex flex-wrap gap-2 rounded-card border border-edge bg-surface-raised p-3">
+          <button
+            onClick={() => handleCalendarDownload(trip)}
+            className="rounded-md border border-edge px-3 py-1.5 text-sm text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+          >
+            Download the file
+          </button>
+          <button
+            onClick={() => handleCalendarEmail(trip, "me")}
+            className="rounded-md border border-edge px-3 py-1.5 text-sm text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+          >
+            Email it to me
+          </button>
+          {canEdit && (
+            <button
+              onClick={() => handleCalendarEmail(trip, "everyone")}
+              className="rounded-md border border-edge px-3 py-1.5 text-sm text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+            >
+              Email everyone on this trip
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* The result of a calendar action. Dismissible, because it is
+          information rather than a problem to solve. */}
+      {calendarNotice && (
+        <button
+          onClick={() => setCalendarNotice(null)}
+          className="w-full rounded-card border border-edge bg-surface-raised px-4 py-2 text-left text-sm text-content-muted transition-colors hover:text-content"
+        >
+          {calendarNotice}
+        </button>
+      )}
 
       {/* Mode essentials: the one section that differs per trip type. */}
       {trip.trip_type === "backpacking" && <BackpackingPanel tripId={id} onChange={refreshTrip} />}
