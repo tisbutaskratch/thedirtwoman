@@ -4,12 +4,24 @@ import type { Location, LocationKind } from "@/api/types";
 import { AddForm, Emoji, EmptyHint, EmptyState, Icon, IconButton, Section, inputClass } from "@/components/ui";
 import { SECTION_META } from "@/lib/tripTypes";
 
-const KIND_OPTIONS: LocationKind[] = ["waypoint", "campsite", "hotel", "poi", "fuel_stop"];
+// Ordered by how often they come up rather than alphabetically: somewhere
+// to stay and a point on the route are most of what people add.
+const KIND_OPTIONS: LocationKind[] = [
+  "waypoint",
+  "lodging",
+  "campsite",
+  "transit",
+  "fuel_stop",
+  "poi",
+];
 
 const KIND_META: Record<LocationKind, { glyph: string; label: string }> = {
   waypoint: { glyph: "📌", label: "Waypoint" },
   campsite: { glyph: "⛺", label: "Campsite" },
-  hotel: { glyph: "🏨", label: "Hotel" },
+  // "Lodging" rather than "Hotel": a spare room, an Airbnb, a hostel and a
+  // friend's sofa are all where you are staying, and none are a hotel.
+  lodging: { glyph: "🛏️", label: "Stay" },
+  transit: { glyph: "🚉", label: "Airport or station" },
   poi: { glyph: "⭐", label: "Point of interest" },
   fuel_stop: { glyph: "⛽", label: "Fuel stop" },
 };

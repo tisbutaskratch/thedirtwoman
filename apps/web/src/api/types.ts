@@ -41,7 +41,13 @@ export interface TripUpdate {
   owner_fuel_range_miles?: number | null;
 }
 
-export type LocationKind = "waypoint" | "campsite" | "hotel" | "poi" | "fuel_stop";
+export type LocationKind =
+  | "waypoint"
+  | "campsite"
+  | "lodging"
+  | "transit"
+  | "poi"
+  | "fuel_stop";
 
 export interface Location {
   id: number;

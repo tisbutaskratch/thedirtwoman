@@ -14,9 +14,22 @@ if TYPE_CHECKING:
 
 
 class LocationKind(str, enum.Enum):
+    """What a place is, in the terms a traveller would use.
+
+    Deliberately short. Every extra option is a decision at the point
+    somebody is trying to type an address, and "poi" absorbs the long tail.
+
+    "lodging" rather than "hotel" because the label was the problem: a
+    mother's spare room, an Airbnb, a hostel and a friend's sofa are all
+    where you are staying, and none of them are a hotel. "transit" exists
+    because airports, stations and ferry terminals had nowhere to go, which
+    is most of the shape of an international or domestic trip.
+    """
+
     waypoint = "waypoint"
     campsite = "campsite"
-    hotel = "hotel"
+    lodging = "lodging"
+    transit = "transit"
     poi = "poi"
     fuel_stop = "fuel_stop"
 
