@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { deleteAccount, type SharedTripAction } from "@/api/account";
 import Critter from "@/art/critters";
-import { Card, Icon, inputClass } from "@/components/ui";
+import { Card, Icon, inputClass, type IconName } from "@/components/ui";
 import { useAuth } from "@/lib/AuthContext";
 import { routes } from "@/lib/site";
-import { getTheme, subscribeTheme, toggleTheme } from "@/lib/themeStore";
+import { getTheme, setTheme, subscribeTheme, type Theme } from "@/lib/themeStore";
 
 /*
  * Account settings, which today is mostly the one action that cannot be
@@ -17,6 +17,11 @@ import { getTheme, subscribeTheme, toggleTheme } from "@/lib/themeStore";
  * explicit rather than defaulted, and requires the account's own email typed
  * out. A confirm dialog is one careless click; this is not.
  */
+const THEMES: { value: Theme; label: string; icon: IconName }[] = [
+  { value: "light", label: "Light", icon: "light" },
+  { value: "dark", label: "Dark", icon: "dark" },
+];
+
 export default function Settings() {
   const theme = useSyncExternalStore(subscribeTheme, getTheme, getTheme);
   const { user, logout } = useAuth();
@@ -93,21 +98,43 @@ export default function Settings() {
         */}
       <Card className="flex flex-col gap-3">
         <h2 className="font-semibold text-content">Appearance</h2>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm text-content">Theme</p>
-            <p className="text-sm text-content-muted">
-              {theme === "dark" ? "Dark" : "Light"}. Saved on this device.
-            </p>
+            <p className="text-sm text-content-muted">Saved on this device, not on your account.</p>
           </div>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex items-center gap-2 whitespace-nowrap rounded-md border border-edge px-3 py-1.5 text-sm text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+          {/*
+            * A segmented control rather than a button, because this is a
+            * setting and not an action: "Switch to dark" told you what would
+            * happen next but never which theme you were on. A radio group is
+            * what this is, so it says so, and arrow keys work.
+            */}
+          <div
+            role="radiogroup"
+            aria-label="Theme"
+            className="flex items-center gap-0.5 rounded-md border border-edge bg-surface-sunken p-0.5"
           >
-            <Icon name={theme === "dark" ? "light" : "dark"} size={15} />
-            Switch to {theme === "dark" ? "light" : "dark"}
-          </button>
+            {THEMES.map((option) => {
+              const active = theme === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  onClick={() => setTheme(option.value)}
+                  className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-sm transition-colors ${
+                    active
+                      ? "bg-surface-raised font-medium text-content shadow-sm"
+                      : "text-content-muted hover:text-content"
+                  }`}
+                >
+                  <Icon name={option.icon} size={15} />
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </Card>
 
