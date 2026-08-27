@@ -32,6 +32,11 @@ function siteMetaPlugin(site: string | undefined) {
         `<meta name="twitter:card" content="summary" />`,
         `<meta name="twitter:title" content="${escape(meta.title)}" />`,
         `<meta name="twitter:description" content="${escape(meta.description)}" />`,
+        `<link rel="icon" href="${meta.favicon}" />`,
+        // Same drawing for the home-screen icon: an SVG scales to whatever
+        // size iOS asks for, so there is no set of PNGs to keep in step.
+        `<link rel="apple-touch-icon" href="${meta.favicon}" />`,
+        `<meta name="theme-color" content="${meta.themeColor}" />`,
       ].join("\n    ");
       return html.replace("<!--site-meta-->", tags);
     },
