@@ -28,12 +28,20 @@ export default function AppLayout() {
             Adventure Planner
           </NavLink>
           <div className="flex items-center gap-2 text-sm">
+            {/* Thin rules rather than gaps, so the nav reads as separate
+                things instead of one run-on row. */}
+            <span aria-hidden className="text-edge">
+              |
+            </span>
             <NavLink
               to={routes.garage}
               className="text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline"
             >
               Garage
             </NavLink>
+            <span aria-hidden className="text-edge">
+              |
+            </span>
             {/*
               * The name is how people expect to reach their account, and
               * this is the only route to it. Hiding it on narrow screens
@@ -48,6 +56,9 @@ export default function AppLayout() {
               <span className="sm:hidden">{user?.name?.split(" ")[0]}</span>
               <span className="hidden sm:inline">{user?.name}</span>
             </NavLink>
+            <span aria-hidden className="text-edge">
+              |
+            </span>
             <ThemeToggle />
             <button
               onClick={handleLogout}
