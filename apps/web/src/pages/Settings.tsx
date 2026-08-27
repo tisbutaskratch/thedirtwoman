@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { deleteAccount, type SharedTripAction } from "@/api/account";
@@ -6,6 +6,7 @@ import Critter from "@/art/critters";
 import { Card, Icon, inputClass } from "@/components/ui";
 import { useAuth } from "@/lib/AuthContext";
 import { routes } from "@/lib/site";
+import { getTheme, subscribeTheme, toggleTheme } from "@/lib/themeStore";
 
 /*
  * Account settings, which today is mostly the one action that cannot be
@@ -17,6 +18,7 @@ import { routes } from "@/lib/site";
  * out. A confirm dialog is one careless click; this is not.
  */
 export default function Settings() {
+  const theme = useSyncExternalStore(subscribeTheme, getTheme, getTheme);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -82,6 +84,31 @@ export default function Settings() {
           </Link>
           .
         </p>
+      </Card>
+
+      {/*
+        * Appearance lives here rather than in the header. It is a setting
+        * somebody picks once and then forgets, which does not earn permanent
+        * space next to the things they use on every visit.
+        */}
+      <Card className="flex flex-col gap-3">
+        <h2 className="font-semibold text-content">Appearance</h2>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm text-content">Theme</p>
+            <p className="text-sm text-content-muted">
+              {theme === "dark" ? "Dark" : "Light"}. Saved on this device.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex items-center gap-2 whitespace-nowrap rounded-md border border-edge px-3 py-1.5 text-sm text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+          >
+            <Icon name={theme === "dark" ? "light" : "dark"} size={15} />
+            Switch to {theme === "dark" ? "light" : "dark"}
+          </button>
+        </div>
       </Card>
 
       {/* --------------------------------------------------------- deleting */}

@@ -1,6 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import SupportFooter from "@/components/SupportFooter";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { Emoji, Icon } from "@/components/ui";
@@ -36,7 +35,6 @@ export default function AppLayout() {
             >
               <Icon name="garage" size={17} />
             </NavLink>
-            <ThemeToggle />
             {/*
               * A person, next to the way out, which is where accounts live
               * in almost everything else. This is the only route to
