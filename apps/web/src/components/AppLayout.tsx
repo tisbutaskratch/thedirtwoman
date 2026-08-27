@@ -36,15 +36,6 @@ export default function AppLayout() {
             >
               <Icon name="garage" size={17} />
             </NavLink>
-            {/*
-              * A real 1px rule, not a "|". A pipe character sits on the text
-              * baseline and inherits the font's weight, so it never quite
-              * lines up beside icons. This is the toolbar convention: a
-              * fixed-height hairline, with the groups tight either side of
-              * it so the gap does the separating and the rule only confirms
-              * it.
-              */}
-            <span aria-hidden className="mx-1 h-5 w-px bg-edge" />
             <ThemeToggle />
             {/*
               * A person, next to the way out, which is where accounts live
@@ -60,11 +51,19 @@ export default function AppLayout() {
             >
               <Icon name="account" size={17} />
             </NavLink>
+            {/*
+              * The door with an arrow leaving it, which is the one glyph
+              * everybody already reads as "log out". Tinted on hover rather
+              * than boxed, because it is the only control here that ends
+              * something, and that is worth a hint without shouting.
+              */}
             <button
               onClick={handleLogout}
-              className="whitespace-nowrap rounded-md border border-edge px-3 py-1.5 text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+              title="Log out"
+              aria-label="Log out"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors hover:bg-rose-500/10 hover:text-rose-500"
             >
-              Log out
+              <Icon name="logout" size={17} />
             </button>
           </div>
         </nav>
