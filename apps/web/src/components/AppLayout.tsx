@@ -3,11 +3,11 @@ import SupportFooter from "@/components/SupportFooter";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { Emoji } from "@/components/ui";
+import { Emoji, Icon } from "@/components/ui";
 import { routes } from "@/lib/site";
 
 export default function AppLayout() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   useDocumentTitle("Adventure Planner");
 
@@ -22,46 +22,47 @@ export default function AppLayout() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <NavLink
             to={routes.dashboard}
-            className="flex items-center gap-2 text-base font-bold tracking-tight"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap text-base font-bold tracking-tight"
           >
             <Emoji glyph="🧭" size="lg" />
             Adventure Planner
           </NavLink>
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-1 text-sm sm:gap-2">
             <NavLink
               to={routes.garage}
-              className="text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline"
+              title="Garage"
+              aria-label="Garage"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors hover:bg-surface-overlay hover:text-content"
             >
-              Garage
+              <Icon name="garage" size={17} />
             </NavLink>
-            {/* A rule between the two links, and nothing at either end: a
-                separator needs something on both sides of it to separate. */}
-            <span aria-hidden className="text-edge">
-              |
-            </span>
             {/*
-              * The name is how people expect to reach their account, and
-              * this is the only route to it. Hiding it on narrow screens
-              * left no way to reach settings at all, which meant no way to
-              * delete your account from a phone. First name only when there
-              * is no room for both names.
+              * A real 1px rule, not a "|". A pipe character sits on the text
+              * baseline and inherits the font's weight, so it never quite
+              * lines up beside icons. This is the toolbar convention: a
+              * fixed-height hairline, with the groups tight either side of
+              * it so the gap does the separating and the rule only confirms
+              * it.
+              */}
+            <span aria-hidden className="mx-1 h-5 w-px bg-edge" />
+            <ThemeToggle />
+            {/*
+              * A person, next to the way out, which is where accounts live
+              * in almost everything else. This is the only route to
+              * settings, so it has to survive every screen size: hiding it
+              * on a phone left no way to delete your account.
               */}
             <NavLink
               to={routes.settings}
-              className="text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline"
+              title="Your account"
+              aria-label="Your account"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors hover:bg-surface-overlay hover:text-content"
             >
-              <span className="sm:hidden">{user?.name?.split(" ")[0]}</span>
-              <span className="hidden sm:inline">{user?.name}</span>
+              <Icon name="account" size={17} />
             </NavLink>
-            {/* No rule before the toggle. The rules delimit links; the
-                toggle and the log out button are controls, and a rule beside
-                a small icon crowds it and implies it is a third link. A
-                wider gap separates the two groups instead. */}
-            <span className="w-1" />
-            <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="rounded-md border border-edge px-3 py-1.5 text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+              className="whitespace-nowrap rounded-md border border-edge px-3 py-1.5 text-content-muted transition-colors hover:border-edge-strong hover:text-content"
             >
               Log out
             </button>
