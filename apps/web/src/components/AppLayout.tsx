@@ -56,9 +56,11 @@ export default function AppLayout() {
               <span className="sm:hidden">{user?.name?.split(" ")[0]}</span>
               <span className="hidden sm:inline">{user?.name}</span>
             </NavLink>
-            <span aria-hidden className="text-edge">
-              |
-            </span>
+            {/* No rule before the toggle. The rules delimit links; the
+                toggle and the log out button are controls, and a rule beside
+                a small icon crowds it and implies it is a third link. A
+                wider gap separates the two groups instead. */}
+            <span className="w-1" />
             <ThemeToggle />
             <button
               onClick={handleLogout}
