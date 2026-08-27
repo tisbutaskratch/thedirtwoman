@@ -32,6 +32,9 @@ from sqlalchemy.orm import Session
 from app.models.expense import Expense, ExpenseParticipant
 from app.models.gear import Gear
 from app.models.journal_entry import JournalEntry
+from app.models.kit import Kit
+from app.models.pin import SectionPin, TripPin
+from app.models.rig import Rig
 from app.models.task import Task
 from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
@@ -155,6 +158,19 @@ def delete_account(db: Session, user: User, shared: SharedTripAction) -> Account
     """Delete a user, and decide what becomes of what they touched."""
     summary = AccountDeletionSummary()
     shared_ids = _shared_trip_ids(db, user.id)
+
+    # Personal things that belong to nobody else: the garage, the kits, and
+    # what they kept pinned. Cleared first, before any trip is deleted, so
+    # this does not race the cascade that removes other people's pins from
+    # the trips going with them.
+    db.query(TripPin).filter(TripPin.user_id == user.id).delete(synchronize_session=False)
+    db.query(SectionPin).filter(SectionPin.user_id == user.id).delete(synchronize_session=False)
+    db.query(Rig).filter(Rig.user_id == user.id).delete(synchronize_session=False)
+    # Kits go through the ORM rather than a bulk delete, so their items go
+    # with them: a bulk delete would skip the cascade and orphan the rows.
+    for kit in db.query(Kit).filter(Kit.user_id == user.id).all():
+        db.delete(kit)
+    db.flush()
 
     for trip in list(db.query(Trip).filter(Trip.user_id == user.id).all()):
         if trip.id not in shared_ids:

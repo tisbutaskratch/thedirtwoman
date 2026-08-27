@@ -250,6 +250,47 @@ export function RoadMark(props: MarkProps) {
   );
 }
 
+/**
+ * A covered dish, carried in.
+ *
+ * The rest of the set is drawn from how you travel: a bike, a tent, a rig,
+ * a pack, a plane, a road. A gathering has no vehicle, so the mark is the
+ * thing everybody actually turns up holding. A domed lid with a knob and
+ * two side handles is legible at 24px in a way a table of people is not,
+ * and the steam says it came out of somebody's oven rather than a shop.
+ */
+export function CoveredDishMark(props: MarkProps) {
+  return (
+    <Frame {...props}>
+      {/* steam, drawn first so the lid overlaps it cleanly */}
+      <path d="M13 7 C13 5, 15 5, 15 3" stroke="currentColor" strokeWidth={STROKE} />
+      <path d="M19 7 C19 5, 17 5, 17 3" stroke="currentColor" strokeWidth={STROKE} />
+      {/* domed lid */}
+      <path
+        d="M7 21 A9 9 0 0 1 25 21 Z"
+        stroke="currentColor"
+        strokeWidth={STROKE}
+        fill="currentColor"
+        fillOpacity="0.12"
+      />
+      {/* knob */}
+      <path d="M16 12 L16 10" stroke="currentColor" strokeWidth={STROKE} />
+      {/* the platter it sits on, wider than the lid so it reads as a base */}
+      <path d="M4 21 L28 21" stroke="currentColor" strokeWidth={STROKE} />
+      <path
+        d="M6 21 L8 26 L24 26 L26 21 Z"
+        stroke="currentColor"
+        strokeWidth={STROKE}
+        fill="currentColor"
+        fillOpacity="0.3"
+      />
+      {/* handles, one each side, so it looks carried rather than served */}
+      <path d="M6 23 L3 23" stroke="currentColor" strokeWidth={STROKE} />
+      <path d="M26 23 L29 23" stroke="currentColor" strokeWidth={STROKE} />
+    </Frame>
+  );
+}
+
 export const TRIP_MARKS: Record<TripType, (props: MarkProps) => JSX.Element> = {
   motocamping: DirtBikeMark,
   camping: TentMark,
@@ -257,6 +298,7 @@ export const TRIP_MARKS: Record<TripType, (props: MarkProps) => JSX.Element> = {
   backpacking: PackMark,
   international: PlaneMark,
   domestic: RoadMark,
+  gathering: CoveredDishMark,
 };
 
 /** The mark for a trip type, at whatever size the surrounding chip wants. */

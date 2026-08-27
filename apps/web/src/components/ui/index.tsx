@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
 import Critter, { critterFor, looseCritterFor } from "@/art/critters";
+import { useSectionPin } from "@/lib/sectionPin";
 import { Emoji, Icon, type IconName } from "@/components/ui/icons";
 
 export { Emoji, Icon } from "@/components/ui/icons";
@@ -89,6 +90,7 @@ export function SectionHeader({
   tone?: Tone;
   actions?: ReactNode;
 }) {
+  const pin = useSectionPin();
   return (
     <div className="flex items-center gap-2">
       <span
@@ -113,7 +115,28 @@ export function SectionHeader({
         size={24}
         className={`ml-2 hidden sm:block ${TONE_TEXT[tone]}`}
       />
-      <div className="ml-auto flex items-center gap-1">{actions}</div>
+      <div className="ml-auto flex items-center gap-1">
+        {/*
+          * The pin sits left of the section's own controls, so the add
+          * button stays where people already reach for it.
+          */}
+        {pin && (
+          <button
+            type="button"
+            onClick={pin.onToggle}
+            title={pin.label}
+            aria-pressed={pin.pinned}
+            className={`rounded-md p-1.5 transition-colors ${
+              pin.pinned
+                ? "text-accent"
+                : "text-content-subtle opacity-0 hover:text-content focus-visible:opacity-100 group-hover/section:opacity-100"
+            }`}
+          >
+            <Icon name={pin.pinned ? "unpin" : "pin"} size={15} />
+          </button>
+        )}
+        {actions}
+      </div>
     </div>
   );
 }
@@ -246,6 +269,23 @@ export function EmptyState({ glyph, message }: { glyph: string; message: string 
       </div>
       <p className="text-sm text-content-subtle">{message}</p>
     </div>
+  );
+}
+
+/**
+ * Shown when a load is taking long enough to look broken.
+ *
+ * The server sleeps when nobody has used it for a while, and waking it can
+ * take most of a minute. Saying so is better than a spinner that gives no
+ * reason, because the honest version is only annoying while the silent one
+ * looks like a bug.
+ */
+export function WakingNotice() {
+  return (
+    <p role="status" className="text-sm text-content-subtle">
+      Still going. The server goes to sleep when nobody is using it, so the first load after a
+      break can take up to a minute.
+    </p>
   );
 }
 

@@ -1,13 +1,12 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import SupportFooter from "@/components/SupportFooter";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/lib/AuthContext";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
-import { Emoji } from "@/components/ui";
+import { Emoji, Icon } from "@/components/ui";
 import { routes } from "@/lib/site";
 
 export default function AppLayout() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   useDocumentTitle("Adventure Planner");
 
@@ -22,25 +21,47 @@ export default function AppLayout() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <NavLink
             to={routes.dashboard}
-            className="flex items-center gap-2 text-base font-bold tracking-tight"
+            className="flex shrink-0 items-center gap-2 whitespace-nowrap text-base font-bold tracking-tight"
           >
             <Emoji glyph="🧭" size="lg" />
             Adventure Planner
           </NavLink>
-          <div className="flex items-center gap-2 text-sm">
-            {/* The name is how people expect to reach their account. */}
+          <div className="flex items-center gap-1 text-sm sm:gap-2">
+            <NavLink
+              to={routes.garage}
+              title="Garage"
+              aria-label="Garage"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors hover:bg-surface-overlay hover:text-content"
+            >
+              <Icon name="garage" size={17} />
+            </NavLink>
+            {/*
+              * A person, next to the way out, which is where accounts live
+              * in almost everything else. This is the only route to
+              * settings, so it has to survive every screen size: hiding it
+              * on a phone left no way to delete your account.
+              */}
             <NavLink
               to={routes.settings}
-              className="hidden text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline sm:inline"
+              title="Your account"
+              aria-label="Your account"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors hover:bg-surface-overlay hover:text-content"
             >
-              {user?.name}
+              <Icon name="account" size={17} />
             </NavLink>
-            <ThemeToggle />
+            {/*
+              * The door with an arrow leaving it, which is the one glyph
+              * everybody already reads as "log out". Tinted on hover rather
+              * than boxed, because it is the only control here that ends
+              * something, and that is worth a hint without shouting.
+              */}
             <button
               onClick={handleLogout}
-              className="rounded-md border border-edge px-3 py-1.5 text-content-muted transition-colors hover:border-edge-strong hover:text-content"
+              title="Log out"
+              aria-label="Log out"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-content-muted transition-colors hover:bg-rose-500/10 hover:text-rose-500"
             >
-              Log out
+              <Icon name="logout" size={17} />
             </button>
           </div>
         </nav>

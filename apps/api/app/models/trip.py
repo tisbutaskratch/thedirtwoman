@@ -14,14 +14,17 @@ if TYPE_CHECKING:
     from app.models.attachment import Attachment
     from app.models.backpacking_detail import BackpackingDetail
     from app.models.camping_detail import CampingDetail
+    from app.models.contribution import Contribution
     from app.models.domestic_detail import DomesticDetail
     from app.models.expense import Expense
+    from app.models.gathering_detail import GatheringDetail
     from app.models.gear import Gear
     from app.models.international_detail import InternationalDetail
     from app.models.journal_entry import JournalEntry
     from app.models.location import Location
     from app.models.motocamping_detail import MotocampingDetail
     from app.models.note import Note
+    from app.models.pin import TripPin
     from app.models.overlanding_detail import OverlandingDetail
     from app.models.route import Route
     from app.models.task import Task
@@ -39,6 +42,9 @@ class TripType(str, enum.Enum):
     international = "international"
     # In-country travel by car, rail, or a domestic flight.
     domestic = "domestic"
+    # A holiday or get-together at somebody's house. Everyone brings
+    # something; nobody is packing for range.
+    gathering = "gathering"
 
 
 class Trip(Base):
@@ -109,6 +115,12 @@ class Trip(Base):
     domestic_detail: Mapped[Optional[DomesticDetail]] = relationship(
         back_populates="trip", cascade="all, delete-orphan", uselist=False
     )
+    gathering_detail: Mapped[Optional[GatheringDetail]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan", uselist=False
+    )
+    contributions: Mapped[list[Contribution]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan"
+    )
     collaborators: Mapped[list[TripCollaborator]] = relationship(
         back_populates="trip", cascade="all, delete-orphan"
     )
@@ -116,5 +128,11 @@ class Trip(Base):
         back_populates="trip", cascade="all, delete-orphan"
     )
     invites: Mapped[list[TripInvite]] = relationship(
+        back_populates="trip", cascade="all, delete-orphan"
+    )
+    # Somebody else's pin is their preference, not this trip's data, but the
+    # row still points here: without this, deleting a trip that anyone had
+    # pinned would fail on a foreign key in Postgres.
+    pins: Mapped[list[TripPin]] = relationship(
         back_populates="trip", cascade="all, delete-orphan"
     )

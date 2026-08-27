@@ -70,6 +70,13 @@ class TripDetailUpdate(BaseModel):
 
     # domestic
     travel_mode: Optional[DomesticTravelMode] = None
+
+    # --- Gathering ------------------------------------------------------
+    occasion: Optional[str] = Field(default=None, max_length=255)
+    host_name: Optional[str] = Field(default=None, max_length=255)
+    headcount: Optional[int] = Field(default=None, ge=0)
+    dietary_notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
+    kitchen_notes: Optional[str] = Field(default=None, max_length=LONG_TEXT_MAX)
     booking_ref: Optional[str] = Field(default=None, max_length=100)
     origin: Optional[str] = Field(default=None, max_length=255)
     destination: Optional[str] = Field(default=None, max_length=255)

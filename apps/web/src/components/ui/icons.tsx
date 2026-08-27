@@ -9,6 +9,11 @@
  */
 import {
   Archive,
+  Pin,
+  PinOff,
+  LogOut,
+  UserRound,
+  Warehouse,
   ArrowLeft,
   ArrowUp,
   Check,
@@ -45,6 +50,11 @@ export const Icons = {
   remove: Minus,
   delete: Trash2,
   archive: Archive,
+  pin: Pin,
+  unpin: PinOff,
+  account: UserRound,
+  garage: Warehouse,
+  logout: LogOut,
   back: ArrowLeft,
   toTop: ArrowUp,
   share: Link2,

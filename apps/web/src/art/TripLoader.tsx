@@ -274,6 +274,39 @@ function TrainTraveller({ className }: TravellerProps) {
   );
 }
 
+/**
+ * Somebody hurrying in with a dish, before it goes cold.
+ *
+ * Everything else in this set is a vehicle crossing the frame. A
+ * get-together has no vehicle, so the thing crossing is a person carrying
+ * the casserole, leaning forward the way you do when you are late and the
+ * lid is not quite on.
+ */
+function DishCarrierTraveller({ className }: TravellerProps) {
+  return (
+    <g className={className}>
+      {/* legs, mid-stride */}
+      <path d="M34 56 L38 44 L44 56" stroke="currentColor" strokeWidth={S} />
+      {/* body, leaning into the walk */}
+      <path d="M38 44 L42 28" stroke="currentColor" strokeWidth={S} />
+      {/* head */}
+      <circle cx="44" cy="24" r="5" stroke="currentColor" strokeWidth={S}
+        fill="currentColor" fillOpacity="0.14" />
+      {/* both arms out front, holding the dish level */}
+      <path d="M41 32 L52 30" stroke="currentColor" strokeWidth={S} />
+      <path d="M40 36 L52 33" stroke="currentColor" strokeWidth={S} />
+      {/* the dish: platter, domed lid, knob */}
+      <path d="M50 32 L66 32" stroke="currentColor" strokeWidth={S} />
+      <path d="M52 32 A6 6 0 0 1 64 32 Z" stroke="currentColor" strokeWidth="1.4"
+        fill="currentColor" fillOpacity="0.16" />
+      <path d="M58 26 L58 24" stroke="currentColor" strokeWidth="1.2" />
+      {/* steam, trailing back the way they came */}
+      <path d="M56 21 C56 19, 53 19, 53 17" stroke="currentColor" strokeWidth="1.1" opacity="0.7" />
+      <path d="M61 21 C61 19, 58 19, 58 17" stroke="currentColor" strokeWidth="1" opacity="0.45" />
+    </g>
+  );
+}
+
 const TRAVELLERS: Record<TripType, (p: TravellerProps) => JSX.Element> = {
   motocamping: CatChaseTraveller,
   camping: BearTraveller,
@@ -281,6 +314,7 @@ const TRAVELLERS: Record<TripType, (p: TravellerProps) => JSX.Element> = {
   backpacking: HikerTraveller,
   international: SuitcaseTraveller,
   domestic: TrainTraveller,
+  gathering: DishCarrierTraveller,
 };
 
 const TONE_TEXT: Record<string, string> = {
@@ -290,6 +324,7 @@ const TONE_TEXT: Record<string, string> = {
   violet: "text-violet-400",
   sky: "text-sky-400",
   fuchsia: "text-fuchsia-400",
+  orange: "text-orange-400",
 };
 
 export default function TripLoader({ type }: { type: TripType }) {

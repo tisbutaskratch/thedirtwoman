@@ -3,6 +3,8 @@ import { listCollaborators } from "@/api/sharing";
 import { createTask, deleteTask, listTasks, updateTask } from "@/api/tasks";
 import type { Collaborator, RequiredLevel, Task } from "@/api/types";
 import { AddForm, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { suggestTaskTitles } from "@/api/suggestions";
+import { useSuggestions } from "@/lib/useSuggestions";
 import AssigneeSelect from "@/components/trip/AssigneeSelect";
 import RequiredLevelChip from "@/components/trip/RequiredLevelChip";
 import { assigneeValue, assignmentPayload } from "@/lib/assignment";
@@ -25,6 +27,8 @@ export default function TasksSection({
   const [roster, setRoster] = useState<Collaborator[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [title, setTitle] = useState("");
+  // The chores that come up on every trip, offered rather than retyped.
+  const pastTitles = useSuggestions("tasks", suggestTaskTitles);
   const [assignedTo, setAssignedTo] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [requiredLevel, setRequiredLevel] = useState<RequiredLevel>("required");
@@ -115,11 +119,17 @@ export default function TasksSection({
           <input
             type="text"
             autoFocus
+            list="task-titles"
             placeholder="Task (e.g. book campsite)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={inputClass}
           />
+          <datalist id="task-titles">
+            {pastTitles.map((t) => (
+              <option key={t} value={t} />
+            ))}
+          </datalist>
           {/* Grid tracks rather than flex-1: the inputs are w-full, so the
               track is what decides their width. */}
           <div className="grid gap-2 sm:grid-cols-[8rem_minmax(0,1fr)_minmax(0,1fr)]">

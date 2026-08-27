@@ -4,7 +4,8 @@ export type TripType =
   | "overlanding"
   | "backpacking"
   | "international"
-  | "domestic";
+  | "domestic"
+  | "gathering";
 
 /** Access level someone has on a trip. */
 export type TripRole = "editor" | "viewer";
@@ -204,6 +205,148 @@ export interface GearUpdate {
   assigned_to_all?: boolean;
   notes?: string | null;
 }
+
+/** What somebody is bringing to a get-together. */
+export type ContributionKind = "food" | "drink" | "dessert" | "game" | "supplies" | "other";
+
+export interface Contribution {
+  id: number;
+  trip_id: number;
+  name: string;
+  kind: ContributionKind;
+  /** Day 1 is the first day. Null means nobody has picked a day yet. */
+  day_index: number | null;
+  assigned_to_user_id: number | null;
+  assigned_to_all: boolean;
+  serves: number | null;
+  confirmed: boolean;
+  notes: string | null;
+}
+
+export interface ContributionCreate {
+  name: string;
+  kind?: ContributionKind;
+  day_index?: number | null;
+  assigned_to_user_id?: number | null;
+  assigned_to_all?: boolean;
+  serves?: number | null;
+  confirmed?: boolean;
+  notes?: string | null;
+}
+
+export interface ContributionUpdate {
+  name?: string;
+  kind?: ContributionKind;
+  day_index?: number | null;
+  assigned_to_user_id?: number | null;
+  assigned_to_all?: boolean;
+  serves?: number | null;
+  confirmed?: boolean;
+  notes?: string | null;
+}
+
+/** What sort of vehicle a rig is, which mostly decides its icon. */
+export type RigKind = "motorcycle" | "truck" | "suv" | "van" | "car" | "other";
+
+/**
+ * A vehicle you own. Yours alone, and not attached to any trip: bringing a
+ * rig on a trip copies its name and range onto the trip rather than linking
+ * to it, so selling the truck never rewrites last autumn.
+ */
+export interface Rig {
+  id: number;
+  user_id: number;
+  name: string;
+  kind: RigKind;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  fuel_capacity_gal: number | null;
+  fuel_economy_mpg: number | null;
+  ground_clearance_in: number | null;
+  tire_size: string | null;
+  drivetrain: string | null;
+  notes: string | null;
+  /** "2019 Toyota Tacoma", or null when none of those were filled in. */
+  description: string | null;
+  /** Full tank to empty, derated for real-world mileage. */
+  est_range_miles: number | null;
+}
+
+export interface RigCreate {
+  name: string;
+  kind?: RigKind;
+  make?: string | null;
+  model?: string | null;
+  year?: number | null;
+  fuel_capacity_gal?: number | null;
+  fuel_economy_mpg?: number | null;
+  ground_clearance_in?: number | null;
+  tire_size?: string | null;
+  drivetrain?: string | null;
+  notes?: string | null;
+}
+
+export type RigUpdate = Partial<RigCreate>;
+
+/** One thing in a kit. Reached through its kit, never on its own. */
+export interface KitItem {
+  id: number;
+  kit_id: number;
+  name: string;
+  quantity: number;
+  notes: string | null;
+}
+
+export interface KitItemCreate {
+  name: string;
+  quantity?: number;
+  notes?: string | null;
+}
+
+export type KitItemUpdate = Partial<KitItemCreate>;
+
+/**
+ * A named set of things you keep packed, yours alone. Deliberately not
+ * about tools: a camp kitchen, a carry-on and a first aid kit are the same
+ * shape as a trailside repair kit.
+ */
+export interface Kit {
+  id: number;
+  user_id: number;
+  name: string;
+  notes: string | null;
+  items: KitItem[];
+}
+
+export interface KitCreate {
+  name: string;
+  notes?: string | null;
+}
+
+export type KitUpdate = Partial<KitCreate>;
+
+/** What happened when a bag was emptied onto a packing list. */
+export interface PackedKit {
+  added: number;
+  skipped: number;
+  gear: Gear[];
+}
+
+/** Parts of a trip page that can be pinned to the top. Mirrors the API enum. */
+export type SectionKey =
+  | "members"
+  | "timeline"
+  | "files"
+  | "contributions"
+  | "packing"
+  | "tasks"
+  | "expenses"
+  | "locations"
+  | "notes"
+  | "journal"
+  | "photos"
+  | "assignments";
 
 export interface Note {
   id: number;

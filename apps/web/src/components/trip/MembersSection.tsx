@@ -12,6 +12,7 @@ import {
 import { ApiError } from "@/api/client";
 import type { Collaborator, PendingMember, TripRole } from "@/api/types";
 import { AddForm, Badge, Emoji, EmptyHint, IconButton, Section, inputClass } from "@/components/ui";
+import RigPicker from "@/components/trip/RigPicker";
 import { SECTION_META } from "@/lib/tripTypes";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -284,7 +285,17 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
                 </div>
 
                 {isMe && editingBike ? (
-                  <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_auto_auto] items-center gap-1">
+                  <div className="flex flex-col gap-1">
+                  <RigPicker
+                    className={`${inputClass} py-1 text-xs`}
+                    onPick={(rig) => {
+                      setVehicleDraft(rig.name);
+                      setRangeDraft(
+                        rig.est_range_miles === null ? "" : String(rig.est_range_miles),
+                      );
+                    }}
+                  />
+                  <div className="grid grid-cols-[minmax(0,1fr)_4.75rem_auto_auto] items-center gap-1">
                     <input
                       type="text"
                       autoFocus
@@ -313,6 +324,7 @@ export default function MembersSection({ tripId, isOwner }: { tripId: number; is
                       title="Cancel"
                       icon="close"
                     />
+                  </div>
                   </div>
                 ) : isMe ? (
                   <button

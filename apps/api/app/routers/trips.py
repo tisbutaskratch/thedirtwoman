@@ -14,6 +14,7 @@ from app.db.session import get_db
 from app.models.backpacking_detail import BackpackingDetail
 from app.models.camping_detail import CampingDetail
 from app.models.domestic_detail import DomesticDetail
+from app.models.gathering_detail import GatheringDetail
 from app.models.international_detail import InternationalDetail
 from app.models.motocamping_detail import MotocampingDetail
 from app.models.overlanding_detail import OverlandingDetail
@@ -33,6 +34,7 @@ _DETAIL_MODEL_BY_TYPE = {
     TripType.camping: CampingDetail,
     TripType.international: InternationalDetail,
     TripType.domestic: DomesticDetail,
+    TripType.gathering: GatheringDetail,
 }
 
 

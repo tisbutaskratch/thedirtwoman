@@ -3,6 +3,10 @@ import { listCollaborators } from "@/api/sharing";
 import { createGear, deleteGear, listGear, updateGear } from "@/api/trips";
 import type { Collaborator, Gear, GearRequiredLevel } from "@/api/types";
 import { AddForm, Emoji, EmptyState, IconButton, Section, inputClass } from "@/components/ui";
+import { suggestGearCategories, suggestGearNames } from "@/api/suggestions";
+import { listKits, packKitOntoTrip } from "@/api/kits";
+import type { Kit } from "@/api/types";
+import { useSuggestions } from "@/lib/useSuggestions";
 import AssigneeSelect from "@/components/trip/AssigneeSelect";
 import RequiredLevelChip, {
   REQUIRED_LEVELS,
@@ -47,6 +51,10 @@ export default function GearSection({
   const [showAdd, setShowAdd] = useState(false);
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
+  // What you packed on other trips, so the things you always bring are a
+  // keystroke away instead of retyped every time.
+  const pastNames = useSuggestions("gear", suggestGearNames);
+  const pastCategories = useSuggestions("gear-categories", suggestGearCategories);
   const [weightOz, setWeightOz] = useState("");
   const [requiredLevel, setRequiredLevel] = useState<GearRequiredLevel>("required");
   const [assignedTo, setAssignedTo] = useState("");
@@ -54,6 +62,39 @@ export default function GearSection({
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  /*
+   * Bags from the garage. Loaded once so the picker can appear without a
+   * click, and hidden entirely when there are none: an empty dropdown
+   * teaches nobody that the feature exists.
+   */
+  const [kits, setKits] = useState<Kit[]>([]);
+  const [packing, setPacking] = useState(false);
+  const [packNotice, setPackNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    listKits().then(setKits).catch(() => setKits([]));
+  }, []);
+
+  async function handlePackKit(kitId: number) {
+    const kit = kits.find((b) => b.id === kitId);
+    if (!kit) return;
+    setPacking(true);
+    try {
+      const result = await packKitOntoTrip(tripId, kitId);
+      // Saying what happened matters most on the second press, when the
+      // honest answer is that everything was already here.
+      setPackNotice(
+        result.added === 0
+          ? `${kit.name} is already on the list.`
+          : `Added ${result.added} from ${kit.name}` +
+            (result.skipped > 0 ? `, ${result.skipped} already there.` : "."),
+      );
+      refresh();
+      onChange?.();
+    } finally {
+      setPacking(false);
+    }
+  }
 
   function refresh() {
     listGear(tripId).then(setGear);
@@ -137,20 +178,53 @@ export default function GearSection({
       count={gear.length}
       meta={gear.length > 0 ? `${packedCount} packed · ${(totalOz / 16).toFixed(1)} lb` : undefined}
       actions={
-        !showAdd && <IconButton onClick={() => setShowAdd(true)} title="Add gear" icon="add" />
+        <div className="flex items-center gap-1.5">
+          {kits.length > 0 && (
+            <select
+              aria-label="Pack a kit from your garage"
+              value=""
+              disabled={packing}
+              onChange={(e) => {
+                if (e.target.value) handlePackKit(Number(e.target.value));
+              }}
+              className={`${inputClass} w-auto py-1 text-xs`}
+            >
+              <option value="">Pack a kit…</option>
+              {kits.map((kit) => (
+                <option key={kit.id} value={kit.id}>
+                  {kit.name} ({kit.items.length})
+                </option>
+              ))}
+            </select>
+          )}
+          {!showAdd && (
+            <IconButton onClick={() => setShowAdd(true)} title="Add gear" icon="add" />
+          )}
+        </div>
       }
     >
+      {packNotice && (
+        <p className="text-xs text-content-subtle" role="status">
+          {packNotice}
+        </p>
+      )}
       {showAdd && (
         <AddForm onSubmit={handleSubmit} onClose={() => setShowAdd(false)} submitting={submitting}>
           <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_10rem_5rem]">
             <input
               type="text"
               autoFocus
+              list="gear-names"
               placeholder="Gear item"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className={inputClass}
             />
+            <datalist id="gear-names">
+              {pastNames.map((n) => (
+                <option key={n} value={n} />
+              ))}
+            </datalist>
             <input
               type="text"
               list="gear-categories"
@@ -160,11 +234,14 @@ export default function GearSection({
               className={inputClass}
             />
             <datalist id="gear-categories">
-              {categories
-                .filter((c) => c !== UNCATEGORIZED)
-                .map((c) => (
-                  <option key={c} value={c} />
-                ))}
+              {Array.from(
+                new Set([
+                  ...categories.filter((c) => c !== UNCATEGORIZED),
+                  ...pastCategories,
+                ]),
+              ).map((c) => (
+                <option key={c} value={c} />
+              ))}
             </datalist>
             <input
               type="number"
