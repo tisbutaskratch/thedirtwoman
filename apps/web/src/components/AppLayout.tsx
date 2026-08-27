@@ -28,17 +28,14 @@ export default function AppLayout() {
             Adventure Planner
           </NavLink>
           <div className="flex items-center gap-2 text-sm">
-            {/* Thin rules rather than gaps, so the nav reads as separate
-                things instead of one run-on row. */}
-            <span aria-hidden className="text-edge">
-              |
-            </span>
             <NavLink
               to={routes.garage}
               className="text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline"
             >
               Garage
             </NavLink>
+            {/* A rule between the two links, and nothing at either end: a
+                separator needs something on both sides of it to separate. */}
             <span aria-hidden className="text-edge">
               |
             </span>
