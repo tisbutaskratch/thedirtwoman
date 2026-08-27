@@ -1,44 +1,39 @@
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import type { SectionKey } from "@/api/types";
-import { Icon } from "@/components/ui";
+import { SectionPinContext } from "@/lib/sectionPin";
 
 /**
- * A section, with a control for keeping it at the top.
+ * Makes one section pinnable.
  *
- * A wrapper rather than a prop on every section, because there are a dozen
- * sections written by hand over months and threading pinning through all of
- * them would mean editing all of them, forever, every time this changes.
- *
- * The control stays invisible until the section is hovered or focused, so a
- * page of twelve sections is not also a page of twelve pins.
+ * The control itself is rendered by SectionHeader, in the row of buttons it
+ * already lays out. This only supplies it, by context, so that a dozen
+ * sections written before pinning existed did not all have to change.
  */
 export default function SectionFrame({
   section,
+  label,
   pinned,
   onToggle,
   children,
 }: {
   section: SectionKey;
+  /** Human name of the section, for the button's tooltip. */
+  label: string;
   pinned: boolean;
   onToggle: () => void;
   children: ReactNode;
 }) {
+  const value = useMemo(
+    () => ({
+      pinned,
+      onToggle,
+      label: pinned ? `Unpin ${label}` : `Pin ${label} to the top`,
+    }),
+    [pinned, onToggle, label],
+  );
   return (
-    <div className="group/frame relative">
-      <button
-        type="button"
-        onClick={onToggle}
-        title={pinned ? `Unpin ${section}` : `Pin ${section} to the top`}
-        aria-pressed={pinned}
-        className={`absolute -top-1 right-0 z-10 rounded-full p-1.5 transition-colors ${
-          pinned
-            ? "text-accent"
-            : "text-content-subtle opacity-0 hover:text-content focus-visible:opacity-100 group-hover/frame:opacity-100"
-        }`}
-      >
-        <Icon name={pinned ? "unpin" : "pin"} size={14} />
-      </button>
-      {children}
-    </div>
+    <SectionPinContext.Provider value={value}>
+      <div key={section}>{children}</div>
+    </SectionPinContext.Provider>
   );
 }

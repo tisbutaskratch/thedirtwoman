@@ -293,10 +293,28 @@ export default function TripDetail() {
     const present = (key: SectionKey) => nodes[key] !== undefined;
     const pinnedKeys = pinnedSections.filter(present);
 
+    // Tooltip wording, so "Pin packing to the top" reads like the section
+    // people are looking at rather than like a database key.
+    const LABELS: Record<SectionKey, string> = {
+      members: "the crew",
+      timeline: "the timeline",
+      files: "files",
+      contributions: "who's bringing what",
+      packing: "the packing list",
+      tasks: "the prep checklist",
+      expenses: "expenses",
+      locations: "locations",
+      notes: "notes",
+      journal: "the journal",
+      photos: "screenshots",
+      assignments: "who's doing what",
+    };
+
     const wrap = (key: SectionKey) => (
       <SectionFrame
         key={key}
         section={key}
+        label={LABELS[key]}
         pinned={pinnedSections.includes(key)}
         onToggle={() => toggleSection(key)}
       >
