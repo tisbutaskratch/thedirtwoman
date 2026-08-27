@@ -67,15 +67,17 @@ export default function Home() {
           className="absolute right-5 top-5 hidden text-accent opacity-100 sm:block"
         />
         <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
-          Why an engineering manager went back to being an engineer
+          What I have been building since going back to engineering
         </h2>
         <p className="mt-3 max-w-3xl text-base leading-relaxed text-content-muted">
-          I managed engineers for nearly three years. I also noticed that
-          the parts of the job I looked forward to were always the technical ones. So I went back to
-          building. I kept the manager's habits: I still think about scope and risk early, and I
-          still write things down for the people who need to sign off. Since coming back I have
-          owned the architecture on a customer-facing feature end to end and led a migration across
-          three legacy integrations.
+          I shipped Carrier Choice, which lets EU and UK shoppers pick their own return carrier. I
+          automated Ship By Loop merchant onboarding against Salesforce. I carried three legacy
+          integrations onto a platform I did not previously own. Right now I am leading a migration
+          of every merchant off per-carrier hardcoded label fields onto a provider-agnostic
+          capability model. Before this I managed engineers for two and a half years. I was decent
+          at it, and I missed the work itself, the design docs and the code review and being the
+          person who builds the thing. I kept the habits worth keeping, which mostly means writing
+          things down and telling people before they have to ask.
         </p>
         <Link
           to="/about"

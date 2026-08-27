@@ -250,6 +250,23 @@ export function EmptyState({ glyph, message }: { glyph: string; message: string 
 }
 
 /**
+ * Shown when a load is taking long enough to look broken.
+ *
+ * The server sleeps when nobody has used it for a while, and waking it can
+ * take most of a minute. Saying so is better than a spinner that gives no
+ * reason, because the honest version is only annoying while the silent one
+ * looks like a bug.
+ */
+export function WakingNotice() {
+  return (
+    <p role="status" className="text-sm text-content-subtle">
+      Still going. The server goes to sleep when nobody is using it, so the first load after a
+      break can take up to a minute.
+    </p>
+  );
+}
+
+/**
  * Placeholder for an empty cell. Deliberately a word rather than a dash,
  * because a "–" sitting in a table reads as the remove control.
  */

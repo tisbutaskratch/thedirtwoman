@@ -1,7 +1,7 @@
 /*
  * Real content for the personal site.
  *
- * Sourced from the 2025-2026 work retrospective and the three resume
+ * Sourced from the 2025-2026 work retrospective and the tailored resume
  * variants. Two things this data deliberately gets right that the PDFs
  * don't, because the PDFs are stale:
  *
@@ -21,21 +21,22 @@ export const profile = {
   tagline: "I like hard problems and code you can build on.",
   location: "Kansas City, MO · Remote",
   summary:
-    "I'm a software engineer at Loop Returns, on the shipping and logistics team. Carrier integrations, label generation, the part of a return that gets a package back to a warehouse. Before this I managed engineers for nearly three years, then went back to building, because that's the work I actually like doing.",
+    "I'm a software engineer at Loop Returns, on the shipping and logistics team. Carrier integrations, label generation, the part of a return that gets a package back to a warehouse. Before this I managed engineers for two and a half years, then went back to building, because that's the work I actually like doing.",
 };
 
 /** The one-liner a recruiter should leave with. */
 export const positioning =
-  "Ten years of production software, nearly three of them managing. I design before I build, ship in pieces small enough to undo, and stay on the hook when something breaks.";
+  "Ten years of production software, two and a half of them managing. I own the architecture for carrier integrations and label generation at Loop Returns. I design at the boundaries first: what a module is allowed to know, what it must never depend on, and where the seam goes so a vendor can be swapped without the domain noticing. I ship in slices small enough to undo and stay on the hook when something breaks.";
 
 export const about = {
   paragraphs: [
     "I like working on things that actually affect people, with people who know things I don't. And I care about helping people grow, which is most of why I enjoyed managing.",
     "At Loop I work on the shipping side of returns. My team owns carrier integrations and label generation, so when you send something back, we're the part that works out how it physically gets there.",
     "I started at Cerner in 2016 writing healthcare software. Nursing workflows, infusion pump interfaces, medication charting. You learn to be careful fast when a bug shows up in someone's chart.",
-    "I joined Loop as an engineer, moved into a tech lead role, then managed for nearly three years across three product areas. I ran the hackathons, set up a mentorship program that got four junior engineers promoted ahead of schedule, and held our area at 99.99% uptime.",
+    "I joined Loop as an engineer, moved into a tech lead role, then managed for two and a half years across three product areas. I ran the hackathons, set up a mentorship program that got four junior engineers promoted ahead of schedule, and held our area at 99.99% uptime.",
     "Then I went back to engineering. The parts of managing I looked forward to were always the technical ones, and I missed being close to the thing being built. It's a different job that happens to sit near code.",
-    "Since coming back I've designed a carrier-choice system end to end and led a migration off three legacy integrations. I still plan and communicate like someone who has had to defend a roadmap, which turns out to be useful.",
+    "Since coming back I've designed Carrier Choice end to end, automated merchant onboarding against Salesforce, carried three legacy integrations onto a platform I didn't own, and I'm now leading every merchant off hardcoded per-carrier label fields onto a capability model. I still plan and communicate like someone who has had to defend a roadmap, which turns out to be useful.",
+    "The way I build: I design at the boundaries first, deciding what a module is allowed to know, what it must never depend on, and where the seam goes so a vendor can be swapped without the domain noticing. The business rules live in plain, testable domain classes, with the framework at the edge as an adapter. The design gets written before the code, with the alternatives I rejected recorded alongside it, so whoever picks the module up inherits the reasoning and not just the result.",
     "I write the design down before I write the code. I ship behind flags and then go back and delete them. When I pick one approach over another I say why, so nobody has to guess a year later. I stay on my own bugs. And when something turns out not to be my bug, I prove it before handing it over.",
   ],
 };
@@ -58,22 +59,27 @@ export interface Role {
 
 export const roles: Role[] = [
   {
-    title: "Software Engineer",
+    title: "Software Engineer, Shipping and Logistics",
     company: "Loop Returns",
     location: "Remote · Kansas City, MO",
     start: "Jul 2025",
     end: "Present",
     current: true,
     summary:
-      "Carrier integrations, label generation, and the shipping side of returns. I own the architecture on a customer-facing feature and on a platform migration, and I take support rotation for everything I ship.",
+      "Carrier integrations and label generation, end to end: the domain modules, the third-party API clients, the admin interfaces merchants configure them through, and the support rotation for all of it.",
     highlights: [
-      "Designed and built Carrier Choice, letting EU and UK shoppers pick their own return carrier. I wrote the provider-agnostic interface a year before the build started, and it went through a PRD, a formal spec, and implementation without needing to change.",
-      "Built it as a four-layer domain module shipped one layer per merge request, with observability split into three separately releasable changes so a metrics bug could never be mistaken for a behaviour regression.",
-      "Led the Nucleus to Synks migration, consolidating three legacy 3PL and warehouse integrations off an aging Node layer. Authored the execution plan, sequenced by risk, not by size, and went on site to pair with the engineer who originally wrote the platform.",
+      "Designed and built Carrier Choice, letting EU and UK shoppers pick their own return carrier. The plan for it had gone stale in the time before we picked it up, so I reworked it onto our current module architecture and design principles, sequenced the delivery, and we shipped on time.",
+      "Built it as a four-layer domain module with commands and queries separated, shipped one layer per merge request, with observability split into three separately releasable changes so a metrics bug could never be mistaken for a behaviour regression.",
+      "Leading Native Label Customizations, replacing per-carrier hardcoded label fields with a provider-agnostic capability model across every merchant. Built a dual-write parity harness that runs the legacy and new paths side by side against real shipments, so the cutover is verified rather than trusted. It caught two silent data-loss bugs, a dropped hazmat field and four carrier records the dual write was skipping, before a single merchant moved.",
+      "Sequenced the backfill lowest-volume-merchant first, with the rollback path proven before the forward one is trusted, and cut scope to the two phases that actually unblocked the dependent billing work.",
+      "Owned Ship By Loop auto-onboarding, my first epic, start to finish: merchant accounts are now created automatically at plan assignment, pulling billing and relationship-owner data straight from Salesforce instead of waiting on a person. Modelled account ownership as a domain entity and put the Salesforce dependency behind a service contract rather than calling it inline, then moved creation onto a queued listener once I saw that doing it synchronously put a third-party call in the signup path.",
+      "Carried the Nucleus to Synks migration, moving three legacy 3PL and ERP integrations (RLM, BlueCherry and ShipHero) off an aging Node serverless layer onto a platform I did not previously own. Authored the execution plan before any migration code, sequenced to pilot the least volatile integration first, and went on site to pair with the platform's original author. Then wrote its coding standards and per-integration documentation, and added the local tooling that let it run alongside our core services.",
       "Designed a Strategy-pattern destination rules engine, then argued that shipping shouldn't own destinations at all. That got pushback. I made the case anyway and handed the domain to the team it belonged to.",
-      "Root-caused a partner bug that was clawing back real customer money. It came down to a redundant API call that had been sitting there since 2021. A second, similar-looking bug turned out not to be ours, so I proved that and handed the other team something they could act on.",
+      "Root-caused a partner bug that was clawing back real customer money. It came down to a redundant API call that had been sitting there since 2021. A second, similar-looking bug turned out not to be ours, so I proved that and handed the other team something they could act on. I work directly with EasyPost's and Sendcloud's support engineers rather than through account management.",
       "Remediated roughly 37,800 shipping labels in one campaign, reworked into batched, rate-limit-aware jobs with a status doc so stakeholders could follow along without asking.",
       "Ran the release train end to end and led a carrier incident through investigation, comms, and a completed root-cause analysis.",
+      "Designed a Claude-based PDF-diff agent that flags label rendering changes during the live migration, reusing a technique from earlier library testing: a deliberately temporary QA layer, switched off once quality is confirmed, rather than permanent manual review or trusting a brittle automated match. The surrounding practice matters more than the agent: design and context documents committed alongside the code, so the tooling and the next engineer read the same current state rather than a stale session history.",
+      "Teach the team's hexagonal architecture conventions in a recurring internal session, onboarded a contractor who was working independently after one walkthrough, and interview candidates on final-round system design panels.",
     ],
     tags: ["PHP / Laravel", "Domain-driven design", "Carrier APIs", "Architecture", "Incident response"],
   },
@@ -194,7 +200,6 @@ export const skills: SkillGroup[] = [
       "JavaScript",
       "Python",
       "Java",
-      "Swift / iOS",
       "SQL",
       "HTML",
       "CSS",
@@ -226,13 +231,26 @@ export const skills: SkillGroup[] = [
       "CQRS",
       "SOLID principles",
       "Event-driven architecture",
-      "Ports and adapters",
+      "Hexagonal architecture (ports and adapters)",
+      "Microservices",
+      "System design",
       "Strategy pattern",
       "Factory pattern",
       "Adapter pattern",
       "Capability interfaces",
       "Enforced module boundaries",
       "Design docs and ADRs",
+    ],
+  },
+  {
+    category: "AI tooling",
+    glyph: "🤖",
+    items: [
+      "Claude Code",
+      "Agent orchestration",
+      "In-repo context and design docs",
+      "Purpose-built verification agents",
+      "Opus for design, Sonnet for execution",
     ],
   },
   {
@@ -244,6 +262,7 @@ export const skills: SkillGroup[] = [
       "SOAP",
       "Webhooks",
       "API versioning",
+      "API design",
       "Contract design",
       "Backward compatibility",
       "EasyPost",
@@ -392,6 +411,10 @@ export const projects: Project[] = [
       "Vitest",
       "Pytest",
       "Docker",
+      "Render",
+      "Netlify",
+      "Cloudflare R2",
+      "Rate limiting",
     ],
   },
   {
@@ -400,9 +423,9 @@ export const projects: Project[] = [
     period: "2025 - 2026",
     status: "Shipped",
     description:
-      "Let EU and UK shoppers choose their own return carrier instead of having one picked for them. A provider-agnostic domain interface designed a full year before the build, then formalised into a four-layer module shipped one layer at a time.",
+      "Let EU and UK shoppers choose their own return carrier instead of having one picked for them. The plan had gone stale before we picked it up, so I reworked it onto our current architecture and design principles, then formalised it into a four-layer module with commands and queries separated, shipped one layer at a time.",
     outcome:
-      "Unblocked merchant launches that had been waiting on it. The original interface never needed to change.",
+      "Unblocked merchant launches that had been waiting on it, and we hit the delivery date.",
     tags: ["Domain-driven design", "Sendcloud", "InPost", "Observability"],
   },
   {
@@ -411,9 +434,9 @@ export const projects: Project[] = [
     period: "2025 - present",
     status: "In flight",
     description:
-      "Consolidating three legacy 3PL and warehouse integrations off an aging Node integration layer onto a newer platform. Sequenced by risk, not size. We piloted on the least volatile integration first, and fixed known debt on the way across so we weren't just moving it.",
+      "Moving three legacy 3PL and ERP integrations (RLM, BlueCherry and ShipHero) off an aging Node serverless layer onto a newer platform. Sequenced by risk, not size. We piloted on the least volatile integration first, and fixed known debt on the way across so we weren't just moving it.",
     outcome:
-      "I did not own this system before and now I am the one documenting and standardising it.",
+      "I did not own this system before. I wrote its coding standards, the per-integration documentation, and the local tooling that lets it run alongside our core services.",
     tags: ["Migration", "SOAP / REST / GraphQL", "Integration platforms"],
   },
   {
@@ -422,10 +445,10 @@ export const projects: Project[] = [
     period: "2025 - present",
     status: "In flight",
     description:
-      "Replacing per-carrier hardcoded label fields with a provider-agnostic customization model. Ran a discovery and audit phase before writing any schema, and published a written library assessment with a reproducible test harness before committing to a build.",
+      "Moving every merchant off per-carrier hardcoded label fields onto a provider-agnostic capability model, so the system reasons about what a provider can do instead of hardcoding what each one happens to want. Discovery and audit came before any schema, and a written library assessment with a reproducible test harness came before committing to a build. I required a security review and self-hosting over a hosted renderer before adopting any third-party label library, because these labels carry customer data.",
     outcome:
-      "Required a formal security review before adopting any third-party label library, and self-hosting over a hosted renderer, because these labels carry customer data.",
-    tags: ["Schema design", "Security review", "ZPL", "Capability framework"],
+      "The dual-write parity harness caught two silent data-loss bugs before a single merchant moved. Backfill runs lowest-volume-merchant first, with the rollback path proven before the forward one is trusted.",
+    tags: ["Schema design", "Parity harness", "Security review", "ZPL", "Capability framework"],
   },
   {
     title: "In-Store Returns iPad App",
@@ -466,7 +489,7 @@ export const competencies: Competency[] = [
     glyph: "📐",
     meaning: "Owning the architecture of a real slice of the system, not just the tickets inside it.",
     evidence: [
-      "Designed the Carrier Choice interface a full year before the build, and it never needed to change through a PRD, a formal spec, and implementation.",
+      "Took a Carrier Choice plan that had gone stale, reworked it onto our current architecture and design principles, sequenced the delivery, and shipped on time.",
       "Owns two domain modules end to end, each built layer by layer, with boundaries the tooling enforces so nobody has to remember them.",
       "Caught an architectural violation mid-build and went back and fixed the foundation before building on top of it.",
     ],
