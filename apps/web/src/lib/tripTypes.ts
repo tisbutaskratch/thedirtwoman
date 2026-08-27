@@ -48,6 +48,11 @@ export const TRIP_TYPE_META: Record<
     tone: "fuchsia",
     blurb: "Car, rail, or a short flight",
   },
+  gathering: {
+    label: "Get-together",
+    tone: "orange",
+    blurb: "Everyone brings something",
+  },
 };
 
 export const TRIP_TYPES: TripType[] = [
@@ -57,6 +62,7 @@ export const TRIP_TYPES: TripType[] = [
   "backpacking",
   "domestic",
   "international",
+  "gathering",
 ];
 
 /** Consistent glyph + hue per trip section, reused across the whole app. */

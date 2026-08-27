@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ApiError } from "@/api/client";
 import { emailTripCalendar, type CalendarRecipients } from "@/api/calendar";
@@ -9,6 +9,8 @@ import ActivitiesSection from "@/components/trip/ActivitiesSection";
 import AssignmentsSection from "@/components/trip/AssignmentsSection";
 import ExpensesSection from "@/components/trip/ExpensesSection";
 import FilesSection from "@/components/trip/FilesSection";
+import ContributionsSection from "@/components/trip/ContributionsSection";
+import SectionFrame from "@/components/trip/SectionFrame";
 import GearSection from "@/components/trip/GearSection";
 import JournalSection from "@/components/trip/JournalSection";
 import LocationsSection from "@/components/trip/LocationsSection";
@@ -16,7 +18,15 @@ import MembersSection from "@/components/trip/MembersSection";
 import NotesSection from "@/components/trip/NotesSection";
 import PhotosSection from "@/components/trip/PhotosSection";
 import TasksSection from "@/components/trip/TasksSection";
-import { Badge, ConfirmDialog, Icon, IconButton, TONE_SOFT, inputClass } from "@/components/ui";
+import {
+  Badge,
+  ConfirmDialog,
+  Icon,
+  IconButton,
+  TONE_SOFT,
+  WakingNotice,
+  inputClass,
+} from "@/components/ui";
 import { useAuth } from "@/lib/AuthContext";
 import TripBackdrop from "@/art/TripBackdrop";
 import TripLoader from "@/art/TripLoader";
@@ -25,9 +35,13 @@ import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import BackpackingPanel from "@/modes/backpacking/BackpackingPanel";
 import CampingPanel from "@/modes/camping/CampingPanel";
 import DomesticPanel from "@/modes/domestic/DomesticPanel";
+import GatheringPanel from "@/modes/gathering/GatheringPanel";
 import InternationalPanel from "@/modes/international/InternationalPanel";
 import OverlandingPanel from "@/modes/overlanding/OverlandingPanel";
 import { routes } from "@/lib/site";
+import { useSlowLoad } from "@/lib/useSlowLoad";
+import { listPinnedSections, pinSection, unpinSection } from "@/api/pins";
+import type { SectionKey } from "@/api/types";
 
 function formatRange(start: string | null, end: string | null) {
   if (!start && !end) return "No dates set";
@@ -99,6 +113,48 @@ export default function TripDetail() {
   // they share one button and a small menu.
   const [calendarMenuOpen, setCalendarMenuOpen] = useState(false);
   const [calendarNotice, setCalendarNotice] = useState<string | null>(null);
+  // The opener finishing is not the same as the trip arriving; only the
+  // fetch itself is worth explaining a long wait for.
+  const waking = useSlowLoad(trip === null && error === null);
+  /*
+   * Sections this person keeps at the top, on every trip rather than this
+   * one. "I always look at the packing list first" is a fact about how
+   * somebody uses the app, not about one holiday.
+   */
+  const [pinnedSections, setPinnedSections] = useState<SectionKey[]>([]);
+
+  useEffect(() => {
+    listPinnedSections()
+      .then(setPinnedSections)
+      .catch(() => setPinnedSections([]));
+  }, []);
+
+  async function toggleSection(section: SectionKey) {
+    const isPinned = pinnedSections.includes(section);
+    // Optimistic: reordering your own page should not wait on a round trip.
+    setPinnedSections((current) =>
+      isPinned ? current.filter((s) => s !== section) : [...current, section],
+    );
+    try {
+      await (isPinned ? unpinSection(section) : pinSection(section));
+    } catch {
+      setPinnedSections((current) =>
+        isPinned ? [...current, section] : current.filter((s) => s !== section),
+      );
+    }
+  }
+  /*
+   * How many days the trip runs, so day pickers offer real days instead of
+   * an open-ended number box. Computed before the early return below,
+   * because hooks cannot be conditional. A trip with no dates still gets one
+   * day, so there is always somewhere to hang the first thing.
+   */
+  const tripDayCount = useMemo(() => {
+    if (!trip?.start_date || !trip?.end_date) return 1;
+    const start = Date.parse(`${trip.start_date}T00:00:00Z`);
+    const end = Date.parse(`${trip.end_date}T00:00:00Z`);
+    return Math.max(Math.round((end - start) / 86_400_000) + 1, 1);
+  }, [trip?.start_date, trip?.end_date]);
 
   useEffect(() => {
     if (hintedType === undefined) return;
@@ -166,10 +222,109 @@ export default function TripDetail() {
 
   if (error) return <p className="text-rose-400">{error}</p>;
   if (!trip || !openerDone) {
-    return hintedType ? (
-      <TripLoader type={hintedType} />
-    ) : (
-      <p className="animate-pulse text-content-subtle">Loading trip…</p>
+    return (
+      <div className="flex flex-col items-center gap-3">
+        {hintedType ? (
+          <TripLoader type={hintedType} />
+        ) : (
+          <p className="animate-pulse text-content-subtle">Loading trip…</p>
+        )}
+        {waking && <WakingNotice />}
+      </div>
+    );
+  }
+
+  /*
+   * Sections, as rows.
+   *
+   * They were inline JSX before pinning existed. Now they need to be data,
+   * because a pinned section has to lift out of wherever it normally sits
+   * and move to the top. The row shape is what preserves the original
+   * layout thinking: anything unbounded gets a full row, and only pairs
+   * that grow at a similar rate and are read together share a two-column
+   * split. When pinning empties half a pair, the survivor goes full width
+   * rather than sitting beside a column of dead space.
+   */
+  function renderSections() {
+    const nodes: Partial<Record<SectionKey, React.ReactNode>> = {
+      members: <MembersSection tripId={id} isOwner={isOwner} />,
+      timeline: (
+        <ActivitiesSection tripId={id} onChange={refreshTrip} tripStartDate={trip!.start_date} />
+      ),
+      files: <FilesSection tripId={id} />,
+      contributions:
+        trip!.trip_type === "gathering" ? (
+          <ContributionsSection
+            tripId={id}
+            startDate={trip!.start_date}
+            dayCount={tripDayCount}
+            canEdit={canEdit}
+            onChange={refreshTrip}
+          />
+        ) : undefined,
+      packing: <GearSection tripId={id} onChange={refreshTrip} />,
+      tasks: <TasksSection tripId={id} onChange={refreshTrip} />,
+      expenses: <ExpensesSection tripId={id} />,
+      locations: <LocationsSection tripId={id} onChange={refreshTrip} />,
+      notes: <NotesSection tripId={id} onChange={refreshTrip} />,
+      journal: <JournalSection tripId={id} />,
+      photos: <PhotosSection tripId={id} />,
+      assignments: <AssignmentsSection tripId={id} />,
+    };
+
+    const rows: SectionKey[][] = [
+      ["members"],
+      ["timeline"],
+      ["files"],
+      ["contributions"],
+      ["packing"],
+      // Prep and spend: both grow with the trip, and both are checklists.
+      ["tasks", "expenses"],
+      // Where you're going and what you jotted down about it.
+      ["locations", "notes"],
+      // The private counterpart to Notes: same act of writing, different
+      // audience, so it gets its own row.
+      ["journal"],
+      ["photos"],
+      // The roll-up goes last: it summarises everything above it.
+      ["assignments"],
+    ];
+
+    const present = (key: SectionKey) => nodes[key] !== undefined;
+    const pinnedKeys = pinnedSections.filter(present);
+
+    const wrap = (key: SectionKey) => (
+      <SectionFrame
+        key={key}
+        section={key}
+        pinned={pinnedSections.includes(key)}
+        onToggle={() => toggleSection(key)}
+      >
+        {nodes[key]}
+      </SectionFrame>
+    );
+
+    return (
+      <>
+        {pinnedKeys.length > 0 && (
+          <div className="flex flex-col gap-8 rounded-card border border-dashed border-edge p-4">
+            {pinnedKeys.map(wrap)}
+          </div>
+        )}
+        {rows.map((row) => {
+          const rest = row.filter((k) => present(k) && !pinnedSections.includes(k));
+          if (rest.length === 0) return null;
+          if (rest.length === 1) return wrap(rest[0]);
+          return (
+            <div
+              key={row.join("-")}
+              className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-2"
+            >
+              {rest.map(wrap)}
+            </div>
+          );
+        })}
+      </>
     );
   }
 
@@ -482,6 +637,7 @@ export default function TripDetail() {
         <InternationalPanel tripId={id} onChange={refreshTrip} />
       )}
       {trip.trip_type === "domestic" && <DomesticPanel tripId={id} onChange={refreshTrip} />}
+      {trip.trip_type === "gathering" && <GatheringPanel tripId={id} onChange={refreshTrip} />}
 
       {/*
        * Sections are grouped by how much content they actually hold, not
@@ -490,8 +646,6 @@ export default function TripDetail() {
        * photos) gets a full row; only pairs that grow at a similar rate,
        * and that you read together, share a two-column split.
        */}
-      <MembersSection tripId={id} isOwner={isOwner} />
-
       {!canEdit && (
         <p className="rounded-card border border-dashed border-edge px-3 py-2 text-xs text-content-subtle">
           You have view-only access to this trip. You can see everything, but
@@ -499,33 +653,7 @@ export default function TripDetail() {
         </p>
       )}
 
-      <ActivitiesSection tripId={id} onChange={refreshTrip} tripStartDate={trip.start_date} />
-
-      <FilesSection tripId={id} />
-
-      <GearSection tripId={id} onChange={refreshTrip} />
-
-      {/* Prep and spend: both grow with the trip, and both are checklists. */}
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-2">
-        <TasksSection tripId={id} onChange={refreshTrip} />
-        <ExpensesSection tripId={id} />
-      </div>
-
-      {/* Where you're going and what you jotted down about it. */}
-      <div className="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-2">
-        <LocationsSection tripId={id} onChange={refreshTrip} />
-        <NotesSection tripId={id} onChange={refreshTrip} />
-      </div>
-
-      {/* The private counterpart to Notes: same act of writing, different
-          audience, so it gets its own row rather than sitting beside the
-          shared one where the distinction would blur. */}
-      <JournalSection tripId={id} />
-
-      <PhotosSection tripId={id} />
-
-      {/* The roll-up goes last: it summarises everything above it. */}
-      <AssignmentsSection tripId={id} />
+      {renderSections()}
 
       <ConfirmDialog
         open={pending !== null}

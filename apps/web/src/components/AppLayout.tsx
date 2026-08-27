@@ -28,12 +28,25 @@ export default function AppLayout() {
             Adventure Planner
           </NavLink>
           <div className="flex items-center gap-2 text-sm">
-            {/* The name is how people expect to reach their account. */}
+            <NavLink
+              to={routes.garage}
+              className="text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline"
+            >
+              Garage
+            </NavLink>
+            {/*
+              * The name is how people expect to reach their account, and
+              * this is the only route to it. Hiding it on narrow screens
+              * left no way to reach settings at all, which meant no way to
+              * delete your account from a phone. First name only when there
+              * is no room for both names.
+              */}
             <NavLink
               to={routes.settings}
-              className="hidden text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline sm:inline"
+              className="text-content-muted underline-offset-4 transition-colors hover:text-content hover:underline"
             >
-              {user?.name}
+              <span className="sm:hidden">{user?.name?.split(" ")[0]}</span>
+              <span className="hidden sm:inline">{user?.name}</span>
             </NavLink>
             <ThemeToggle />
             <button

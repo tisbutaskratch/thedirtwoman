@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { getOverlandingDetail, updateOverlandingDetail } from "@/modes/overlanding/api";
 import type { OverlandingDetail } from "@/modes/overlanding/types";
 import { Badge, Card, Field, IconButton, Section, StatTile, inputClass } from "@/components/ui";
+import RigPicker from "@/components/trip/RigPicker";
 
 const YES_NO = [
   { label: "Not sure yet", value: "" },
@@ -111,7 +112,31 @@ export default function OverlandingPanel({
           onSubmit={handleSubmit}
           className="flex flex-col gap-3 rounded-card border border-edge bg-surface-overlay p-4"
         >
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {/* Copies the rig's details in rather than linking to it, so
+                editing them here never reaches back into your saved rig. */}
+            <RigPicker
+              className={`${inputClass} w-auto`}
+              onPick={(rig) =>
+                setForm((f) => ({
+                  ...f,
+                  vehicle_name: rig.name,
+                  drivetrain: rig.drivetrain ?? f.drivetrain,
+                  ground_clearance_in:
+                    rig.ground_clearance_in === null
+                      ? f.ground_clearance_in
+                      : String(rig.ground_clearance_in),
+                  fuel_capacity_gal:
+                    rig.fuel_capacity_gal === null
+                      ? f.fuel_capacity_gal
+                      : String(rig.fuel_capacity_gal),
+                  fuel_economy_mpg:
+                    rig.fuel_economy_mpg === null
+                      ? f.fuel_economy_mpg
+                      : String(rig.fuel_economy_mpg),
+                }))
+              }
+            />
             <IconButton onClick={() => setEditing(false)} title="Cancel" icon="close" />
           </div>
           <div className="grid gap-3 sm:grid-cols-3">

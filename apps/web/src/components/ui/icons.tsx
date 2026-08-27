@@ -9,6 +9,8 @@
  */
 import {
   Archive,
+  Pin,
+  PinOff,
   ArrowLeft,
   ArrowUp,
   Check,
@@ -45,6 +47,8 @@ export const Icons = {
   remove: Minus,
   delete: Trash2,
   archive: Archive,
+  pin: Pin,
+  unpin: PinOff,
   back: ArrowLeft,
   toTop: ArrowUp,
   share: Link2,

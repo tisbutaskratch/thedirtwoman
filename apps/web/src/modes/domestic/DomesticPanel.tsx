@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Badge, Field, IconButton, Section, StatTile, inputClass } from "@/components/ui";
+import RigPicker from "@/components/trip/RigPicker";
 import { getDomesticDetail, updateDomesticDetail } from "@/modes/domestic/api";
 import type { DomesticDetail, DomesticTravelMode } from "@/modes/domestic/types";
 
@@ -185,6 +186,21 @@ export default function DomesticPanel({
 
           {/* Only the fields that apply to the chosen mode. */}
           {form.travel_mode === "car" && (
+            <div className="flex flex-col gap-3">
+              <RigPicker
+                className={`${inputClass} w-auto`}
+                label="Taking one of your own? Pick it…"
+                onPick={(rig) =>
+                  setForm((f) => ({
+                    ...f,
+                    is_rental: "false",
+                    vehicle_mpg:
+                      rig.fuel_economy_mpg === null
+                        ? f.vehicle_mpg
+                        : String(rig.fuel_economy_mpg),
+                  }))
+                }
+              />
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <Field label="Rental?">
                 <select value={form.is_rental} onChange={set("is_rental")} className={inputClass}>
@@ -231,6 +247,7 @@ export default function DomesticPanel({
                   className={inputClass}
                 />
               </Field>
+            </div>
             </div>
           )}
 

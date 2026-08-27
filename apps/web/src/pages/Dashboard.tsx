@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listTrips } from "@/api/trips";
+import { listPinnedTrips, pinTrip, unpinTrip } from "@/api/pins";
 import type { Trip } from "@/api/types";
-import { Badge, EmptyState, Icon, TONE_EDGE, TONE_SOFT } from "@/components/ui";
+import { Badge, EmptyState, Icon, TONE_EDGE, TONE_SOFT, WakingNotice } from "@/components/ui";
 import { useAuth } from "@/lib/AuthContext";
 import TripMark from "@/art/tripMarks";
 import { TRIP_TYPE_META } from "@/lib/tripTypes";
 import { routes } from "@/lib/site";
+import { useSlowLoad } from "@/lib/useSlowLoad";
 
 function formatRange(start: string | null, end: string | null) {
   if (!start && !end) return "No dates yet";
@@ -39,12 +41,38 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [trips, setTrips] = useState<Trip[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Pinned trip ids, in the order they were pinned. Kept separate from the
+  // trips themselves because a pin is this person's preference, not part of
+  // the trip: pinning a shared trip must not move it for anybody else.
+  const [pinned, setPinned] = useState<number[]>([]);
+  const waking = useSlowLoad(trips === null && error === null);
 
   useEffect(() => {
     listTrips()
       .then(setTrips)
       .catch(() => setError("Could not load trips."));
+    // A failed pin lookup should not stop the trips rendering; the worst
+    // case is that nothing appears pinned.
+    listPinnedTrips()
+      .then(setPinned)
+      .catch(() => setPinned([]));
   }, []);
+
+  async function togglePin(trip: Trip) {
+    const isPinned = pinned.includes(trip.id);
+    // Moved optimistically: this is a view preference, and waiting on a
+    // round trip to reorder your own list feels broken.
+    setPinned((current) =>
+      isPinned ? current.filter((id) => id !== trip.id) : [...current, trip.id],
+    );
+    try {
+      await (isPinned ? unpinTrip(trip.id) : pinTrip(trip.id));
+    } catch {
+      setPinned((current) =>
+        isPinned ? [...current, trip.id] : current.filter((id) => id !== trip.id),
+      );
+    }
+  }
 
   // Upcoming trips first (soonest departure), then undated, then past.
   // Archived trips are filed separately rather than mixed into the list.
@@ -60,6 +88,19 @@ export default function Dashboard() {
       archived: byDate.filter((t) => t.archived_at !== null),
     };
   }, [trips]);
+
+  // Pinned trips lift out of the main list rather than being highlighted in
+  // place. Highlighting still leaves you scrolling to find them, which is
+  // the thing pinning is for.
+  const { pinnedTrips, unpinnedTrips } = useMemo(() => {
+    if (!current) return { pinnedTrips: null, unpinnedTrips: null };
+    return {
+      pinnedTrips: pinned
+        .map((id) => current.find((t) => t.id === id))
+        .filter((t): t is Trip => t !== undefined),
+      unpinnedTrips: current.filter((t) => !pinned.includes(t.id)),
+    };
+  }, [current, pinned]);
 
   const nextUp = current?.find((t) => countdown(t.start_date) !== null);
 
@@ -88,28 +129,55 @@ export default function Dashboard() {
       {trips === null && !error && (
         // Skeleton cards say nothing to a screen reader, so the placeholder
         // announces itself instead of leaving the page silently empty.
-        <div
-          role="status"
-          aria-label="Loading trips"
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {[0, 1, 2].map((i) => (
-            <div
-              key={i}
-              aria-hidden
-              className="h-40 animate-pulse rounded-card border border-edge bg-surface-raised"
-            />
-          ))}
+        <div className="flex flex-col gap-4">
+          <div
+            role="status"
+            aria-label="Loading trips"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                aria-hidden
+                className="h-40 animate-pulse rounded-card border border-edge bg-surface-raised"
+              />
+            ))}
+          </div>
+          {waking && <WakingNotice />}
         </div>
       )}
       {trips?.length === 0 && (
         <EmptyState glyph="🧭" message="No trips yet. Start planning your first adventure." />
       )}
 
-      {current && current.length > 0 && (
+      {pinnedTrips && pinnedTrips.length > 0 && (
+        <div className="flex flex-col gap-3">
+          <h2 className="flex items-center gap-2 text-sm font-medium uppercase tracking-wider text-content-subtle">
+            <Icon name="pin" size={14} /> Pinned
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pinnedTrips.map((trip) => (
+              <TripCard
+                key={trip.id}
+                trip={trip}
+                shared={trip.user_id !== user?.id}
+                pinned
+                onTogglePin={() => togglePin(trip)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {unpinnedTrips && unpinnedTrips.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {current.map((trip) => (
-            <TripCard key={trip.id} trip={trip} shared={trip.user_id !== user?.id} />
+          {unpinnedTrips.map((trip) => (
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              shared={trip.user_id !== user?.id}
+              onTogglePin={() => togglePin(trip)}
+            />
           ))}
         </div>
       )}
@@ -138,7 +206,19 @@ export default function Dashboard() {
   );
 }
 
-function TripCard({ trip, shared, dimmed }: { trip: Trip; shared: boolean; dimmed?: boolean }) {
+function TripCard({
+  trip,
+  shared,
+  dimmed,
+  pinned,
+  onTogglePin,
+}: {
+  trip: Trip;
+  shared: boolean;
+  dimmed?: boolean;
+  pinned?: boolean;
+  onTogglePin?: () => void;
+}) {
   const meta = TRIP_TYPE_META[trip.trip_type];
   const days = countdown(trip.start_date);
   return (
@@ -155,9 +235,30 @@ function TripCard({ trip, shared, dimmed }: { trip: Trip; shared: boolean; dimme
         >
           <TripMark type={trip.trip_type} size={24} />
         </span>
-        <div className="flex flex-wrap justify-end gap-1.5">
+        <div className="flex flex-wrap items-start justify-end gap-1.5">
           {shared && <Badge tone="cyan">Shared</Badge>}
           <Badge tone={meta.tone}>{meta.label}</Badge>
+          {onTogglePin && (
+            <button
+              type="button"
+              onClick={(e) => {
+                // The control lives inside the card's link, so the click has
+                // to stop before it navigates to the trip.
+                e.preventDefault();
+                e.stopPropagation();
+                onTogglePin();
+              }}
+              title={pinned ? "Unpin this trip" : "Pin this trip to the top"}
+              aria-pressed={pinned ?? false}
+              className={`rounded-full p-1 transition-colors ${
+                pinned
+                  ? "text-accent"
+                  : "text-content-subtle opacity-0 hover:text-content focus-visible:opacity-100 group-hover:opacity-100"
+              }`}
+            >
+              <Icon name={pinned ? "unpin" : "pin"} size={14} />
+            </button>
+          )}
         </div>
       </div>
 

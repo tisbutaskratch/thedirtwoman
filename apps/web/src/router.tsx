@@ -16,6 +16,7 @@ import Skills from "@/pages/Skills";
 import TripDetail from "@/pages/TripDetail";
 import PlannerHome from "@/components/PlannerHome";
 import Privacy from "@/pages/Privacy";
+import Garage from "@/pages/Garage";
 import Settings from "@/pages/Settings";
 import WhatsNew from "@/pages/WhatsNew";
 import { isPlanner } from "@/lib/site";
@@ -67,6 +68,7 @@ const plannerRoutes = (base: string) => [
           { path: "dashboard", element: <Dashboard /> },
           { path: "trips/new", element: <NewTrip /> },
           { path: "trips/:tripId", element: <TripDetail /> },
+          { path: "garage", element: <Garage /> },
           { path: "settings", element: <Settings /> },
         ],
       },

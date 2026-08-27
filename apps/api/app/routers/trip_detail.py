@@ -10,6 +10,7 @@ from app.models.trip import Trip, TripType
 from app.schemas.backpacking import BackpackingDetailRead
 from app.schemas.camping import CampingDetailRead
 from app.schemas.domestic import DomesticDetailRead
+from app.schemas.gathering import GatheringDetailRead
 from app.schemas.international import InternationalDetailRead
 from app.schemas.motocamping import MotocampingDetailRead
 from app.schemas.overlanding import OverlandingDetailRead
@@ -17,6 +18,7 @@ from app.schemas.trip_detail import TripDetailUpdate
 from app.services.backpacking import to_backpacking_detail_read
 from app.services.camping import to_camping_detail_read
 from app.services.domestic import to_domestic_detail_read
+from app.services.gathering import to_gathering_detail_read
 from app.services.international import to_international_detail_read
 from app.services.motocamping import to_motocamping_detail_read
 from app.services.overlanding import to_overlanding_detail_read
@@ -30,6 +32,7 @@ DetailRead = Union[
     CampingDetailRead,
     InternationalDetailRead,
     DomesticDetailRead,
+    GatheringDetailRead,
 ]
 
 # Each mode with a detail model: the Trip relationship holding it, the
@@ -129,6 +132,17 @@ _MODE_CONFIG: dict[TripType, tuple[str, set[str], Callable[[object, Trip], objec
             "lodging_ref",
         },
         to_domestic_detail_read,
+    ),
+    TripType.gathering: (
+        "gathering_detail",
+        {
+            "occasion",
+            "host_name",
+            "headcount",
+            "dietary_notes",
+            "kitchen_notes",
+        },
+        to_gathering_detail_read,
     ),
 }
 

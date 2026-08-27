@@ -8,6 +8,9 @@ belonging to anyone else goes with it.
 from __future__ import annotations
 
 from app.models.gear import Gear
+from app.models.kit import Kit, KitItem
+from app.models.pin import SectionPin, TripPin
+from app.models.rig import Rig
 from app.models.journal_entry import JournalEntry
 from app.models.trip import Trip
 from app.models.trip_collaborator import TripCollaborator
@@ -293,3 +296,26 @@ def test_a_stranger_cannot_leave_a_trip_they_were_never_on(client, auth_headers)
     trip_id = _trip(client, owner, "Fellowship")
 
     assert client.delete(f"/trips/{trip_id}/collaborators/me", headers=stranger).status_code == 404
+
+
+def test_deleting_an_account_takes_the_rigs_kits_and_pins(client, auth_headers, db_session):
+    """All of it points at the user row, so all of it has to go first.
+
+    SQLite does not enforce foreign keys by default and Postgres does, so a
+    missed cleanup here passes locally and fails in production.
+    """
+    headers = auth_headers("frodo@bagend.dev")
+    trip_id = _trip(client, headers)
+    client.post("/rigs", json={"name": "The Tacoma"}, headers=headers)
+    kit_id = client.post("/kits", json={"name": "Trailside repair"}, headers=headers).json()["id"]
+    client.post(f"/kits/{kit_id}/items", json={"name": "Tyre levers"}, headers=headers)
+    client.put(f"/pins/trips/{trip_id}", headers=headers)
+    client.put("/pins/sections/packing", headers=headers)
+
+    assert _delete_account(client, headers, "frodo@bagend.dev").status_code == 200
+
+    assert db_session.query(Rig).count() == 0
+    assert db_session.query(Kit).count() == 0
+    assert db_session.query(KitItem).count() == 0
+    assert db_session.query(TripPin).count() == 0
+    assert db_session.query(SectionPin).count() == 0

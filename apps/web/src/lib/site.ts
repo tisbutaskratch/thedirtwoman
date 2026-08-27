@@ -52,5 +52,6 @@ export const routes = {
   dashboard: `${PREFIX}/dashboard`,
   newTrip: `${PREFIX}/trips/new`,
   trip: (tripId: number | string) => `${PREFIX}/trips/${tripId}`,
+  garage: `${PREFIX}/garage`,
   settings: `${PREFIX}/settings`,
 } as const;

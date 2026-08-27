@@ -234,6 +234,55 @@ export function Milo(p: MascotProps) {
   );
 }
 
+/**
+ * Pepper, who has claimed the head of the table.
+ *
+ * The other hosts are out in weather. Pepper is indoors, sat at a laid
+ * table with a covered dish in front of her, which is the whole difference
+ * between a get-together and a trip. Same outlined build as the rest of the
+ * set so she does not look borrowed from another app.
+ */
+function Pepper({ size, className }: MascotProps) {
+  return (
+    <Stage size={size} className={className}>
+      {/* the table, drawn first so everything else sits on it */}
+      <path d="M4 44 L60 44" stroke="currentColor" strokeWidth={S} />
+      <path
+        d="M8 44 L10 58 L54 58 L56 44 Z"
+        stroke="currentColor"
+        strokeWidth={S}
+        fill="currentColor"
+        fillOpacity="0.1"
+      />
+      {/* head and ears, peering over the top */}
+      <path
+        d="M22 34 A10 10 0 0 1 42 34 L42 40 L22 40 Z"
+        stroke="currentColor"
+        strokeWidth={S}
+        fill="currentColor"
+        fillOpacity="0.14"
+      />
+      <path d="M24 27 L21 19 L28 23 Z" stroke="currentColor" strokeWidth={S} />
+      <path d="M40 27 L43 19 L36 23 Z" stroke="currentColor" strokeWidth={S} />
+      {/* eyes, and a nose */}
+      <circle cx="28" cy="33" r="1.5" fill="currentColor" />
+      <circle cx="36" cy="33" r="1.5" fill="currentColor" />
+      <path d="M32 36 L30.5 38 L33.5 38 Z" fill="currentColor" />
+      {/* whiskers */}
+      <path d="M22 36 L17 35 M22 38 L17 39" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+      <path d="M42 36 L47 35 M42 38 L47 39" stroke="currentColor" strokeWidth="1" opacity="0.6" />
+      {/* the dish she brought, lid on, still steaming */}
+      <path d="M16 44 A7 7 0 0 1 30 44 Z" stroke="currentColor" strokeWidth="1.4"
+        fill="currentColor" fillOpacity="0.16" />
+      <path d="M23 37 L23 35" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M20 31 C20 29, 22 29, 22 27" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+      {/* a fork, because somebody is ready */}
+      <path d="M50 40 L50 50" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M48 40 L48 44 M52 40 L52 44" stroke="currentColor" strokeWidth="1" opacity="0.7" />
+    </Stage>
+  );
+}
+
 export const MASCOTS: Record<
   TripType,
   { name: string; Art: (p: MascotProps) => JSX.Element }
@@ -244,6 +293,7 @@ export const MASCOTS: Record<
   backpacking: { name: "Fern", Art: Fern },
   international: { name: "Wanda", Art: Wanda },
   domestic: { name: "Milo", Art: Milo },
+  gathering: { name: "Pepper", Art: Pepper },
 };
 
 /** The host for a trip type, posed in the corner of its mode panel. */
