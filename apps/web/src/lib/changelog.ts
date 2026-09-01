@@ -53,8 +53,16 @@ export const RELEASES: Release[] = [
         text: "When the app is slow to open after you have been away, it now says why. The server goes to sleep when nobody is using it, and waking it takes up to a minute. It was doing that before; it just did not tell you.",
       },
       {
+        kind: "better",
+        text: "The header is tidier. Your garage, your account and the way out are icons now, and the light and dark switch has moved into Settings, where it also tells you which one you are on and that the choice is saved on this device rather than on your account.",
+      },
+      {
+        kind: "better",
+        text: "Both sites have a proper icon in the browser tab, so they are findable in a row of twenty of them.",
+      },
+      {
         kind: "fixed",
-        text: "On a phone there was no way to reach your account settings, which meant no way to delete your account. Your name is now in the header at every size.",
+        text: "On a phone there was no way to reach your account settings, which meant no way to delete your account. The account icon is now in the header at every size.",
       },
     ],
   },
